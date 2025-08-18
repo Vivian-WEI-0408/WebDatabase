@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .account{
+            width:400px;
+            border:1px solid #dddddd;
+            box-shadow:5px 5px 20px #aaa;
+
+            margin-left:auto;
+            margin-right:auto;
+            margin-top:100px;
+            padding:20px 40px;
+        }
+        .account h2{
+            margin-top:10px;
+            text-align:center;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="account">
+        <h2>
+            用户登录
+        </h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="exampleInputUsername">用户名</label>
+                {{form.uname}}
+                <span>{{ form.uname.errors.0 }}</span>
+{#                <input type="text" class="form-control" id="exampleInputUsername" placeholder="用户名">#}
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword">密码</label>
+                {{ form.password }}
+                <span>{{ form.password.errors.0 }}</span>
+{#                <input type="password" class="form-control" id="exampleInputPassword" placeholder="密码">#}
+            </div>
+            <input type="submit" value="登录" class="btn btn-primary">
+        </form>
+    </div>
+</body>
+</html>
