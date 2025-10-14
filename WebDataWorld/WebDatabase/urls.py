@@ -18,6 +18,8 @@ from WebDatabase import views,account
 urlpatterns = [
     # path("",v),
     path("StrainName",views.SearchByStrainName,name="StrainName"),
+
+
     path("Part",views.PartDataALL,name="Part"),
     path("PartName",views.SearchByPartName,name="PartName"),
     path("PartAlias",views.SearchByPartAlterName,name="PartAlias"),
@@ -26,9 +28,8 @@ urlpatterns = [
     path("PartRPU",views.SearchByRPU,name="PartRPU"),
     path("PartSeq",views.SearchBySeq,name="PartSeq"),
     path("PartFile",views.SearchPartFile,name="PartFile"),
+    path('SearchRPU',views.GetPartRPU,name="SearchRPU"),
     path("AddPartRPU",views.AddPartRPU,name="AddPartRPU"),
-
-
     path("AddPartData",views.AddPartData,name="AddPartData"),
     path("AddPartFile",views.AddPartFileAddress,name="AddPartFile"),
     path("UpdatePart",views.UpdatePart,name="UpdatePart"),
@@ -36,7 +37,9 @@ urlpatterns = [
     path("UpdatePartRPU",views.UpdatePartRPU,name="UpdatePartRPU"),
     path("deletePart",views.deletePartData,name="deletePart"),
     path("deletePartFile",views.deletePartFile,name="deletePartFile"),
-    path("PlamsidName",views.SearchByPlasmidName,name="PlamsidName"),
+
+
+    path("PlasmidName",views.SearchByPlasmidName,name="PlamsidName"),
     path("PlasmidAlterName",views.SearchByPlasmidAlterName,name="PlasmidAlterName"),
     path("PlasmidSeqByName",views.SearchPlasmidSequenceByName,name="PlasmidSeq"),
     path("PlasmidSeq",views.SearchByPlasmidSeq,name="PlasmidSeq"),
@@ -47,6 +50,8 @@ urlpatterns = [
     path("PlasmidLevel",views.SearchByLevel,name="PlasmidLevel"),
     path("PlasmidPlate",views.SearchByPlate,name="PlasmidPlate"),
     path("PlasmidParent",views.SearchPlasmidParent,name="PlasmidParent"),
+    path("PlasmidParentByID",views.SearchPlasmidParentByID,name="PlasmidParentByID"),
+    path("GetParentID",views.GetParentID,name="GetParentID"),
     path("PlasmidFile",views.SearchPlasmidFileAddress,name="PlasmidFile"),
     path("AddPlasmidFile",views.AddPlasmidFileAddress,name="AddPlasmidFile"),
     path("AddPlasmidData",views.AddPlasmidData,name="AddPlasmidData"),
@@ -56,6 +61,8 @@ urlpatterns = [
     path("deletePlasmid",views.deletePlasmidData,name="deletePlasmid"),
     path("deletePlasmidFile",views.deletePlasmidFileAddress,name="deletePlasmidFile"),
     path("deletePlasmidParent",views.DeleteParentPlasmid,name="deletePlasmidParent"),
+
+
     path("BackboneName",views.SearchByBackboneName,name="BackboneName"),
     path("BackboneSeq",views.SearchByBackboneSeq,name="BackboneSeq"),
     path("BackboneSpecies",views.SearchByBackboneSpecies,name="BackboneSpecies"),
@@ -69,25 +76,32 @@ urlpatterns = [
     path("UpdateBackboneFile",views.UpdateBackboneFileAddress,name="UpdateBackboneFile"),
     path("deleteBackbone",views.DeleteBackboneData,name="deleteBackbone"),
     path("deleteBackboneFile",views.DeleteBackboneFileAddress,name="deleteBackboneFile"),
+
     path("TestDataName",views.SearchByTestdataName,name="TestDataName"),
+
     path("GetDBDList",views.GetDBDList,name="GetDBDList"),
     path("GetDBDNameList",views.GetDBDNameList,name="GetDBDNameList"),
     path("GetDBDKdList",views.GetDBDKdList,name="GetDBDKdList"),
     path("GetDBD",views.GetDBD,name="GetDBD"),
+    path("GetDBDAllByName",views.GetDBDAllByName,name="GetDBDByAllName"),
     path("GetDBDMenu",views.GetDBDMenu,name="GetDBDMenu"),
     path("GetDBDKd",views.GetDBDKd,name="GetDBDKd"),
     path("AddDBD",views.AddDBD,name="AddDBD"),
     path("UpdateDBD",views.UpdateDBD,name="UpdateDBD"),
+
     path("GetLBDDimer",views.GetLBDDimer,name="GetLBDDimer"),
     path("GetLBDDimerMenu",views.GetLBDDimerMenu,name="GetLBDDimerMenu"),
     path("GetLBDDimerNameList",views.GetLBDDimerNameList,name="GetLBDDimerNameList"),
+    path("GetLBDDimerAllByName",views.GetLBDDimerAllByName,name="GetLBDDimerAllByName"),
     path("ADDLBDDimer",views.AddLBDDimer,name="ADDLBDDimer"),
     path("UpdateLbdDimer",views.UpdateLbdDimer,name="UpdateLbdDimer"),
     path("GetLBDNr",views.GetLBDNr,name="GetLBDNr"),
     path("GetLBDNRMenu",views.GetLBDNRMenu,name="GetLBDNRMenu"),
+    path("GetLBDAllByName",views.GetLBDNRAllByName,name="GetLBDNRAllByName"),
     path("GetLBDNRNameList",views.GetLBDNRNameList,name="GetLBDNRNameList"),
     path("AddLbdnr",views.AddLbdnr,name="AddLbdnr"),
     path("UpdateLBDnr",views.UpdateLBDnr,name="UpdateLBDnr"),
+    
     path("login",account.login,name="login"),
     path("logout",account.logout,name="logout"),
 ]

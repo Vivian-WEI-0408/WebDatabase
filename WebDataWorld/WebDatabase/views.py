@@ -6,10 +6,10 @@ import math
 from django.core import serializers
 from django.utils.deprecation import MiddlewareMixin
 from .models import (Backbonetable,Parentplasmidtable,
-                     Partrputable,Parttable,Plasmidneed,
-                     Straintable,TbBackboneUserfileaddress,
-                     TbPartUserfileaddress,TbPlasmidUserfileaddress,
-                     Testdatatable,User,Lbdnrtable,Lbddimertable,Dbdtable)
+                    Partrputable,Parttable,Plasmidneed,
+                    Straintable,TbBackboneUserfileaddress,
+                    TbPartUserfileaddress,TbPlasmidUserfileaddress,
+                    Testdatatable,User,Lbdnrtable,Lbddimertable,Dbdtable)
 from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
     PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
     TbPartUserfileaddressSerializer,TbPlasmidUserfileaddressSerializer,TestdatatableSerializer
@@ -192,6 +192,18 @@ def SearchByRPU(request):
         # return JsonResponse({'code': 204, 'status': 'failed', 'data': "Part Not Found"})
 
 
+def GetPartRPU(request):
+    if(request.method == "GET"):
+        partID = request.GET.get('partID')
+        if(partID == None or partID == ""):
+            return JsonResponse("PartID cannot be empty", status = 400, safe=False)
+        PartRPUList = Partrputable.objects.filter(partid = partID)
+        if(len(PartRPUList) > 0):
+            return JsonResponse(data=list(PartRPUList.values()),status=200,safe=False)
+        else:
+            return JsonResponse("Part RPU Data doesn't exist",status=404, safe=False)
+
+
 def SearchBySeq(request):
     if(request.method == "GET"):
         Seq = request.GET.get('seq')
@@ -278,8 +290,8 @@ def AddPartData(request):
             return JsonResponse(data="Parameters name, sequence cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name or Sequence can not be empty'})
         Parttable.objects.create(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
-                                 confirmedsequence = ConfirmedSequence, insertsequence = InsertSequence,
-                                 sourceorganism = sourceOrganism, reference=reference, note=note, type=type,)
+                                confirmedsequence = ConfirmedSequence, insertsequence = InsertSequence,
+                                sourceorganism = sourceOrganism, reference=reference, note=note, type=type,)
         return JsonResponse(data="Added part data", status=200,safe=False)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data added'})
 
@@ -417,12 +429,13 @@ def deletePartFile(request):
 def SearchByPlasmidName(request):
     if(request.method == "GET"):
         Name = request.GET.get('name')
+        print(Name)
         if(Name == None or Name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
         PlasmidList = Plasmidneed.objects.filter(name=Name)
         if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
+            return JsonResponse(data=list(PlasmidList.values()), status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -589,6 +602,42 @@ def SearchPlasmidParent(request):
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':"Plasmid Parent not Found"})
 
+def SearchPlasmidParentByID(request):
+    if(request.method == "GET"):
+        plasmidID = request.GET.get('plasmidID')
+        if(plasmidID == None or plasmidID == ""):
+            return JsonResponse(data="PlasmidID cannot be empty",status = 400, safe=False)
+        ParentList = Parentplasmidtable.objects.filter(sonplasmidid=plasmidID)
+        if(len(ParentList) == 0):
+            return JsonResponse(data = "No Parent Plasmid", status = 404, safe=False)
+        PlasmidNameList = []
+        for obj in ParentList:
+            name = Plasmidneed.objects.get(plasmidid=obj.parentplasmidid).name
+            PlasmidNameList.append(name)
+        if(len(PlasmidNameList) > 0):
+            return JsonResponse(data=PlasmidNameList,status=200,safe=False)
+        else:
+            return JsonResponse(data = "No such plasmid",status=404,safe=False)
+        
+def GetParentID(request):
+    if(request.method == "GET"):
+        plasmidID = request.GET.get('plasmidID')
+        if(plasmidID == None or plasmidID == ""):
+            return JsonResponse(data="PlasmidID cannot be empty",status = 400, safe=False)
+        ParentList = Parentplasmidtable.objects.filter(sonplasmidid=plasmidID)
+        if(len(ParentList) == 0):
+            return JsonResponse(data = "No Parent Plasmid", status = 404, safe=False)
+        ParentIDList = []
+        for obj in ParentList:
+            ParentIDList.append(obj.parentplasmidid)
+        if(len(ParentIDList) > 0):
+            return JsonResponse(data=ParentIDList,status=200,safe=False)
+        else:
+            return JsonResponse(data = "No such plasmid",status=404,safe=False)
+        
+
+
+
 def SearchPlasmidFileAddress(request):
     if(request.method == "GET"):
         Name = request.GET.get('name')
@@ -603,7 +652,7 @@ def SearchPlasmidFileAddress(request):
         FilterDict = {"userid": userid,"plasmidid": PlasmidID}
         Address = TbPlasmidUserfileaddress.objects.filter(FilterDict).first().fileaddress
         if(Address != ""):
-            return JsonResponse(data=Address, status=200)
+            return JsonResponse(data=Address, status=200, safe=False)
             # return JsonResponse({'code':200,'status':'success','data':Address})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -891,7 +940,7 @@ def SearchBackboneFileAddress(request):
         FilterDict = {"userid": userid,"backboneid":BackboneID}
         BackboneAddress = TbBackboneUserfileaddress.objects.filter(**FilterDict).first().fileaddress
         if(BackboneAddress != ""):
-            return JsonResponse(data=BackboneAddress, status=200)
+            return JsonResponse(data=BackboneAddress, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':BackboneAddress})
         else:
             return JsonResponse(data="No such Backbone Address", status=404,safe=False)
@@ -1054,7 +1103,7 @@ def GetDBDList(request):
                 PartObj = Parttable.objects.filter(name = DBD.name).first()
                 # DBDDict[DBD.name] = [PartObj.alias,PartObj.level0sequence,PartObj.sourceorganism,PartObj.reference,PartObj.note,PartObj.confirmedsequence,PartObj.insertsequence,DBD.i0,DBD.kd]
                 DBDDict.append({"Name":DBD.name,"Alias": PartObj.alias,"Level0Sequence":PartObj.level0sequence,"SourceOrganism":PartObj.sourceorganism,"Reference":PartObj.reference,"Note":PartObj.note,"ConfirmedSequence":PartObj.confirmedsequence,"InsertSequence":PartObj.insertsequence,"I0": DBD.i0,"kd": DBD.kd})
-                DBDDict.append([DBD.name,PartObj.alias,PartObj.level0sequence,PartObj.sourceorganism,PartObj.reference,PartObj.note,PartObj.confirmedsequence,PartObj.insertsequence,PartObj,DBD.i0,DBD.kd])
+                # DBDDict.append([DBD.name,PartObj.alias,PartObj.level0sequence,PartObj.sourceorganism,PartObj.reference,PartObj.note,PartObj.confirmedsequence,PartObj.insertsequence,DBD.i0,DBD.kd])
             return JsonResponse(data=DBDDict, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(DBDList)})
         else:
@@ -1100,6 +1149,22 @@ def GetDBD(request):
         else:
             return JsonResponse(data="No such DBD", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'No DB Data Found'})
+
+def GetDBDAllByName(request):
+    if(request.method == "GET"):
+        name = request.GET.get('name')
+        if(name == None or name == ""):
+            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status':'failed','data':"name can not be empty"})
+        DBD = Dbdtable.objects.filter(name = name).first()
+        if(DBD != None):
+            part_obj = Parttable.objects.filter(name = name).first()
+            DBD_list = {"Name":DBD.name,"Alias": part_obj.alias,"Level0Sequence":part_obj.level0sequence,"SourceOrganism":part_obj.sourceorganism,"Reference":part_obj.reference,"Note":part_obj.note,"ConfirmedSequence":part_obj.confirmedsequence,"InsertSequence":part_obj.insertsequence,"I0": DBD.i0,"kd": DBD.kd}
+            # DBD_list = [DBD.name,part_obj.alias,part_obj.level0sequence,part_obj.sourceorganism,part_obj.reference,part_obj.note,part_obj.confirmedsequence,part_obj.insertsequence,DBD.i0,DBD.kd]
+            return JsonResponse(data = DBD_list, status=200,safe=False)
+            # return JsonResponse({'code':200,'status':'success','data':list(DBD)})
+        else:
+            return JsonResponse(data="No such DBD", status=404,safe=False)
 
 def GetDBDMenu(request):
     if(request.method == "GET"):
@@ -1191,11 +1256,28 @@ def GetLBDDimerMenu(request):
             for obj in LBDDimerList:
                 LBDMenu.append({"name":obj.name,'k1':obj.k1,'k2':obj.k2,'k3':obj.k3,'i':obj.i})
                 # LBDMenu[obj.name] = [obj.k1,obj.k2,obj.k3,obj.i]
-            return JsonResponse(data=LBDMenu, status=200)
+            return JsonResponse(data=LBDMenu, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':LBDMenu})
         else:
             return JsonResponse(data="No such LBDDimer", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'No LBD Dimer Data Found'})
+
+def GetLBDDimerAllByName(request):
+    if(request.method == "GET"):
+        name = request.GET.get('name')
+        if(name == None or name == ""):
+            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status':'failed','data':"name can not be empty"})
+        LBD = Lbddimertable.objects.filter(name = name).first()
+        if(LBD != None):
+            part_obj = Parttable.objects.filter(name = name).first()
+            LBD_list = {"name":LBD.name,"alias":part_obj.alias,"level0sequence":part_obj.level0sequence,"sourceorganism":part_obj.sourceorganism,"reference":part_obj.reference,"note":part_obj.note,"confirmedsequence":part_obj.confirmedsequence,"insertsequence":part_obj.insertsequence,"k1":LBD.k1,"k2":LBD.k2,"k3":LBD.k3,"i":LBD.i}
+            # LBD_list = [LBD.name,part_obj.alias,part_obj.level0sequence,part_obj.sourceorganism,part_obj.reference,part_obj.note,part_obj.confirmedsequence,part_obj.insertsequence,LBD.k1,LBD.k2,LBD.k3,LBD.i]
+            return JsonResponse(data = LBD_list, status=200,safe=False)
+            # return JsonResponse({'code':200,'status':'success','data':list(DBD)})
+        else:
+            return JsonResponse(data="No such LBD Dimer", status=404,safe=False)
+
 
 def GetLBDDimerNameList(request):
     if(request.method == "GET"):
@@ -1204,7 +1286,8 @@ def GetLBDDimerNameList(request):
         if(len(LBDDimerList) > 0):
             for obj in LBDDimerList:
                 NameList.append(obj.name)
-            return JsonResponse(data=NameList, status=200)
+            print(NameList)
+            return JsonResponse(data=NameList, status=200, safe=False)
             # return JsonResponse({'code':200,'status':'success','data':NameList})
         else:
             return JsonResponse(data="No such LBDDimer", status=404,safe=False)
@@ -1271,12 +1354,29 @@ def GetLBDNRMenu(request):
         if(len(LBDNrList) > 0):
             for obj in LBDNrList:
                 # LBDNRMenu[obj.name] = [obj.k1,obj.k2,obj.k3,obj.kx1,obj.kx2]
-                LBDNRMenu.append({"name":obj.name,"k1":obj.k1,"k2":obj.k2,"kx1":obj.kx1,"kx2":obj.kx2})
+                LBDNRMenu.append({"name":obj.name,"k1":obj.k1,"k2":obj.k2,"k3":obj.k3,"kx1":obj.kx1,"kx2":obj.kx2})
             return JsonResponse(data=LBDNRMenu, status=200)
             # return JsonResponse({'code':200,'status':'success','data':LBDNRMenu})
         else:
             return JsonResponse(data="No such LBDNr", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'No LBDNR Data Found'})
+
+def GetLBDNRAllByName(request):
+    if(request.method == "GET"):
+        name = request.GET.get('name')
+        if(name == None or name == ""):
+            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status':'failed','data':"name can not be empty"})
+        LBD = Lbdnrtable.objects.filter(name = name).first()
+        if(LBD != None):
+            part_obj = Parttable.objects.filter(name = name).first()
+            LBD_list = {"name":LBD.name,"alias":part_obj.alias,"level0sequence":part_obj.level0sequence,"sourceorganism":part_obj.sourceorganism,"reference":part_obj.reference,"note":part_obj.note,"confirmedsequence":part_obj.confirmedsequence,"insertsequence":part_obj.insertsequence,"k1":LBD.k1,"k2":LBD.k2,"k3":LBD.k3,"kx1":LBD.kx1,"kx2":LBD.kx2}
+            # LBD_list = [LBD.name,part_obj.alias,part_obj.level0sequence,part_obj.sourceorganism,part_obj.reference,part_obj.note,part_obj.confirmedsequence,part_obj.insertsequence,LBD.k1,LBD.k2,LBD.k3,LBD.i]
+            return JsonResponse(data = LBD_list, status=200,safe=False)
+            # return JsonResponse({'code':200,'status':'success','data':list(DBD)})
+        else:
+            return JsonResponse(data="No such LBD Dimer", status=404,safe=False)
+
 
 def GetLBDNRNameList(request):
     if(request.method == "GET"):
@@ -1285,7 +1385,7 @@ def GetLBDNRNameList(request):
         if(len(LBDNRList) > 0):
             for obj in LBDNRList:
                 LBDNameList.append(obj.name)
-            return JsonResponse(data=LBDNameList, status=200)
+            return JsonResponse(data=LBDNameList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':LBDNRMenu})
         else:
             return JsonResponse(data="No such LBDNR", status=404,safe=False)
@@ -1321,6 +1421,15 @@ def UpdateLBDnr(request):
         else:
             Lbdnrtable.objects.filter(name=Name).update(k1 = k1,k2=k2,k3=k3,kx1=kx1,kx2=kx2)
             return JsonResponse(data="Updated LBD NR", status=200, safe=False)
+
+def GetPartIDByName(request):
+    if(request.method == "GET"):
+        Name = request.GET.get('name')
+        if(Name != None and Name != ""):
+            ID = Parttable.objects.filter(Name = Name).first().partid
+            return JsonResponse(data = {"PartID":ID},status=200,safe=False)
+        else:
+            return JsonResponse(data = "Name cannot be empty",status=400,safe=False)
 
 
 

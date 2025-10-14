@@ -334,6 +334,41 @@ paths:
             text/plain:
               schema:
                 type: string
+  /SearchRPU:
+     get:
+         summary: Search Part RPU By Part ID
+         tags:
+           - Part
+         operationId: SearchRPU
+         description: Return Part RPU Data
+         parameters:
+           - name: partID
+             required: true
+             in: query
+             description: part id
+             schema:
+               type: string
+         responses:
+           '200':
+             description: Return Part RPU Data
+             content:
+               application/json:
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PartRPU'
+           '400':
+             description: parameter ID is empty
+             content:
+               text/plain:
+                 schema:
+                   type: string
+           '404':
+             description: Part RPU Data doesn't exist
+             content:
+               text/plain:
+                 schema:
+                   type: string
   /AddPartRPU:
     post:
       summary: Append part rpu data in database
@@ -951,6 +986,76 @@ paths:
                   type: string
         '400':
           description: PlasmidName cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: No such Plasmid/Parent plasmid
+          content:
+            application/json:
+              schema:
+                type: string
+  /PlasmidParentByID:
+    get:
+      summary: List Parent plasmid name by Plasmid ID
+      tags:
+        - Plasmid
+      description: Search Parent plasmid name of plasmid id provided
+      operationId: PlasmidParentByID
+      parameters:
+        - name: plasmidID
+          in: query
+          required: true
+          description: plasmid id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Return parent plasmid name of plasmid provided
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: PlasmidID cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: No such Plasmid/Parent plasmid
+          content:
+            application/json:
+              schema:
+                type: string
+  /GetParentID:
+    get:
+      summary: List Parent plasmid IDs by Plasmid ID
+      tags:
+        - Plasmid
+      description: Search Parent plasmid IDs of plasmid id provided
+      operationId: GetParentID
+      parameters:
+        - name: plasmidID
+          in: query
+          required: true
+          description: plasmid id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Return parent plasmid IDs of plasmid provided
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+        '400':
+          description: PlasmidID cannot be empty
           content:
             application/json:
               schema:
@@ -1806,6 +1911,41 @@ paths:
             application/json:
               schema:
                 type: string
+  /GetDBDAllByName:
+    get:
+      summary: Get complex dbd value
+      tags:
+        - DBD
+      description: search dbd all value by name provided
+      operationId: GetDBDAllByName
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: DBD name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Return DBD value list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DBDAll'
+        '400':
+          description: Parameter name cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: No such DBD
+          content:
+            application/json:
+              schema:
+                type: string
   /GetDBDMenu:
     get:
       summary: Get All DBD simple data
@@ -1977,6 +2117,34 @@ paths:
             application/json:
               schema:
                 type: string
+  /GetLBDDimerAllByName:
+    get:
+      summary: List LBD All value by name provided
+      tags:
+        - LBDDimer
+      description: Return complex lbd dimer value
+      operationId: GetLBDDimerAllByName
+      responses:
+        '200':
+          description: Get all lbd dimer value by name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LBDDimerComplex'
+        '400':
+          description: Parameter Name cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: No such LBDDimer
+          content:
+            application/json:
+              schema:
+                type: string
   /ADDLBDDimer:
     post:
       summary: Add Simple LBD Dimer data
@@ -2071,6 +2239,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LBDNRSimple'
+        '404':
+          description: No LBD NR data
+          content:
+            application/json:
+              schema:
+                type: string
+  /GetLBDNRAllByName:
+    get:
+      summary: List complex LBD NR data by name provided
+      tags:
+        - LBDNR
+      description: Get complex LBD NR value by name
+      operationId: GetLBDNRAllByName
+      responses:
+        '200':
+          description: Return LBD NR data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LBDNRComplex'
+        '400':
+          description: Parameter name cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
         '404':
           description: No LBD NR data
           content:

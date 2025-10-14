@@ -3,6 +3,8 @@ import hashlib
 from django.shortcuts import render,HttpResponse,redirect
 from django import forms
 from WebDatabase import models
+from django.http import HttpResponse, JsonResponse
+
 #md5加密
 def md5(data):
     m = hashlib.md5()
@@ -21,6 +23,7 @@ def login(request):
     """登录页面"""
     if(request.method == 'GET'):
         form = LoginModelForm()
+        print("111")
         return render(request,"login.html",{'form':form})
     form = LoginModelForm(data= request.POST)
     if form.is_valid():
@@ -34,7 +37,7 @@ def login(request):
         #验证正确之后
         #网站生成随机字符串，写到浏览器cookie中；再写入session
         request.session['info'] = {'uid':admin_object.uid,'uname':admin_object.uname}
-        return redirect("/WebDatabase/Part")
+        return redirect('/WebDatabase/Part')
     else:
         return render(request,"login.html",{'form':form})
 
