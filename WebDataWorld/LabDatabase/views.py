@@ -15,7 +15,7 @@ import pandas as pd
 import json
 # from .forms import FileUploadForm
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
 
 # class User_auth(MiddlewareMixin):
 
