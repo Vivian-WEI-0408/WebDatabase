@@ -21,6 +21,7 @@ urlpatterns = [
 
 
     path("Part",views.PartDataALL,name="Part"),
+    path("PartByID",views.SearchByPartID,name="PartByID"),
     path("PartName",views.SearchByPartName,name="PartName"),
     path("PartAlias",views.SearchByPartAlterName,name="PartAlias"),
     path("PartType",views.SearchByPartType,name="PartType"),
@@ -29,6 +30,7 @@ urlpatterns = [
     path("PartSeq",views.SearchBySeq,name="PartSeq"),
     path("PartFile",views.SearchPartFile,name="PartFile"),
     path('SearchRPU',views.GetPartRPU,name="SearchRPU"),
+    path('PartID',views.GetPartIDByName,name="PartID"),
     path("AddPartRPU",views.AddPartRPU,name="AddPartRPU"),
     path("AddPartData",views.AddPartData,name="AddPartData"),
     path("AddPartFile",views.AddPartFileAddress,name="AddPartFile"),
@@ -37,9 +39,11 @@ urlpatterns = [
     path("UpdatePartRPU",views.UpdatePartRPU,name="UpdatePartRPU"),
     path("deletePart",views.deletePartData,name="deletePart"),
     path("deletePartFile",views.deletePartFile,name="deletePartFile"),
+    path("PartFilter",views.PartFilter,name="PartFilter"),
 
-
+    path("Plasmid",views.PlasmidDataALL,name="Plasmid"),
     path("PlasmidName",views.SearchByPlasmidName,name="PlamsidName"),
+    path("PlasmidByID",views.SearchByPlasmidID,name="PlasmidByID"),
     path("PlasmidAlterName",views.SearchByPlasmidAlterName,name="PlasmidAlterName"),
     path("PlasmidSeqByName",views.SearchPlasmidSequenceByName,name="PlasmidSeq"),
     path("PlasmidSeq",views.SearchByPlasmidSeq,name="PlasmidSeq"),
@@ -52,30 +56,34 @@ urlpatterns = [
     path("PlasmidParent",views.SearchPlasmidParent,name="PlasmidParent"),
     path("PlasmidParentByID",views.SearchPlasmidParentByID,name="PlasmidParentByID"),
     path("GetParentID",views.GetParentID,name="GetParentID"),
+    path("PlasmidID",views.GetPlasmidIDByName,name="PlasmidID"),
     path("PlasmidFile",views.SearchPlasmidFileAddress,name="PlasmidFile"),
     path("AddPlasmidFile",views.AddPlasmidFileAddress,name="AddPlasmidFile"),
     path("AddPlasmidData",views.AddPlasmidData,name="AddPlasmidData"),
-    path("AddPlasmidParent",views.AddParentPlasmid,name="AddParentPlasmid"),
     path("UpdatePlasmid",views.UpdatePlasmidData,name="UpdatePlasmid"),
     path("UpdatePlasmidFile",views.UpdatePlasmidFileAddress,name="UpdatePlasmidFile"),
     path("deletePlasmid",views.deletePlasmidData,name="deletePlasmid"),
     path("deletePlasmidFile",views.deletePlasmidFileAddress,name="deletePlasmidFile"),
     path("deletePlasmidParent",views.DeleteParentPlasmid,name="deletePlasmidParent"),
+    path("PlasmidFilter",views.PlasmidFilter,name="PlasmidFilter"),
 
-
+    path("Backbone",views.BackboneDataALL,name="Backbone"),
     path("BackboneName",views.SearchByBackboneName,name="BackboneName"),
+    path("BackboneByID",views.SearchByBackboneID,name="BackboneID"),
     path("BackboneSeq",views.SearchByBackboneSeq,name="BackboneSeq"),
     path("BackboneSpecies",views.SearchByBackboneSpecies,name="BackboneSpecies"),
     path("BackboneOri",views.SearchByBackboneOri,name="BackboneOri"),
     path("BackboneMarker",views.SearchByBackboneMarker,name="BackboneMarker"),
     path("BackboneCopyNumber",views.SearchByCopyNumber,name="BackboneCopyNumber"),
     path("BackboneFile",views.SearchBackboneFileAddress,name="BackboneFile"),
+    path("BackboneID",views.GetBackboneIDByName,name="BackboneID"),
     path("AddBackbone",views.AddBackboneData,name="AddBackbone"),
     path("AddBackboneFile",views.AddBackboneFileAddress,name="AddBackboneFile"),
-    path("UpdateBackbone",views.UpdateBackboneData,name="/UpdateBackbone"),
+    path("UpdateBackbone",views.UpdateBackboneData,name="UpdateBackbone"),
     path("UpdateBackboneFile",views.UpdateBackboneFileAddress,name="UpdateBackboneFile"),
     path("deleteBackbone",views.DeleteBackboneData,name="deleteBackbone"),
     path("deleteBackboneFile",views.DeleteBackboneFileAddress,name="deleteBackboneFile"),
+    path("BackboneFilter",views.BackboneFilter,name="BackboneFilter"),
 
     path("TestDataName",views.SearchByTestdataName,name="TestDataName"),
 
@@ -104,4 +112,35 @@ urlpatterns = [
     
     path("login",account.login,name="login"),
     path("logout",account.logout,name="logout"),
+    path("register",account.register,name="register"),
+
+    path("PartNameFilter",views.SearchByPartNameFilter,name="PartNameFilter"),
+    path("BackboneNameFilter",views.SearchByBackboneNameFilter,name="BackboneNameFilter"),
+    path("PlasmidNameFilter",views.SearchByPlasmidNameFilter,name="PlasmidNameFilter"),
+
+    path("AddPartParent",views.AddParentPart,name="AddPartParent"),
+    path("AddBackboneParent",views.AddParentBackbone,name="AddParentBackbone"),
+    path("AddPlasmidParent",views.AddParentPlasmid,name="AddParentPlasmid"),
+
+    path("GetPartParent",views.GetParentPart, name = "GetPartParent"),
+    path("GetBackboneParent",views.GetParentBackbone,name="GetBackboneParent"),
+    path("GetPlasmidParent",views.GetParentPlasmid,name="GetPlasmidParent"),
+    path("GetPlasmidSon",views.GetSonPlasmid,name="GetPlasmidSon"),
+
+    path("getPartValueList/<str:column>",views.getPartValueList,name="getPartValueList"),
+    path("getBackboneValueList/<str:column>",views.getBackboneValueList,name="getBackboneValueList"),
+    path("getPlasmidValueList/<str:column>",views.getPlasmidValueList,name="getPlasmidValueList"),
+
+    path("getPartScarList",views.getPartScarList,name = "getPartScarList"),
+    path("getBackboneScarList",views.getBackboneScarList, name = "getBackboneScarList"),
+    path("getPlasmidScarList",views.getPlasmidScarList, name = "getPlasmidScarList"),
+
+    path("getPartScar",views.getPartScar,name = "getPartScar"),
+    path("setPartScar",views.setPartScar,name = "setPartScar"),
+
+    path("getBackboneScar",views.getBackboneScar,name="getBackboneScar"),
+    path("setBackboneScar",views.setBackboneScar, name = "setBackboneScar"),
+
+    path("getPlasmidScar",views.getPlasmidScar,name = "getPlasmidScar"),
+    path("setPlasmidScar",views.setPlasmidScar,name = "setPlasmidScar"),
 ]

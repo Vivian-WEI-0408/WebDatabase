@@ -6,7 +6,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: 'http://localhost:8000/WebDatabase'
+  - url: 'http://10.30.76.2:8000/WebDatabase'
 tags:
   - name: Strain
     description: Function of strain data
@@ -79,6 +79,41 @@ paths:
                   $ref: '#/components/schemas/part'
         '404':
           description: No part data
+          content:
+            text/plain:
+              schema:
+                type: string
+  /PartByID:
+    get:
+      summary: List parts data by ID
+      tags:
+        - Part
+      description: List parts by provided ID
+      operationId: PartByID
+      parameters:
+        - name: ID
+          required: true
+          in: query
+          description: The ID used to search
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Get Part Data list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/part'
+        '400':
+          description: parameter is empty
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: No such part
           content:
             text/plain:
               schema:
@@ -369,6 +404,44 @@ paths:
                text/plain:
                  schema:
                    type: string
+  /PartID:
+    get:
+      summary: Get Part ID by name
+      tags:
+        - Part
+      operationId: PartID
+      describe: Get Part ID
+      parameters:
+           - name: name
+             required: true
+             in: query
+             description: part name
+             schema:
+               type: string
+      responses:
+           '200':
+             description: Return Part ID
+             content:
+               application/json:
+                  schema:
+                  type: object
+                  properties:
+                    PartID:
+                      type: integer
+
+           '400':
+             description: parameter name is empty
+             content:
+               text/plain:
+                 schema:
+                   type: string
+           '404':
+             description: Part name doesn't exist
+             content:
+               text/plain:
+                 schema:
+                   type: string
+      
   /AddPartRPU:
     post:
       summary: Append part rpu data in database
@@ -617,6 +690,41 @@ paths:
           description: plasmid name to search
           schema:
             type: string
+      responses:
+        '200':
+          description: List plasmid data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plasmid'
+        '400':
+          description: Name cannot be empty
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: No such plasmid
+          content:
+            text/plain:
+              schema:
+                type: string
+  /PlasmidByID:
+    get:
+      summary: List plasmid data by ID
+      tags:
+        - Plasmid
+      operationId: PlasmidByID
+      description: search plasmid data by ID provided
+      parameters:
+        - name: ID
+          in: query
+          required: true
+          description: plasmid ID to search
+          schema:
+            type: integer
       responses:
         '200':
           description: List plasmid data
@@ -1066,6 +1174,44 @@ paths:
             application/json:
               schema:
                 type: string
+  
+  /PlasmidID:
+    get:
+      summary: Get Plasmid ID by name
+      tags:
+        - Plasmid
+      operationId: PlasmidID
+      describe: Get Plasmid ID
+      parameters:
+           - name: name
+             required: true
+             in: query
+             description: Plasmid name
+             schema:
+               type: string
+      responses:
+           '200':
+             description: Return Plasmid ID
+             content:
+               application/json:
+                  schema:
+                  type: object
+                  properties:
+                    PlasmidID:
+                      type: integer
+           '400':
+             description: parameter name is empty
+             content:
+               text/plain:
+                 schema:
+                   type: string
+           '404':
+             description: Plasmid name doesn't exist
+             content:
+               text/plain:
+                 schema:
+                   type: string
+
   /PlasmidFile:
     get:
       summary: Get Plasmid file address
@@ -1383,6 +1529,41 @@ paths:
             application/json:
               schema:
                 type: string
+  /BackboneByID:
+    get:
+      summary: List backbone data
+      tags:
+        - Backbone
+      description: Search backbone data by ID provided
+      operationId: BackboneByID
+      parameters:
+        - name: ID
+          in: query
+          required: true
+          description: Backbone ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: return backbone data of ID provided
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Backbone'
+        '400':
+          description: Parameter name cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: No such name
+          content:
+            application/json:
+              schema:
+                type: string
   /BackboneSeq:
     get:
       summary: List backbone data by sequence
@@ -1591,6 +1772,44 @@ paths:
             application/json:
               schema:
                 type: string
+
+  /BackboneID:
+    get:
+      summary: Get Backbone ID by name
+      tags:
+        - Backbone
+      operationId: BackboneID
+      describe: Get Backbone ID
+      parameters:
+           - name: name
+             required: true
+             in: query
+             description: Backbone name
+             schema:
+               type: string
+      responses:
+           '200':
+             description: Return Backbone ID
+             content:
+               application/json:
+                  schema:
+                  type: object
+                  properties:
+                    BackboneID:
+                      type: integer
+           '400':
+             description: parameter name is empty
+             content:
+               text/plain:
+                 schema:
+                   type: string
+           '404':
+             description: Backbone name doesn't exist
+             content:
+               text/plain:
+                 schema:
+                   type: string
+
   /AddBackbone:
     post:
       summary: Add backbone data
@@ -1616,6 +1835,7 @@ paths:
             application/json:
               schema:
                 type: string
+
   /AddBackboneFile:
     post:
       summary: Add backbone file address
@@ -1647,6 +1867,7 @@ paths:
             application/json:
               schema: 
                 type: string
+
   /UpdateBackbone:
     post:
       summary: Update backbone data

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>载体骨架信息 - 基因元件数据库</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a6fc4, #0d4d8a);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .backbone-id {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .info-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h2 {
+            color: #1a6fc4;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2 i {
+            margin-right: 10px;
+        }
+        
+        .backbone-name {
+            font-size: 1.8rem;
+            color: #0d4d8a;
+            margin-bottom: 10px;
+        }
+        
+        .sequence-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .sequence {
+            font-family: 'Courier New', monospace;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: nowrap;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-top: 4px solid #1a6fc4;
+        }
+        
+        .feature-card h3 {
+            color: #0d4d8a;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-card h3 i {
+            margin-right: 8px;
+        }
+        
+        .feature-card p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .feature-details {
+            margin-top: 15px;
+        }
+        
+        .feature-detail-item {
+            display: flex;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #0d4d8a;
+        }
+        
+        .detail-value {
+            color: #555;
+        }
+        
+        .map-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .plasmid-map {
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #0d4d8a;
+        }
+        
+        .plasmid-label {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #0d4d8a;
+            transform-origin: center;
+            text-align: center;
+            width: 80px;
+        }
+        
+        .reference-list {
+            list-style-type: none;
+        }
+        
+        .reference-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #1a6fc4;
+        }
+        
+        .reference-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #0d4d8a;
+        }
+        
+        .reference-authors {
+            color: #555;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+        
+        .reference-journal {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .reference-link {
+            color: #1a6fc4;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .reference-link:hover {
+            text-decoration: underline;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-top: 4px solid #1a6fc4;
+        }
+        
+        .info-card h3 {
+            color: #0d4d8a;
+            margin-bottom: 10px;
+        }
+        
+        .info-card p {
+            color: #555;
+        }
+        
+        .download-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a6fc4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #0d4d8a;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f1f5f9;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .info-grid, .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .plasmid-map {
+                height: 300px;
+                width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>载体骨架信息</h1>
+            <div class="backbone-id">载体ID: {{backbone.id}}</div>
+        </header>
+        
+        <div class="content">
+            <div class="info-section">
+                <h2><i>📋</i> 基本信息</h2>
+                <div class="backbone-name">{{backbone.name}}</div>
+                <!-- <p>pUC19是一种常用的克隆载体，大小为2686 bp，具有高拷贝数、多克隆位点和蓝白斑筛选等特性。</p> -->
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>载体大小</h3>
+                        <p>{{backbone.length}} bp</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>拷贝数</h3>
+                        <p>{{backbone.copynumber}}</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>宿主</h3>
+                        <p>{{backbone.species}}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h2><i>🧬</i> 载体特征</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3><i>📍</i> 复制起点 (Ori)</h3>
+                        <div class="feature-details">
+                            <div class="feature-detail-item">
+                                <div class="detail-label">类型:</div>
+                                <div class="detail-value">{{backbone.ori}}</div>
+                            </div>
+                            <!-- <div class="feature-detail-item">
+                                <div class="detail-label">位置:</div>
+                                <div class="detail-value">1551-2026 bp</div>
+                            </div>
+                            <div class="feature-detail-item">
+                                <div class="detail-label">特性:</div>
+                                <div class="detail-value">高拷贝数，松弛型复制</div>
+                            </div> -->
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3><i>🔖</i> 标记基因 (Marker)</h3>
+                        <!-- <p>pUC19载体使用氨苄青霉素抗性基因作为选择标记。</p> -->
+                        <div class="feature-details">
+                            <div class="feature-detail-item">
+                                <div class="detail-label">类型:</div>
+                                <div class="detail-value">{{backbone.marker}}</div>
+                            </div>
+                            <!-- <div class="feature-detail-item">
+                                <div class="detail-label">名称:</div>
+                                <div class="detail-value">Ampicillin resistance (AmpR)</div>
+                            </div>
+                            <div class="feature-detail-item">
+                                <div class="detail-label">位置:</div>
+                                <div class="detail-value">329-1276 bp</div>
+                            </div>
+                            <div class="feature-detail-item">
+                                <div class="detail-label">筛选浓度:</div>
+                                <div class="detail-value">100 μg/mL</div>
+                            </div> -->
+                        </div>
+                    </div>
+                    
+                    <!-- <div class="feature-card">
+                        <h3><i>🧪</i> 报告基因</h3>
+                        <p>pUC19载体使用LacZα作为报告基因，支持蓝白斑筛选。</p>
+                        <div class="feature-details">
+                            <div class="feature-detail-item">
+                                <div class="detail-label">类型:</div>
+                                <div class="detail-value">β-半乳糖苷酶α片段</div>
+                            </div>
+                            <div class="feature-detail-item">
+                                <div class="detail-label">名称:</div>
+                                <div class="detail-value">LacZα</div>
+                            </div>
+                            <div class="feature-detail-item">
+                                <div class="detail-label">位置:</div>
+                                <div class="detail-value">397-504 bp</div>
+                            </div>
+                            <div class="feature-detail-item">
+                                <div class="detail-label">筛选底物:</div>
+                                <div class="detail-value">X-gal/IPTG</div>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h2><i>🗺️</i> 载体图谱</h2>
+                <p>{{backbone.name}}载体图谱显示主要功能元件的位置和方向：</p>
+                <div class="map-container">
+                    <div class="plasmid-map">
+                        <div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{backbone.marker}}</div>
+                        <div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">{{backbone.ori}}</div>
+                        <!-- <div class="plasmid-label" style="transform: rotate(180deg) translate(220px) rotate(-180deg);">LacZα (397-504)</div>
+                        <div class="plasmid-label" style="transform: rotate(270deg) translate(220px) rotate(-270deg);">MCS (396-454)</div> -->
+                        <!-- <div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">AmpR (329-1276)</div>
+                        <div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">Ori (1551-2026)</div>
+                        <div class="plasmid-label" style="transform: rotate(180deg) translate(220px) rotate(-180deg);">LacZα (397-504)</div>
+                        <div class="plasmid-label" style="transform: rotate(270deg) translate(220px) rotate(-270deg);">MCS (396-454)</div> -->
+                    </div>
+                </div>
+                <div class="download-section">
+                    <button class="btn"><i>📥</i> 下载载体图谱</button>
+                    <button class="btn"><i>🧬</i> 下载序列文件</button>
+                    <button class="btn"><i>📋</i> 下载详细说明</button>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h2><i>🧬</i> 载体序列</h2>
+                <p>以下是pUC19载体的完整DNA序列：</p>
+                <div class="sequence-container">
+                    <div class="sequence" id="SequenceContainer">
+                        {{backbone.sequence}}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h2><i>📚</i> 参考文献</h2>
+                <ul class="reference-list">
+                    <li class="reference-item">
+                        <div class="reference-title">{{backbone.reference}}</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            <p>基因元件数据库 &copy; 2023 | 最后更新: 2023年11月15日</p>
+        </footer>
+    </div>
+
+    <script>
+        // 简单的载体图谱交互效果
+        document.querySelectorAll('.plasmid-label').forEach(label => {
+            label.addEventListener('mouseover', function() {
+                this.style.backgroundColor = 'rgba(255,255,255,0.7)';
+                this.style.padding = '2px 5px';
+                this.style.borderRadius = '3px';
+                this.style.zIndex = '10';
+            });
+            
+            label.addEventListener('mouseout', function() {
+                this.style.backgroundColor = 'transparent';
+                this.style.padding = '0';
+                this.style.borderRadius = '0';
+                this.style.zIndex = '1';
+            });
+        });
+        
+        // 下载按钮交互
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i>✓</i> 下载中...';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    alert('下载完成！');
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

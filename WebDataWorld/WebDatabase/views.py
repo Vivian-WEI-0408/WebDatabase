@@ -3,13 +3,17 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.core import serializers
 import math
-from django.core import serializers
+import json
+import uuid
+from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 from .models import (Backbonetable,Parentplasmidtable,
                     Partrputable,Parttable,Plasmidneed,
                     Straintable,TbBackboneUserfileaddress,
                     TbPartUserfileaddress,TbPlasmidUserfileaddress,
-                    Testdatatable,User,Lbdnrtable,Lbddimertable,Dbdtable)
+                    Testdatatable,User,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
+                    Parentparttable, Partscartable, Backbonescartable, Plasmidscartable)
+from django.views.decorators.csrf import csrf_exempt
 from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
     PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
     TbPartUserfileaddressSerializer,TbPlasmidUserfileaddressSerializer,TestdatatableSerializer
@@ -20,10 +24,11 @@ class User_auth(MiddlewareMixin):
 
     def process_request(self,request):
         #排除不需要登录就能访问的页面
-        if request.path_info == "/WebDatabase/login":
+        if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register":
             return
         info = request.session.get('info')
-        print(info)
+        print(f'User_auth{info}')
+        # print(info)
         if not info:
             return redirect('/WebDatabase/login')
         else:
@@ -57,25 +62,118 @@ def SearchByStrainName(request):
 
 
 
-
-
-
-
-
-
-
 #-------------------------------------------------------------
 #Part Table
 #ALL
 def PartDataALL(request):
+    print("PartDataAll")
     if(request.method == "GET"):
-        PartData = Parttable.objects.all().order_by('name')
-        if(len(PartData) > 0):
-            return JsonResponse(data=list(PartData.values()), status=200,safe=False)
-            # return JsonResponse({'code':200,'data':list(PartData.values())})
+        page = int(request.GET.get('page',0))
+        if(page == 0):
+            PartData = Parttable.objects.all().order_by('name')
+            if(len(PartData) > 0):
+                return JsonResponse(data=list(PartData.values()), status=200,safe=False)
+                # return JsonResponse({'code':200,'data':list(PartData.values())})
+            else:
+                return JsonResponse(data="No such part", status=404,safe=False)
+                # return JsonResponse({'code':204,'status': 'failed', 'data': []})
         else:
-            return JsonResponse(data="No such part", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+            page_size = int(request.GET.get('page_size',10))
+            offset = (page -1)*page_size
+            total_count = Parttable.objects.count()
+            total_pages = (total_count + page_size -1) // page_size
+            query_set = Parttable.objects.order_by('name').values('partid','name','type','sourceorganism','reference')[offset:offset+page_size]
+            # query_set = Parttable.objects.only('partid','name','type','sourceorganism','reference').order_by('name')[offset:offset+page_size]
+            has_next = page < total_pages
+            has_previous = page > 1
+            return JsonResponse(data={'success':True,
+                                      'data':list(query_set),
+                                      'pagination':{
+                                          'current_page' : page,
+                                          'total_pages' : total_pages,
+                                          'total_count' : total_count,
+                                          'has_next':has_next,
+                                          'has_previous' : has_previous,
+                                          'page_size':page_size,
+                                          'offset':offset
+                                          }
+                                        },status = 200, safe=False
+                                )
+
+#PartFilter
+def PartFilter(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        type = data["type"]
+        Enzyme = data['Enzyme']
+        Scar = data['Scar']
+        name = data['name']
+        page = data['page']
+        page_size = data['page_size']
+        offset = (page - 1) * page_size
+        if(type != ""):
+            if(type.lower() == "promoter"):
+                type = 1
+            elif(type.lower() == "terminator"):
+                type = 3
+            elif(type.lower() == "rbs"):
+                type = 4
+            elif(type.lower() == "cds"):
+                type = 2
+        scarpartid = []
+        if(Enzyme == "BsmBI"):
+            scarpartid = list(Partscartable.objects.filter(bsmbi = Scar).values('partid'))
+        elif(Enzyme == "BsaI"):
+            scarpartid = list(Partscartable.objects.filter(bsai = Scar).values('partid'))
+        elif(Enzyme == "BbsI"):
+            scarpartid = list(Partscartable.objects.filter(bbsi = Scar).values('partid'))
+        elif(Enzyme == "AarI"):
+            scarpartid = list(Partscartable.objects.filter(aari = Scar).values('partid'))
+        elif(Enzyme == "SapI"):
+            scarpartid = list(Partscartable.objects.filter(sapi = Scar).values('partid'))
+        if(Enzyme != "" and len(scarpartid) == 0):
+            return JsonResponse(data={'success':False,'error':'No data'}, status = 400, safe = False)
+        result = Parttable.objects
+        PartResult = []
+        if(len(scarpartid) != 0):
+            for each_id in scarpartid:
+                result = result.filter(partid = each_id['partid'])
+                if(type != "" and result != None):
+                    # 'partid','name','type','sourceorganism','reference'
+                    result = result.filter(type = type)
+                if(name != "" and result != None):
+                    result = result.filter(name__icontains = name)
+                if(result != None):
+                    PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
+        else:
+            if(type != "" and result != None):
+                # 'partid','name','type','sourceorganism','reference'
+                result = result.filter(type = type)
+            if(name != "" and result != None):
+                print(name)
+                result = result.filter(name__icontains = name)
+            if(result != None):
+                PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
+        if(len(PartResult[0]) != 0):
+            total_count = len(PartResult[0])
+            total_pages = (total_count + page_size -1) // page_size
+            has_next = page < total_pages
+            has_previous = page > 1
+            return JsonResponse(data = {'success':True, 'data': list(PartResult[0][offset:offset+page_size]),
+                                        'pagination':{
+                                            'current_page' : page,
+                                            'total_pages' : total_pages,
+                                            'total_count' : total_count,
+                                            'has_next' : has_next,
+                                            'has_previous' : has_previous,
+                                            'page_size' : page_size,
+                                            'offset' : offset
+                                            }
+                                        },status = 200, safe = False)
+        else:
+            return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
+
+
 #Search
 def SearchByPartName(request):
     if(request.method == "GET"):
@@ -84,6 +182,69 @@ def SearchByPartName(request):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
         PartList = Parttable.objects.filter(name=Name)
+        if(len(PartList) > 0):
+            return JsonResponse(data=list(PartList.values()), status=200,safe=False)
+            # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
+        else:
+            return JsonResponse(data="No such part", status=404,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+
+def SearchByPartNameFilter(request):
+    if(request.method == "GET"):
+        Name = request.GET.get('keywords')
+        Type = request.GET.get('Type')
+        print(Name)
+        print(Type)
+        if(Name == None or Name == ""):
+            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+        else:
+            try:
+                promoterResult = list(Parttable.objects.only('partid','name','sourceorganism','reference').filter(name__icontains = Name,type=Type).values())
+                if(len(promoterResult) > 0):
+                    return JsonResponse(data=promoterResult,status=200,safe=False)
+                else:
+                    return JsonResponse(data = [],status=200,safe=False)
+            except Exception as e:
+                return JsonResponse(data = str(e),status=404,safe=False)
+
+def SearchByBackboneNameFilter(request):
+    if(request.method == "GET"):
+        Name = request.GET.get('keywords')
+        if(Name == None or Name == ""):
+            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+        else:
+            try:
+                backboneResult = list(Backbonetable.objects.only('id','name','ori','marker','species').filter(name__icontains = Name).values())
+                if(len(backboneResult) > 0):
+                    return JsonResponse(data=backboneResult,status=200,safe=False)
+                else:
+                    return JsonResponse(data = [],status=200,safe=False)
+            except Exception as e:
+                return JsonResponse(data = str(e),status=404,safe=False)
+
+
+def SearchByPlasmidNameFilter(request):
+    if(request.method == 'GET'):
+        Name = request.GET.get('keywords')
+        if(Name == None or Name == ""):
+            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+        else:
+            try:
+                plasmidResult = list(Plasmidneed.objects.only('plasmidid','name','oricloning','orihost','markercloning','markerhost').filter(name__icontains=Name).values())
+                if(len(plasmidResult) > 0):
+                    return JsonResponse(data = list(plasmidResult.values),status=200,safe=False)
+                else:
+                    return JsonResponse(data = [],status=200,safe=False)
+            except Exception as e:
+                return JsonResponse(data = str(e),status=404,safe=False)
+
+def SearchByPartID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('ID')
+        if(ID == None or ID == ""):
+            return JsonResponse(data="ID cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
+        PartList = Parttable.objects.filter(partid=ID)
         if(len(PartList) > 0):
             return JsonResponse(data=list(PartList.values()), status=200,safe=False)
             # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
@@ -264,16 +425,18 @@ def AddPartRPU(request):
 
 def AddPartData(request):
     if(request.method == "POST"):
-        name = request.POST.get('name')
-        alias = request.POST.get('alias')
-        length = len(request.POST.get('Level0Sequence'))
-        level0Seq = request.POST.get('Level0Sequence')
-        ConfirmedSequence = request.POST.get('ConfirmedSequence')
-        InsertSequence = request.POST.get('InsertSequence')
-        sourceOrganism = request.POST.get("source")
-        reference = request.POST.get("reference")
-        note = request.POST.get("note")
-        type = request.POST.get("type")
+        data = json.loads(request.body)
+        print(data)
+        name = data['name']
+        alias = data['alias']
+        length = len(data['Level0Sequence'])
+        level0Seq = data['Level0Sequence']
+        ConfirmedSequence = data['ConfirmedSequence'] if'ConfirmedSequence' in data else ""
+        InsertSequence = data['InsertSequence'] if 'InsertSequence' in data else ""
+        sourceOrganism = data['source'] if 'source' in data else ""
+        reference = data['reference']  if 'reference' in data else ""
+        note = data['note'] if 'note' in data else ""
+        type = data['type']
         if(type == None or type == ""):
             return JsonResponse(data="Type cannot be empty", status=400,safe=False)
         if(type.lower() == "promoter"):
@@ -286,12 +449,18 @@ def AddPartData(request):
             type = 4
         elif(type.lower() == "carb"):
             type = 5
-        if(name == "" or name == None or level0Seq == "" or ConfirmedSequence == "" or InsertSequence == ""):
+        username = request.session['info']['uname']
+        if(name == "" or name == None or level0Seq == ""):
             return JsonResponse(data="Parameters name, sequence cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name or Sequence can not be empty'})
-        Parttable.objects.create(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
+        if(Parttable.objects.filter(name=name).first() != None):
+            Parttable.objects.filter(name = name).update(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
                                 confirmedsequence = ConfirmedSequence, insertsequence = InsertSequence,
-                                sourceorganism = sourceOrganism, reference=reference, note=note, type=type,)
+                                sourceorganism = sourceOrganism, reference=reference, note=note, type=type,user=username)
+        else:
+            Parttable.objects.create(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
+                                confirmedsequence = ConfirmedSequence, insertsequence = InsertSequence,
+                                sourceorganism = sourceOrganism, reference=reference, note=note, type=type,user=username)
         return JsonResponse(data="Added part data", status=200,safe=False)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data added'})
 
@@ -425,6 +594,123 @@ def deletePartFile(request):
 
 #---------------------------------------------------------------
 #pladmid need
+def PlasmidDataALL(request):
+    if(request.method == "GET"):
+        page = int(request.GET.get('page',0))
+        if(page == 0):
+            PlasmidData = Plasmidneed.objects.all().order_by('name')
+            if(len(PlasmidData) > 0):
+                return JsonResponse(data=list(PlasmidData.values()), status=200,safe=False)
+                # return JsonResponse({'code':200,'data':list(PartData.values())})
+            else:
+                return JsonResponse(data="No plasmid", status=404,safe=False)
+                # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+        else:
+            page_size = int(request.GET.get('page_size',10))
+            offset = (page -1)*page_size
+            total_count = Plasmidneed.objects.count()
+            total_pages = (total_count + page_size -1) // page_size
+            # query_set = Plasmidneed.objects.only('plasmidid','name','oricloning','orihost','markercloning','markerhost','level').all().order_by('name')[offset:offset+page_size]
+            query_set = (Plasmidneed.objects.order_by('name').values('plasmidid','name','oricloning','orihost','markercloning','markerhost','level'))[offset:offset+page_size]
+            has_next = page < total_pages
+            has_previous = page > 1
+            return JsonResponse(data={'success':True,
+                                      'data':list(query_set),
+                                      'pagination':{
+                                          'current_page' : page,
+                                          'total_pages' : total_pages,
+                                          'total_count' : total_count,
+                                          'has_next':has_next,
+                                          'has_previous' : has_previous,
+                                          'page_size':page_size,
+                                          'offset':offset
+                                          }
+                                        },status = 200, safe=False
+                                )
+        
+
+#Plasmid Filter
+#PartFilter
+def PlasmidFilter(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        Name = data['name']
+        OriClone = data['oriClone']
+        MarkerClone = data['markerClone']
+        OriHost = data['oriHost']
+        MarkerHost = data['markerHost']
+        Enzyme = data['Enzyme']
+        Scar = data['Scar']
+        page = data['page']
+        page_size = data['page_size']
+        offset = (page -1)*page_size
+
+        scarplasmidid = []
+        if(Enzyme == "BsmBI"):
+            scarplasmidid = list(Plasmidscartable.objects.filter(bsmbi = Scar).values('plasmidid'))
+        elif(Enzyme == "BsaI"):
+            scarplasmidid = list(Plasmidscartable.objects.filter(bsai = Scar).values('plasmidid'))
+        elif(Enzyme == "BbsI"):
+            scarplasmidid = list(Plasmidscartable.objects.filter(bbsi = Scar).values('plasmidid'))
+        elif(Enzyme == "AarI"):
+            scarplasmidid = list(Plasmidscartable.objects.filter(aari = Scar).values('plasmidid'))
+        elif(Enzyme == "SapI"):
+            scarplasmidid = list(Plasmidscartable.objects.filter(sapi = Scar).values('plasmidid'))
+        if(Enzyme != "" and len(scarplasmidid) == 0):
+            return JsonResponse(data={'success':False,'error':'No data'}, status = 404, safe = False)
+        result = Plasmidneed.objects
+        PlasmidResult = []
+        if(len(scarplasmidid) != 0):
+            for each_id in scarplasmidid:
+                result = result.filter(plasmidid = each_id['plasmidid'])
+                if(OriClone != '' and result != None):
+                    # 'partid','name','type','sourceorganism','reference'
+                    result = result.filter(oricloning=OriClone)
+                if(OriHost != "" and result != None):
+                    result = result.filter(orihost = OriHost)
+                if(MarkerClone != '' and result != None):
+                    result = result.filter(markercloning = MarkerClone)
+                if(MarkerHost != '' and result != None):
+                    result = result.filter(markerhost = MarkerHost)
+                if(Name != '' and result != None):
+                    result = result.filter(name__icontains = Name)
+                if(result != None):
+                    # 'plasmidid','name','oricloning','orihost','markercloning','markerhost','level'
+                    PlasmidResult.append(result.order_by('name').values('plasmidid','name','oricloning','orihost','markercloning','markerhost','level'))
+        else:
+            if(OriClone != "" and result != None):
+                # 'partid','name','type','sourceorganism','reference'
+                result = result.filter(oricloning = OriClone)
+            if(OriHost != "" and result != None):
+                result = result.filter(orihost = OriHost)
+            if(MarkerClone != '' and result != None):
+                result = result.filter(markercloning = MarkerClone)
+            if(MarkerHost != '' and result != None):
+                result = result.filter(markerhost = MarkerHost)
+            if(Name != "" and result != None):
+                result = result.filter(name__icontains = Name)
+            if(result != None):
+                PlasmidResult.append(result.order_by('name').values('plasmidid','name','oricloning','orihost','markercloning','markerhost','level'))
+        if(len(PlasmidResult[0]) != 0):
+            total_count = len(PlasmidResult[0])
+            total_pages = (total_count + page_size -1) // page_size
+            has_next = page < total_pages
+            has_previous = page > 1
+            return JsonResponse(data = {'success':True, 'data': list(PlasmidResult[0][offset:offset+page_size]),
+                                        'pagination':{
+                                            'current_page' : page,
+                                            'total_pages' : total_pages,
+                                            'total_count' : total_count,
+                                            'has_next' : has_next,
+                                            'has_previous' : has_previous,
+                                            'page_size' : page_size,
+                                            'offset' : offset
+                                            }
+                                        })
+        else:
+            return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
+
+
 #search
 def SearchByPlasmidName(request):
     if(request.method == "GET"):
@@ -434,6 +720,20 @@ def SearchByPlasmidName(request):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
         PlasmidList = Plasmidneed.objects.filter(name=Name)
+        if(len(PlasmidList) > 0):
+            return JsonResponse(data=list(PlasmidList.values()), status=200,safe=False)
+            # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
+        else:
+            return JsonResponse(data="No such Plasmid", status=404,safe=False)
+            # return JsonResponse({'code':204,'status':'failed','data':"Plamsid Not Found"})
+
+def SearchByPlasmidID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('ID')
+        if(ID == None or ID == ""):
+            return JsonResponse(data="ID cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
+        PlasmidList = Plasmidneed.objects.filter(plasmidid=ID)
         if(len(PlasmidList) > 0):
             return JsonResponse(data=list(PlasmidList.values()), status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
@@ -678,37 +978,45 @@ def AddPlasmidFileAddress(request):
 
 def AddPlasmidData(request):
     if(request.method == "POST"):
-        name = request.POST.get('name')
-        oriclone = request.POST.get('oriclone')
-        orihost = request.POST.get('orihost')
-        markerclone = request.POST.get('markerclone')
-        markerhost = request.POST.get('markerhost')
-        level = request.POST.get('level')
-        length = len(request.POST.get('sequence'))
-        sequence = request.POST.get('sequence')
-        plate = request.POST.get('plate')
-        state = request.POST.get('state')
-        note = request.POST.get('note')
-        alias = request.POST.get('alias')
+        data = json.loads(request.body)
+        name = data['name']
+        oriclone = data['oriclone']
+        orihost = data['orihost']
+        markerclone = data['markerclone']
+        markerhost = data['markerhost']
+        level = data['level']
+        length = len(data['sequence'])
+        sequence = data['sequence']
+        plate = data['plate'] if 'plate' in data else ""
+        state = data['state'] if 'state' in data else 0
+        note = data['note'] if 'note' in data else ""
+        alias = data['alias']
+        ParentInfo = data['ParentInfo'] if 'ParentInfo' in data else ""
         if(name == None or name == "" or level == None or level == "" or sequence == None or sequence == ""
                  or orihost == None or orihost == "" or markerclone == None or markerclone == "" or oriclone == None
                  or orihost == "" or markerhost == None or markerhost == ""):
-            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+            return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
-        Plasmidneed.objects.create(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
+        if(Plasmidneed.objects.filter(name = name).first() == None):
+            Plasmidneed.objects.create(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
                                    markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
-                                   plate=plate, state = state, note=note, alias=alias)
-        return JsonResponse(data="Plasmid Data Added", status=200)
+                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
+        else:
+            Plasmidneed.objects.filter(name=name).update(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
+                                   markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
+                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
+        return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Added'})
 
 def AddParentPlasmid(request):
     if(request.method == "POST"):
-        sonPlasmidName = request.POST.get('SonPlasmidName')
-        ParentPlasmidName = request.POST.get('ParentPlasmidName')
+        data = json.loads(request.body)
+        sonPlasmidName = data['SonPlasmidName']
+        ParentPlasmidName = data['ParentPlasmidName']
         if(sonPlasmidName == None or sonPlasmidName == "" or ParentPlasmidName == None or ParentPlasmidName == ""):
             return JsonResponse(data="SonPlasmidName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
-        sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first().plasmidid
+        sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
         if(sonPlasmidID == None):
             return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
@@ -717,14 +1025,52 @@ def AddParentPlasmid(request):
             return JsonResponse(data="No such ParentPlasmid", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
         for parent in parentPlasmidList:
-            parentplasmidID = Plasmidneed.objects.filter(name=parent).first().plasmidid
+            parentplasmidID = Plasmidneed.objects.filter(name=parent).first()
             if(parentplasmidID != None):
                 Parentplasmidtable.objects.create(sonplasmidid=sonPlasmidID, parentplasmidid=parentplasmidID)
             else:
                 return JsonResponse(data="Parent Plasmid Not Found", status=404,safe=False)
                 # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
-        return JsonResponse(data="Parent Plasmid Added", status=200)
+        return JsonResponse(data="Parent Plasmid Added", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
+
+def GetParentPart(request):
+    if(request.method == 'GET'):
+        sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
+        ppResult = list(Parentparttable.objects.filter(sonplasmidid = sonPlasmidid).values('parentpartid'))
+        pplist = []
+        # print(ppResult)
+        for each_id in ppResult:
+            pplist.append(list(Parttable.objects.filter(partid = each_id['parentpartid']).values('name','note')))
+        # print(pplist)
+        return JsonResponse(data={'success':True,'data':pplist},status = 200, safe = False)
+
+def GetParentBackbone(request):
+    if(request.method == 'GET'):
+        sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
+        pbResult = list(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidid).values('parentbackboneid'))
+        pblist = []
+        for each_id in pbResult:
+            pblist.append(list(Backbonetable.objects.filter(id = each_id['parentbackboneid']).values('name','notes')))
+        return JsonResponse(data={'success':True, 'data':pblist},status = 200, safe = False)
+
+def GetParentPlasmid(request):
+    if(request.method == 'GET'):
+        sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
+        ppResult = list(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidid).values('parentplasmidid'))
+        pplist = []
+        for each_id in ppResult:
+            pplist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['parentplasmidid']).values('name','note')))
+        return JsonResponse(data = {'success':True,'data':pplist},status = 200, safe = False)
+
+def GetSonPlasmid(request):
+    if(request.method == "GET"):
+        parentPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
+        spResult = list(Parentplasmidtable.objects.filter(parentplasmidid = parentPlasmidid).values('sonplasmidid'))
+        splist = []
+        for each_id in spResult:
+            splist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['sonplasmidid']).values('name','note')))
+        return JsonResponse(data = {'success':True, 'data':splist},status = 200, safe = False)
 
 #Update
 def UpdatePlasmidData(request):
@@ -842,6 +1188,127 @@ def DeleteParentPlasmid(request):
 #----------------------------------------------------------
 #Backbone table
 #Search
+def BackboneDataALL(request):
+    if(request.method == "GET"):
+        page = int(request.GET.get('page',0))
+        if(page == 0):
+            BackboneData = Backbonetable.objects.all().order_by('name')
+            if(len(BackboneData) > 0):
+                return JsonResponse(data={'success': True, 'data':list(BackboneData.values())}, status=200,safe=False)
+                # return JsonResponse({'code':200,'data':list(PartData.values())})
+            else:
+                return JsonResponse(data={'success':False, 'error':"No such backbone"}, status=404,safe=False)
+                # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+        else:
+            page_size = int(request.GET.get('page_size',10))
+            offset = (page -1)*page_size
+            total_count = Backbonetable.objects.count()
+            total_pages = (total_count + page_size -1) // page_size
+            query_set = Backbonetable.objects.order_by('name').values('id','name','marker','ori','species')[offset:offset+page_size]
+            # query_set = Backbonetable.objects.only('id','name','marker','ori','species').all().order_by('name')[offset:offset+page_size]
+
+            has_next = page < total_pages
+            has_previous = page > 1
+            return JsonResponse(data={'success':True,
+                                      'data':list(query_set),
+                                      'pagination':{
+                                          'current_page' : page,
+                                          'total_pages' : total_pages,
+                                          'total_count' : total_count,
+                                          'has_next':has_next,
+                                          'has_previous' : has_previous,
+                                          'page_size':page_size,
+                                          'offset':offset
+                                          }
+                                        },status = 200, safe=False
+                                )
+
+#Backbone filter
+
+def BackboneFilter(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        print(data)
+        ori = data['ori']
+        marker = data['marker']
+        Enzyme = data['Enzyme']
+        Scar = data['Scar']
+        Name = data['name']
+        page = data['page']
+        page_size = data['page_size']
+        offset = (page -1)*page_size
+
+        scarBackboneid = []
+        if(Enzyme == "BsmBI"):
+            scarBackboneid = list(Backbonescartable.objects.filter(bsmbi = Scar).values('backboneid'))
+        elif(Enzyme == "BsaI"):
+            scarBackboneid = list(Backbonescartable.objects.filter(bsai = Scar).values('backboneid'))
+        elif(Enzyme == "BbsI"):
+            scarBackboneid = list(Backbonescartable.objects.filter(bbsi = Scar).values('backboneid'))
+        elif(Enzyme == "AarI"):
+            scarBackboneid = list(Backbonescartable.objects.filter(aari = Scar).values('backboneid'))
+        elif(Enzyme == "SapI"):
+            scarBackboneid = list(Backbonescartable.objects.filter(sapi = Scar).values('backboneid'))
+        if(Enzyme != "" and len(scarBackboneid) == 0):
+            return JsonResponse(data={'success':False,'error':'No data'}, status = 404, safe = False)
+        result = Backbonetable.objects
+        BackboneResult = []
+        if(len(scarBackboneid) != 0):
+            for each_id in scarBackboneid:
+                result = result.filter(id = each_id['backboneid'])
+                if(ori != "" and result != None):
+                    # 'partid','name','type','sourceorganism','reference'
+                    result = result.filter(ori = ori)
+                if(marker != "" and result != None):
+                    result = result.filter(marker = marker)
+                if(Name != "" and result != None):
+                    result = result.filter(name__icontains = Name)
+                if(result != None):
+                    BackboneResult.append(result.order_by('name').values('id','name','marker','ori','species'))
+        else:
+            if(ori != "" and result != None):
+                result = result.filter(ori = ori)
+            if(marker != "" and result != None):
+                result = result.filter(marker = marker)
+            if(Name != "" and result != None):
+                result = result.filter(name__icontains = Name)
+            if(result != None):
+                BackboneResult.append(result.order_by('name').values('id','name','marker','ori','species'))
+        if(len(BackboneResult[0]) != 0):
+            total_count = len(BackboneResult[0])
+            total_pages = (total_count + page_size -1) // page_size
+            has_next = page < total_pages
+            has_previous = page > 1
+
+            # data={'success':True,
+            #                           'data':list(query_set.values()),
+            #                           'pagination':{
+            #                               'current_page' : page,
+            #                               'total_pages' : total_pages,
+            #                               'total_count' : total_count,
+            #                               'has_next':has_next,
+            #                               'has_previous' : has_previous,
+            #                               'page_size':page_size,
+            #                               'offset':offset
+            #                               }
+            #                             },status = 200, safe=False
+            return JsonResponse(data = {'success':True, 'data': list(BackboneResult[0][offset:offset+page_size]),
+                                        'pagination':{
+                                            'current_page' : page,
+                                            'total_pages' : total_pages,
+                                            'total_count' : total_count,
+                                            'has_next' : has_next,
+                                            'has_previous' : has_previous,
+                                            'page_size' : page_size,
+                                            'offset' : offset
+                                            }
+                                        })
+        else:
+            return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
+            
+
+
+
 def SearchByBackboneName(request):
     if(request.method == "GET"):
         Name = request.GET.get('name')
@@ -855,6 +1322,20 @@ def SearchByBackboneName(request):
         else:
             return JsonResponse(data="No such Name", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
+
+def SearchByBackboneID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('ID')
+        if(ID == None or ID == ""):
+            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
+        BackboneList = Backbonetable.objects.filter(id=ID)
+        if(len(BackboneList) > 0):
+            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
+            # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
+        else:
+            return JsonResponse(data="No such Plasmid", status=404,safe=False)
+            # return JsonResponse({'code':204,'status':'failed','data':"Plamsid Not Found"})
 
 def SearchByBackboneSeq(request):
     if(request.method == "GET"):
@@ -948,21 +1429,27 @@ def SearchBackboneFileAddress(request):
 #Add
 def AddBackboneData(request):
     if(request.method == "POST"):
-        name = request.POST.get('name')
-        length = len(request.POST.get('sequence'))
-        sequence = request.POST.get('sequence')
-        ori = request.POST.get('ori')
-        marker = request.POST.get('marker')
-        species = request.POST.get('species')
-        copynumber = request.POST.get('copynumber')
-        note = request.POST.get('note')
-        scar = request.POST.get('scar')
-        alias = request.POST.get('alias')
+        data = json.loads(request.body)
+        name = data['name']
+        length = len(data['sequence'])
+        sequence = data['sequence']
+        ori = data['ori']
+        marker = data['marker']
+        species = data['species']
+        copynumber = data['copynumber'] if 'copynumber' in data else ""
+        note = data['note'] if 'note' in data else ""
+        alias = data['alias'] if 'alias' in data else ""
+        username = request.session['info']['uname']
+        print(data)
         if(name == None or name == "" or sequence == None or sequence == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
-        Backbonetable.objects.create(name=name, length=length, sequence=sequence, ori=ori, marker=marker,
-                                     species = species,copynumber=copynumber, notes=note, scar=scar, alias=alias)
+        if(Backbonetable.objects.filter(name = name).first() != None):
+            Backbonetable.objects.filter(name = name).update(name=name, length=length, sequence=sequence, ori=ori, marker=marker,
+                                     species = species,copynumber=copynumber, notes=note, alias=alias,user=username)
+        else:
+            Backbonetable.objects.create(name=name, length=length, sequence=sequence, ori=ori, marker=marker,
+                                     species = species,copynumber=copynumber, notes=note, alias=alias,user=username)
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Added'})
 
@@ -1222,14 +1709,6 @@ def UpdateDBD(request):
 
 
 
-
-
-
-
-
-
-
-
 #===================================================================================================
 #LBD Dimer
 def GetLBDDimer(request):
@@ -1426,34 +1905,339 @@ def GetPartIDByName(request):
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name != None and Name != ""):
-            ID = Parttable.objects.filter(Name = Name).first().partid
-            return JsonResponse(data = {"PartID":ID},status=200,safe=False)
+            ID = Parttable.objects.filter(name = Name).first()
+            if(ID != None):
+                return JsonResponse(data = {"PartID":ID.partid},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such part",status=404, safe=False)
+        else:
+            return JsonResponse(data = "Name cannot be empty",status=400,safe=False)
+
+
+def GetBackboneIDByName(request):
+    if(request.method == 'GET'):
+        Name = request.GET.get('name')
+        if(Name != None and Name != ''):
+            ID = Backbonetable.objects.filter(name=Name).first()
+            if(ID != None):
+                return JsonResponse(data={"BackboneID":ID.id},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such Backbone",status=404, safe=False)
+        else:
+            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+
+def GetPlasmidIDByName(request):
+    if(request.method=='GET'):
+        Name = request.GET.get('name')
+        if(Name != None and Name != ""):
+            ID = Plasmidneed.objects.filter(name = Name).first()
+            if(ID != None):
+                return JsonResponse(data = {"PlasmidID":ID.plasmidid},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such Plasmid",status=400, safe=False)
         else:
             return JsonResponse(data = "Name cannot be empty",status=400,safe=False)
 
 
 
+def AddParentPart(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        sonPlasmidName = data['SonPlasmidName']
+        ParentPartName = data['ParentPartName']
+        print(sonPlasmidName)
+        print(ParentPartName)
+        if(sonPlasmidName == None or sonPlasmidName == "" or ParentPartName == None or ParentPartName == ""):
+            return JsonResponse(data="PlasmidName or PartName cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
+        sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
+        if(sonPlasmidID == None):
+            return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
+        parentPartList = ParentPartName.split(',')
+        if(len(parentPartList) == 0):
+            return JsonResponse(data="No such ParentPart", status=404,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
+        for parent in parentPartList:
+            parentpartID = Parttable.objects.filter(name=parent).first()
+            if(parentpartID != None):
+                Parentparttable.objects.create(sonplasmidid=sonPlasmidID, parentpartid=parentpartID)
+            else:
+                return JsonResponse(data="Parent Part Not Found", status=404,safe=False)
+                # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
+        return JsonResponse(data="Parent Part Added", status=200,safe=False)
+        # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
 
-# def deleteBackbone(request):
-#     #filter表示筛选
-#     Backbonetable.objects.filter(name="Django").delete()
-#     return HttpResponse("成功")
-#
-# #获取数据
-# def getBackbone(request):
-#     #[]queryset可以理解成列表，行行行的对象数据
-#     queryset = Backbonetable.objects.all()
-#
-#     row_obj = Backbonetable.objects.filter(name="Django").first()
-#     return HttpResponse("chenggong")
-#
-# def Update(request):
-#     #这一行不要执行会改所有
-#     # Backbonetable.objects.all().update(name="777")
-#     Backbonetable.objects.filter(name="Django").update(name="Django2")
-#     return HttpResponse("chenggong")
+def AddParentBackbone(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        sonPlasmidName = data['SonPlasmidName']
+        ParentBackboneName = data['ParentBackboneName']
+        if(sonPlasmidName == None or sonPlasmidName == "" or ParentBackboneName == None or ParentBackboneName == ""):
+            return JsonResponse(data="PlasmidName or BackboneName cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
+        sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
+        if(sonPlasmidID == None):
+            return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
+        parentBackboneList = ParentBackboneName.split(',')
+        if(len(parentBackboneList) == 0):
+            return JsonResponse(data="No such Parent Backbone", status=404,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
+        for parent in parentBackboneList:
+            parentBackboneID = Backbonetable.objects.filter(name=parent).first()
+            if(parentBackboneID != None):
+                Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidID, parentbackboneid=parentBackboneID)
+            else:
+                return JsonResponse(data="Parent Backbone Not Found", status=404,safe=False)
+                # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
+        return JsonResponse(data="Parent Backbone Added", status=200,safe=False)
+        # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
+
+def getPartValueList(request,column):
+    if(request.method == 'GET'):
+        if(column != None and column != ""):
+            categories = Parttable.objects.values_list(column,flat=True).distinct()
+            categories_list = list(categories)
+            for each_cate in categories_list:
+                if(each_cate == "_" or each_cate == ""):
+                    categories_list.remove(each_cate)
+            return JsonResponse(data={'success':True,'data':categories_list}, status = 200, safe=False)
+        else:
+            return JsonResponse(data="column cannot be empty",status=400, safe=False)
+        
+def getBackboneValueList(request,column):
+    if(request.method == 'GET'):
+        if(column != None and column != ""):
+            categories = Backbonetable.objects.values_list(column,flat=True).distinct()
+            categories_list = list(categories)
+            for each_cate in categories_list:
+                if(each_cate == "_" or each_cate == ""):
+                    categories_list.remove(each_cate)
+            return JsonResponse(data={'success':True,'data':categories_list}, status = 200, safe=False)
+        else:
+            return JsonResponse(data="column cannot be empty",status=400, safe=False)
+
+def getPlasmidValueList(request,column):
+    if(request.method == 'GET'):
+        if(column != None and column != ""):
+            categories = Plasmidneed.objects.values_list(column,flat=True).distinct()
+            categories_list = list(categories)
+            for each_cate in categories_list:
+                if(each_cate == "_" or each_cate == ""):
+                    categories_list.remove(each_cate)
+            return JsonResponse(data={'success':True,'data':categories_list}, status = 200, safe=False)
+        else:
+            return JsonResponse(data="column cannot be empty",status=400, safe=False)
+
+#======================================================================
+#Part Scar Operation      
+def getPartScar(request):
+    if(request.method == 'GET'):
+        name = request.GET.get('name')
+        if(name != None and name != ""):
+            part_object = Parttable.objects.filter(name = name).first()
+            scar_info = Partscartable.objects.filter(partid = part_object).first()
+            if(scar_info != None):
+                return JsonResponse(data = {'success':True,'scar_info':scar_info},status = 200, safe = False)
+            else:
+                return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
+        else:
+            return JsonResponse(data={'success':False, 'error':"Name cannot be empty"},status = 400,safe=False)
 
 
+def setPartScar(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        name = data['name']
+        bsmbi = data['bsmbi']
+        bsai = data['bsai']
+        bbsi = data['bbsi']
+        aari = data['aari']
+        sapi = data['sapi']
+        if(name != None and name != ""):
+            part_obj = Parttable.objects.filter(name = name).first()
+            if(part_obj == None):
+                return JsonResponse(data = {'success':False, 'error':'No such part'},status = 404, safe= False)
+            if(Partscartable.objects.filter(partid = part_obj) != None):
+                Partscartable.objects.filter(partid = part_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+            else:
+                Partscartable.objects.create(partid = part_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+            return JsonResponse(data = {'success':True}, status = 200, safe = False)
+        else:
+            return JsonResponse(data={'success':False,'error':'Name cannot be empty'},stauts = 400, safe = False)
+    else:
+        return JsonResponse(data = {'success' : False,'error' : 'Just Post request'},status = 400, safe=False)
+
+#==================================================================================
+#Backbone Scar Operation
+def getBackboneScar(request):
+    if(request.method == 'GET'):
+        name = request.GET.get('name')
+        if(name != None and name != ""):
+            backbone_object = Backbonetable.objects.filter(name = name).first()
+            scar_info = Backbonescartable.objects.filter(id = backbone_object).first()
+            if(scar_info != None):
+                return JsonResponse(data = {'success':True,'scar_info':scar_info},status = 200, safe = False)
+            else:
+                return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
+        else:
+            return JsonResponse(data={'success':False, 'error':"Name cannot be empty"},status = 400,safe=False)
+    else:
+        return JsonResponse(data = {'success':False, 'error':'Just GET method'},status = 400, safe=False)
+
+def setBackboneScar(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        print(data)
+        name = data['name']
+        bsmbi = data['bsmbi']
+        bsai = data['bsai']
+        bbsi = data['bbsi']
+        aari = data['aari']
+        sapi = data['sapi']
+        if(name != None and name != ""):
+            backbone_obj = Backbonetable.objects.filter(name = name).first()
+            if(backbone_obj == None):
+                print("No Backbone")
+                return JsonResponse(data = {'success':False, 'error':'No such backbone'},status = 404, safe= False)
+            if(Backbonescartable.objects.filter(backboneid = backbone_obj) != None):
+                Backbonescartable.objects.filter(backboneid = backbone_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+            else:
+                Backbonescartable.objects.create(backboneid = backbone_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+            return JsonResponse(data = {'success':True}, status = 200, safe = False)
+        else:
+            return JsonResponse(data={'success':False,'error':'Name cannot be empty'},status = 400, safe = False)
+    else:
+        return JsonResponse(data = {'success' : False,'error' : 'Just Post request'},status = 400, safe=False)
+    
 
 
+#=====================================================================================
+#Plasmid Scar Operation
+def getPlasmidScar(request):
+    if(request.method == 'GET'):
+        name = request.GET.get('name')
+        if(name != None and name != ""):
+            plasmid_obj = Plasmidneed.objects.filter(name = name).first()
+            scar_info = Plasmidscartable.objects.filter(plasmidid = plasmid_obj).first()
+            if(scar_info != None):
+                return JsonResponse(data = {'success':True,'scar_info':scar_info},status = 200, safe = False)
+            else:
+                return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
+        else:
+            return JsonResponse(data="Name cannot be empty",status = 400,safe=False)
 
+def setPlasmidScar(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        name = data['name']
+        bsmbi = data['bsmbi']
+        bsai = data['bsai']
+        bbsi = data['bbsi']
+        aari = data['aari']
+        sapi = data['sapi']
+        if(name != None and name != ""):
+            plasmid_obj = Plasmidneed.objects.filter(name = name).first()
+            if(plasmid_obj == None):
+                return JsonResponse(data = {'success':False, 'error':'No such plasmid'},status = 404, safe= False)
+            if(Plasmidscartable.objects.filter(plasmidid = plasmid_obj) != None):
+                Plasmidscartable.objects.filter(plasmidid = plasmid_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+            else:
+                Plasmidscartable.objects.create(plasmidid = plasmid_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+            return JsonResponse(data = {'success':True}, status = 200, safe = False)
+        else:
+            return JsonResponse(data={'success':False,'error':'Name cannot be empty'},stauts = 400, safe = False)
+    else:
+        return JsonResponse(data = {'success' : False,'error' : 'Just Post request'},status = 400, safe=False)
+    
+
+def getPartScarList(request):
+    if(request.method == "GET"):
+        # bsmbi = request.POST.get('bsmbi')
+        # bsai = request.POST.get('bsai')
+        # bbsi = request.POST.get('bbsi')
+        # aari = request.POST.get('aari')
+        # sapi = request.POST.get('sapi')
+        categories1 = list(Partscartable.objects.values_list('bsmbi',flat = True).distinct())
+        categories2 = list(Partscartable.objects.values_list('bsai',flat = True).distinct())
+        categories3 = list(Partscartable.objects.values_list('bbsi',flat = True).distinct())
+        categories4 = list(Partscartable.objects.values_list('aari',flat = True).distinct())
+        categories5 = list(Partscartable.objects.values_list('sapi',flat = True).distinct())
+        categories_list = []
+        for each_cate in categories1:
+            if(each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories2:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories3:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories4:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories5:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        return JsonResponse(data = {'success':True,'data':categories_list}, status=200,safe=False)
+
+def getBackboneScarList(request):
+    if(request.method == "GET"):
+        # bsmbi = request.POST.get('bsmbi')
+        # bsai = request.POST.get('bsai')
+        # bbsi = request.POST.get('bbsi')
+        # aari = request.POST.get('aari')
+        # sapi = request.POST.get('sapi')
+        categories1 = list(Backbonescartable.objects.values_list('bsmbi',flat = True).distinct())
+        categories2 = list(Backbonescartable.objects.values_list('bsai',flat = True).distinct())
+        categories3 = list(Backbonescartable.objects.values_list('bbsi',flat = True).distinct())
+        categories4 = list(Backbonescartable.objects.values_list('aari',flat = True).distinct())
+        categories5 = list(Backbonescartable.objects.values_list('sapi',flat = True).distinct())
+        categories_list = []
+        for each_cate in categories1:
+            if(each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories2:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories3:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories4:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories5:
+            if(categories_list.__contains__(each_cate) == False and each_cate != "_" and each_cate != ""):
+                categories_list.append(each_cate)
+        return JsonResponse(data = {'success':True,'data':categories_list}, status=200,safe=False)
+
+def getPlasmidScarList(request):
+    if(request.method == "GET"):
+        # bsmbi = request.POST.get('bsmbi')
+        # bsai = request.POST.get('bsai')
+        # bbsi = request.POST.get('bbsi')
+        # aari = request.POST.get('aari')
+        # sapi = request.POST.get('sapi')
+        categories1 = list(Plasmidscartable.objects.values_list('bsmbi',flat = True).distinct())
+        categories2 = list(Plasmidscartable.objects.values_list('bsai',flat = True).distinct())
+        categories3 = list(Plasmidscartable.objects.values_list('bbsi',flat = True).distinct())
+        categories4 = list(Plasmidscartable.objects.values_list('aari',flat = True).distinct())
+        categories5 = list(Plasmidscartable.objects.values_list('sapi',flat = True).distinct())
+        categories_list = []
+        for each_cate in categories1:
+            if(each_cate != '_' and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories2:
+            if(categories_list.__contains__(each_cate) == False and each_cate != '_' and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories3:
+            if(categories_list.__contains__(each_cate) == False and each_cate != '_' and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories4:
+            if(categories_list.__contains__(each_cate) == False and each_cate != '_' and each_cate != ""):
+                categories_list.append(each_cate)
+        for each_cate in categories5:
+            if(categories_list.__contains__(each_cate) == False and each_cate != '_' and each_cate != ""):
+                categories_list.append(each_cate)
+        return JsonResponse(data = {'success':True,'data':categories_list}, status=200,safe=False)

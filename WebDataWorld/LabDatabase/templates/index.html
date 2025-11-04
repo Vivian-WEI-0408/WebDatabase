@@ -1,0 +1,1592 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>生物元件管理系统</title>
+    <link href="{% static 'LabDatabase/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+    <script src="{% static 'LabDatabase/bootstrap.bundle.min.js' %}"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #4a6491);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 25px;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0;
+        }
+        
+        .card-body {
+            padding: 25px;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+            padding: 0 10px;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            padding: 12px 25px;
+            font-weight: 500;
+            color: #6c757d;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: white;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+        }
+        
+        .tab-content {
+            background-color: white;
+            padding: 0;
+        }
+        
+        .tab-pane {
+            padding: 25px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-primary {
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px 0;
+        }
+        
+        .pagination-info {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .pagination {
+            margin-bottom: 0;
+        }
+        
+        .page-link {
+            color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 15px;
+        }
+        
+        .page-link:hover {
+            background-color: #f8f9fa;
+            color: var(--secondary-color);
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .search-box {
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            border-radius: 6px;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            width: 300px;
+        }
+
+        .selector-div{
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>🧬 生物元件管理系统</h1>
+                    <p>管理 Part、Backbone 和 Plasmid 数据</p>
+                </div>
+                <div>
+                    <span class="badge bg-light text-dark">v2.1.0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">元件库管理</h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="part-tab" data-bs-toggle="tab" data-bs-target="#part" type="button" role="tab" aria-controls="part" aria-selected="true">
+                            🧩 Part
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="backbone-tab" data-bs-toggle="tab" data-bs-target="#backbone" type="button" role="tab" aria-controls="backbone" aria-selected="false">
+                            🧬 Backbone
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="plasmid-tab" data-bs-toggle="tab" data-bs-target="#plasmid" type="button" role="tab" aria-controls="plasmid" aria-selected="false">
+                            🧪 Plasmid
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="myTabContent">
+                    <!-- Part Tab -->
+                    <div class="tab-pane fade show active" id="part" role="tabpanel" aria-labelledby="part-tab">
+                        <!-- <form>
+                            {% csrf_token %} -->
+                        <div class="selector-div">
+                            <div> Type </div>
+                            <select id = "PartTypeSelect">
+                                <option></option>
+                                <option>Promoter</option>
+                                <option>RBS</option>
+                                <option>CDS</option>
+                                <option>Terminator</option>
+                            </select>
+                            <div>Enzyme</div>
+                            <select id = "PartEnzyme">
+                                <option></option>
+                                <option>BsmBI</option>
+                                <option>BsaI</option>
+                                <option>BbsI</option>
+                                <option>AarI</option>
+                                <option>SapI</option>
+                            </select>
+                            <div>Scar</div>
+                            <select id = "PartScar">
+                                <option></option>
+                            </select>
+                            <button class="btn btn-primary" id = "PartSelectorReset">清空</button>
+                            <!-- </form> -->
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                📤 上传图谱
+                            </button>
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#batchUploadModal">
+                                📁 批量上传
+                            </button>
+                            <div class="ms-auto">
+                                <input type="text" class="search-input" placeholder="搜索 Part..." id = "PartSearchInput">
+                                <button class="btn btn-primary" id="Partsearchbutton">
+                                    <i class="fa fa-search" aria-hidden="true">搜索</i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>名称</th>
+                                        <th>种类</th>
+                                        <th>物种</th>
+                                        <th>参考信息</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="partTableBody">
+                                    <!-- Part 数据将通过 JavaScript 动态生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination-container">
+                            <div class="pagination-info" id="partPaginationInfo">
+                                显示 0 条记录中的 0 到 0 条
+                            </div>
+                            <nav>
+                                <ul class="pagination" id="partPagination">
+                                    <!-- 分页控件将通过 JavaScript 动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Backbone Tab -->
+                    <div class="tab-pane fade" id="backbone" role="tabpanel" aria-labelledby="backbone-tab">
+                        <form>
+                            {% csrf_token %}
+                        <div class="selector-div">
+                            <div> Ori </div>
+                            <select id = "OriSelect">
+                                <option></option>
+                            </select>
+                            <div>Marker</div>
+                            <select id = "MarkerSelect">
+                                <option></option>
+                            </select>
+                            <div>Enzyme</div>
+                            <select id = "BackboneEnzyme">
+                                <option></option>
+                                <option>BsmBI</option>
+                                <option>BsaI</option>
+                                <option>BbsI</option>
+                                <option>AarI</option>
+                                <option>SapI</option>
+                            </select>
+                            <div>Scar</div>
+                            <select id = "BackboneScar">
+                                <option></option>
+                            </select>
+                            <button class="btn btn-primary" id = "BackboneSelectorReset">清空</button>
+                            </form>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                📤 上传图谱
+                            </button>
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#batchUploadModal">
+                                📁 批量上传
+                            </button>
+                            <div class="ms-auto">
+                                <input type="text" class="search-input" placeholder="搜索 Backbone..." id = "BackboneSearchInput">
+                                <button class="btn btn-primary" id="Backbonesearchbutton">
+                                    <i class="fa fa-search" aria-hidden="true">搜索</i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>名称</th>
+                                        <th>Marker</th>
+                                        <th>Origin</th>
+                                        <th>物种</th>
+                                        <th>Scar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="backboneTableBody">
+                                    <!-- Backbone 数据将通过 JavaScript 动态生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination-container">
+                            <div class="pagination-info" id="backbonePaginationInfo">
+                                显示 0 条记录中的 0 到 0 条
+                            </div>
+                            <nav>
+                                <ul class="pagination" id="backbonePagination">
+                                    <!-- 分页控件将通过 JavaScript 动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- Plasmid Tab -->
+                    <div class="tab-pane fade" id="plasmid" role="tabpanel" aria-labelledby="plasmid-tab">
+                        <form>
+                        {% csrf_token %}
+                        <div class="selector-div">
+                            <div> Ori(clone) </div>
+                            <select id = "OriCloneSelect">
+                                <option></option>
+                            </select>
+                            <div>Marker(clone)</div>
+                            <select id = "MarkerCloneSelect">
+                                <option></option>
+                            </select>
+                            <div>Ori(Host)</div>
+                            <select id = "OriHostSelect">
+                                <option></option>
+                            </select>
+                            <div>Marker(Host)</div>
+                            <select id = "MarkerHostSelect">
+                                <option></option>
+                            </select>
+                            <div>Enzyme</div>
+                            <select id = "PlasmidEnzyme">
+                                <option></option>
+                                <option>BsmBI</option>
+                                <option>BsaI</option>
+                                <option>BbsI</option>
+                                <option>AarI</option>
+                                <option>SapI</option>
+                            </select>
+                            <div>Scar</div>
+                            <select id = "PlasmidScar">
+                                <option></option>
+                            </select>
+                            <button class="btn btn-primary" id = "PlasmidSelectorReset">清空</button>
+                        </form>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                📤 上传图谱
+                            </button>
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#batchUploadModal">
+                                📁 批量上传
+                            </button>
+                            <div class="ms-auto">
+                                <input type="text" class="search-input" placeholder="搜索 Plasmid..." id="PlasmidSearchInput">
+                                <button class="btn btn-primary" id="Plasmidsearchbutton">
+                                    <i class="fa fa-search" aria-hidden="true">搜索</i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>名称</th>
+                                        <th>Ori(Cloning)</th>
+                                        <th>Ori(Host)</th>
+                                        <th>Marker(Cloning)</th>
+                                        <th>Marker(Host)</th>
+                                        <th>Level</th>
+                                        <th>Scar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plasmidTableBody">
+                                    <!-- Plasmid 数据将通过 JavaScript 动态生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination-container">
+                            <div class="pagination-info" id="plasmidPaginationInfo">
+                                显示 0 条记录中的 0 到 0 条
+                            </div>
+                            <nav>
+                                <ul class="pagination" id="plasmidPagination">
+                                    <!-- 分页控件将通过 JavaScript 动态生成 -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传图谱模态框 -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">上传图谱</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadForm">
+                        <div class="mb-3">
+                            <label for="fileInput" class="form-label">选择图谱文件</label>
+                            <input class="form-control" type="file" id="fileInput">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">描述</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="uploadBtn">上传</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量上传模态框 -->
+    <div class="modal fade" id="batchUploadModal" tabindex="-1" aria-labelledby="batchUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="batchUploadModalLabel">批量上传</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>请上传包含数据的Excel文件。</p>
+                    <form id="batchUploadForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="batchFileInput" class="form-label">选择文件</label>
+                            <input class="form-control" type="file" id="batchFileInput">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">模板下载</label>
+                            <div>
+                                <a href="/LabDatabase/download/part" class="btn btn-sm btn-outline-primary me-2">Part模板</a>
+                                <a href="/LabDatabase/download/backbone" class="btn btn-sm btn-outline-primary me-2">Backbone模板</a>
+                                <a href="/LabDatabase/download/plasmid" class="btn btn-sm btn-outline-primary">Plasmid模板</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="batchUploadBtn">批量上传</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        
+        // 分页设置
+        const itemsPerPage = 10;
+        let currentPages = {
+            part: 1,
+            backbone: 1,
+            plasmid: 1
+        };
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化所有标签页
+            renderTable('part',false, currentPages.part);
+            renderTable('backbone',false,currentPages.backbone);
+            renderTable('plasmid',false,currentPages.plasmid);
+            
+            // 添加上传按钮事件监听
+            document.getElementById('uploadBtn').addEventListener('click', function() {
+                alert('上传功能将在实际系统中实现');
+                const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+                uploadModal.hide();
+            });
+            
+            document.getElementById('batchUploadBtn').addEventListener('click', function() {
+                // alert('批量上传功能将在实际系统中实现');
+                var file_input = document.getElementById('batchFileInput');
+                var file = file_input.files[0];
+                console.log(file);
+                if(!file){
+                    alert('请选择文件');
+                    return;
+                }
+                const fd = new FormData();
+                fd.append('file',file);
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                fetch("/LabDatabase/UploadFile",{
+                    method:'POST',
+                    body: fd,
+                    headers:{
+                        'X-CSRFToken': csrfToken
+                        // 'Content-Type':'multipart/form-data'
+                    }
+                }).then(response => response.json())
+                .then(data =>{
+                    if(data.success){
+                        alert('文件已上传');
+                    }
+                    else{
+                        alert(data.message);
+                    }
+                })
+                file_input.innerText = '';
+                const batchUploadModal = bootstrap.Modal.getInstance(document.getElementById('batchUploadModal'));
+                batchUploadModal.hide();
+            });
+            //渲染selector div
+            renderselect();
+
+            document.getElementById('PartSelectorReset').addEventListener('click', function(){
+                const PartTypeSelect = document.getElementById('PartTypeSelect');
+                const PartEnzyme = document.getElementById('PartEnzyme');
+                const PartScar = document.getElementById('PartScar');
+                PartTypeSelect.selectedIndex = 0;
+                PartEnzyme.selectedIndex = 0;
+                PartScar.selectedIndex = 0;
+            });
+
+            document.getElementById('BackboneSelectorReset').addEventListener('click', function(){
+                const OriSelect = document.getElementById('OriSelect');
+                const MarkerSelect = document.getElementById('MarkerSelect');
+                const BackboneEnzyme = document.getElementById('BackboneEnzyme');
+                const BackboneScar = document.getElementById('BackboneScar');
+                OriSelect.selectedIndex = 0;
+                MarkerSelect.selectedIndex = 0;
+                BackboneEnzyme.selectedIndex = 0;
+                BackboneScar.selectedIndex = 0;
+            });
+
+            document.getElementById('PlasmidSelectorReset').addEventListener('click',function(){
+                const OriCloneSelect = document.getElementById('OriCloneSelect');
+                const MarkerCloneSelect = document.getElementById('MarkerCloneSelect');
+                const OriHostSelect = document.getElementById('OriHostSelect');
+                const MarkerHostSelect = document.getElementById('MarkerCloneSelect');
+                const PlasmidEnzyme = document.getElementById('PlasmidEnzyme');
+                const PlasmidScar = document.getElementById('PlasmidScar');
+                OriCloneSelect.selectedIndex = 0;
+                MarkerCloneSelect.selectedIndex = 0;
+                OriHostSelect.selectedIndex = 0;
+                MarkerHostSelect.selectedIndex = 0;
+                PlasmidEnzyme.selectedIndex = 0;
+                PlasmidScar.selectedIndex = 0;
+            });
+
+            //搜索功能实现
+            //part
+            document.getElementById('Partsearchbutton').addEventListener('click', function() {
+                let Type = document.getElementById('PartTypeSelect').options[document.getElementById('PartTypeSelect').selectedIndex].text;
+                let Enzyme = document.getElementById('PartEnzyme').options[document.getElementById('PartEnzyme').selectedIndex].text;
+                let Scar = document.getElementById('PartScar').options[document.getElementById('PartScar').selectedIndex].text;
+                let name = document.getElementById('PartSearchInput').value;
+                if(Type == "" && Enzyme == "" && Scar == "" && name == ""){
+                    alert("请选择筛选标准");
+                    return
+                }
+                else{
+                    renderTable("part",true,1);
+                }
+            });
+            //Backbone
+            document.getElementById('Backbonesearchbutton').addEventListener('click', function() {
+                let ori = document.getElementById('OriSelect').options[document.getElementById('OriSelect').selectedIndex].text;
+                let marker = document.getElementById('MarkerSelect').options[document.getElementById('MarkerSelect').selectedIndex].text;
+                let Enzyme = document.getElementById('BackboneEnzyme').options[document.getElementById('BackboneEnzyme').selectedIndex].text;
+                let scar = document.getElementById("BackboneScar").options[document.getElementById("BackboneScar").selectedIndex].text;
+                let name = document.getElementById("BackboneSearchInput").value;
+                if(ori == "" && marker == "" && Enzyme == "" && scar == "" && name == ""){
+                    alert("请选择筛选标准");
+                }
+                else{
+                    renderTable("backbone",true,1);
+                }
+            });
+            //Plasmid
+            document.getElementById('Plasmidsearchbutton').addEventListener('click',function(){
+                let oriClone = document.getElementById('OriCloneSelect').options[document.getElementById('OriCloneSelect').selectedIndex].text;
+                let markerClone = document.getElementById('MarkerCloneSelect').options[document.getElementById('MarkerCloneSelect').selectedIndex].text;
+                let oriHost = document.getElementById('OriHostSelect').options[document.getElementById('OriHostSelect').selectedIndex].text;
+                let markerHost = document.getElementById('MarkerHostSelect').options[document.getElementById('MarkerHostSelect').selectedIndex].text;
+                let Enzyme = document.getElementById('PlasmidEnzyme').options[document.getElementById('PlasmidEnzyme').selectedIndex].text;
+                let scar = document.getElementById("PlasmidScar").options[document.getElementById("PlasmidScar").selectedIndex].text;
+                let name = document.getElementById("PlasmidSearchInput").value;
+                console.log("testtest");
+                if(oriClone == "" && markerClone == "" && oriHost == "" && markerHost == "" && Enzyme == "" && scar == "" && name == ""){
+                    alert("请选择筛选标准");
+                }
+                else{
+                    renderTable("plasmid",true,1);
+                }
+            });
+
+        });
+
+        //Part Search
+        // function PartSearch(){
+        //     let Type = document.getElementById('PartTypeSelect').innerText;
+        //     let Enzyme = document.getElementById('PartEnzyme').innerText;
+        //     let Scar = document.getElementById('PartScar').innerText;
+        //     let name = document.getElementById('PartSearchInput').text;
+            
+        // }
+
+        // 渲染表格
+        function renderTable(type,isSearch,page) {
+            const tableBody = document.getElementById(`${type}TableBody`);
+            const pagination = document.getElementById(`${type}Pagination`);
+            const paginationInfo = document.getElementById(`${type}PaginationInfo`);
+            let result = {};
+            let totalItems = 0;
+            let totalPages = 0;
+            let currentPage = 1;
+            let offset = 0;
+            //非搜索渲染
+            if(isSearch == false){
+                if(type === 'part'){
+                    fetch(`/LabDatabase/getdata?type=part&page=${page}`)
+                    .then(response => response.json())
+                    .then(data =>{
+                        result = data.data;
+                        totalItems = data.pagination.total_count;
+                        totalPages = data.pagination.total_pages;
+                        currentPage = data.pagination.current_page;
+                        offset = data.pagination.offset;
+                    
+                        tableBody.innerHTML = '';
+                        if (totalItems === 0) {
+                            tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">📭</div>
+                                        <div>没有找到数据</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        } else {
+                        // 填充表格数据
+                            result.forEach(item => {
+                                const row = document.createElement('tr');
+                                let PartType = "";
+                                if(item.type === 1){
+                                    PartType = "promoter";
+                                }
+                                else if(item.type === 2){
+                                    PartType = "CDS";
+                                }
+                                else if(item.type === 3){
+                                    PartType = "Terminator";
+                                }
+                                else if(item.type === 4){
+                                    PartType = "RBS";
+                                }
+                                row.innerHTML = `
+                                    <td>${item.partid}</td>
+                                    <td>${item.name}</td>
+                                    <td>${PartType}</td>
+                                    <td>${item.sourceorganism}</td>
+                                    <td>${item.reference}</td>
+                                    <td class="action-cell">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/part/${item.partid}'">查看</button>
+                                        <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            })
+                        }
+                        // 更新分页信息
+                        paginationInfo.textContent = `显示 ${totalItems} 条记录中的 ${offset} 到 ${offset+10} 条`;
+            
+                        // 生成分页控件
+                        pagination.innerHTML = '';
+            
+                        // 上一页按钮
+                        const prevLi = document.createElement('li');
+                        prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+                        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch}, ${page - 1})">上一页</a>`;
+                        pagination.appendChild(prevLi);
+            
+                        // 页码按钮
+                        console.log(currentPage);
+                        if(totalPages >= 10){
+                            if(currentPage + 10 < totalPages) {
+                                for (let i = currentPage; i <= currentPage+10; i++) {
+                                    console.log(i);
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                            else{
+                                for(let i = totalPages - 10; i<=totalPages;i++){
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch}, ${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                        }
+                        else{
+                            for (let i = 1; i <= totalPages; i++) {
+                                const pageLi = document.createElement('li');
+                                pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                pagination.appendChild(pageLi);
+                            }
+                        }
+            
+                        // 下一页按钮
+                        const nextLi = document.createElement('li');
+                        nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+                        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${page + 1})">下一页</a>`;
+                        pagination.appendChild(nextLi);
+                    });
+                }
+                else if(type === 'backbone'){
+                    fetch(`/LabDatabase/getdata?type=backbone&page=${page}`)
+                    .then(response => response.json())
+                    .then(data =>{
+                        console.log(data);
+                        result = data.data;
+                        totalItems = data.pagination.total_count;
+                        totalPages = data.pagination.total_pages;
+                        currentPage = data.pagination.current_page;
+                        offset = data.pagination.offset;
+
+                        tableBody.innerHTML = '';
+                        if (totalItems === 0) {
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">📭</div>
+                                            <div>没有找到数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        } else {
+                            result.forEach(item => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${item.id}</td>
+                                    <td>${item.name}</td>
+                                    <td>${item.marker}</td>
+                                    <td>${item.ori} bp</td>
+                                    <td>${item.species}</td>
+                                    <td>${item.scar}</td>
+                                    <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '活跃' : '非活跃'}</span></td>
+                                    <td class="action-cell">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/backbone/${item.id}'">查看</button>
+                                        <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            })
+                        }
+                        // 更新分页信息
+                        paginationInfo.textContent = `显示 ${totalItems} 条记录中的 ${offset} 到 ${offset+10} 条`;
+            
+                        // 生成分页控件
+                        pagination.innerHTML = '';
+            
+                        // 上一页按钮
+                        const prevLi = document.createElement('li');
+                        prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+                        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page - 1})">上一页</a>`;
+                        pagination.appendChild(prevLi);
+            
+                        // 页码按钮
+                        if(totalPages >= 10){
+                            if(currentPage + 10 < totalPages) {
+                                for (let i = currentPage; i <= currentPage+10; i++) {
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                            else{
+                                for(let i = totalPages - 10; i<=totalPages;i++){
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                        
+                        }
+                        else{
+                            for (let i = 1; i <= totalPages; i++) {
+                                const pageLi = document.createElement('li');
+                                pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                pagination.appendChild(pageLi);
+                            }
+                        }
+            
+                        // 下一页按钮
+                        const nextLi = document.createElement('li');
+                        nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+                        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page + 1})">下一页</a>`;
+                        pagination.appendChild(nextLi);
+                    });
+                }
+                else if(type === 'plasmid'){
+                    fetch(`/LabDatabase/getdata?type=plasmid&page=${page}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        result = data.data;
+                        totalItems = data.pagination.total_count;
+                        totalPages = data.pagination.total_pages;
+                        currentPage = data.pagination.current_page;
+                        offset = data.pagination.offset;
+
+                        tableBody.innerHTML = '';
+                        if (totalItems === 0) {
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">📭</div>
+                                            <div>没有找到数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        } else {
+                            result.forEach(item => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${item.plasmidid}</td>
+                                    <td>${item.name}</td>
+                                    <td>${item.oricloning}</td>
+                                    <td>${item.orihost}</td>
+                                    <td>${item.markercloning}</td>
+                                    <td>${item.markerhost}</td>
+                                    <td>${item.level}</td>
+                                    <td>${item.Scar}</td>
+                                    <td class="action-cell">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
+                                        <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            })
+                        }
+                        // 更新分页信息
+                        paginationInfo.textContent = `显示 ${totalItems} 条记录中的 ${offset} 到 ${offset+10} 条`;
+            
+                        // 生成分页控件
+                        pagination.innerHTML = '';
+            
+                        // 上一页按钮
+                        const prevLi = document.createElement('li');
+                        prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+                        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page - 1})">上一页</a>`;
+                        pagination.appendChild(prevLi);
+            
+                        // 页码按钮
+                        if(totalPages >= 10){
+                            if(currentPage + 10 < totalPages) {
+                                for (let i = currentPage; i <= currentPage+10; i++) {
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                            else{
+                                for(let i = totalPages - 10; i<=totalPages;i++){
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                        
+                        }
+                        else{
+                            for (let i = 1; i <= totalPages; i++) {
+                                const pageLi = document.createElement('li');
+                                pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${i})">${i}</a>`;
+                                pagination.appendChild(pageLi);
+                            }
+                        }
+                    
+            
+                        // 下一页按钮
+                        const nextLi = document.createElement('li');
+                        nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+                        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page + 1})">下一页</a>`;
+                        pagination.appendChild(nextLi);
+                    });
+                }
+            }
+
+            //搜索渲染
+            else{
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                if(type === 'part'){
+                    const request_body = {'SearchType':"part",'name':document.getElementById('PartSearchInput').value,
+                    'Type':document.getElementById('PartTypeSelect').options[document.getElementById('PartTypeSelect').selectedIndex].text,
+                    'Enzyme':document.getElementById('PartEnzyme').options[document.getElementById('PartEnzyme').selectedIndex].text,
+                    'Scar':document.getElementById('PartScar').options[document.getElementById('PartScar').selectedIndex].text,
+                    'page' : page, 'page_size':10}
+                    fetch(`/LabDatabase/filterdata`,{
+                        method:'POST',
+                        body: JSON.stringify(request_body),
+                        headers:{
+                            'X-CSRFToken':csrfToken,
+                            'Content-Type':"application/json",
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data =>{
+                        if(data.success){
+                            result = data.data;
+                            totalItems = data.pagination.total_count;
+                            totalPages = data.pagination.total_pages;
+                            currentPage = data.pagination.current_page;
+                            offset = data.pagination.offset;
+                            
+                            tableBody.innerHTML = '';
+                            if (totalItems === 0) {
+                                tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">📭</div>
+                                            <div>没有找到数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                `;
+                            } else {
+                            // 填充表格数据
+                                result.forEach(item => {
+                                    const row = document.createElement('tr');
+                                    let PartType = "";
+                                    if(item.type === 1){
+                                        PartType = "promoter";
+                                    }
+                                    else if(item.type === 2){
+                                        PartType = "CDS";
+                                    }
+                                    else if(item.type === 3){
+                                        PartType = "Terminator";
+                                    }
+                                    else if(item.type === 4){
+                                        PartType = "RBS";
+                                    }
+                                    row.innerHTML = `
+                                        <td>${item.partid}</td>
+                                        <td>${item.name}</td>
+                                        <td>${PartType}</td>
+                                        <td>${item.sourceorganism}</td>
+                                        <td>${item.reference}</td>
+                                        <td class="action-cell">
+                                            <button class="btn btn-sm btn-outline-primary">查看</button>
+                                            <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                            <button class="btn btn-sm btn-outline-danger">删除</button>
+                                        </td>
+                                        `;
+                                    tableBody.appendChild(row);
+                                })
+                            }
+                            // 更新分页信息
+                            paginationInfo.textContent = `显示 ${totalItems} 条记录中的 ${offset} 到 ${offset+10} 条`;
+            
+                            // 生成分页控件
+                            pagination.innerHTML = '';
+            
+                            // 上一页按钮
+                            const prevLi = document.createElement('li');
+                            prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+                            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch}, ${page - 1})">上一页</a>`;
+                            pagination.appendChild(prevLi);
+            
+                            // 页码按钮
+                            console.log(currentPage);
+                            if(totalPages >= 10){
+                                if(currentPage + 10 < totalPages) {
+                                    for (let i = currentPage; i <= currentPage+10; i++) {
+                                        console.log(i);
+                                        const pageLi = document.createElement('li');
+                                        pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                        pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                        pagination.appendChild(pageLi);
+                                    }
+                                }
+                                else{
+                                    for(let i = totalPages - 10; i<=totalPages;i++){
+                                        const pageLi = document.createElement('li');
+                                        pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                        pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch}, ${i})">${i}</a>`;
+                                        pagination.appendChild(pageLi);
+                                    }
+                                }
+                            }
+                            else{
+                                for (let i = 1; i <= totalPages; i++) {
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+            
+                            // 下一页按钮
+                            const nextLi = document.createElement('li');
+                            nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+                            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${page + 1})">下一页</a>`;
+                            pagination.appendChild(nextLi);
+                        }
+                        else{
+                            tableBody.innerHTML = '';
+                            tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">📭</div>
+                                        <div>没有找到数据</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        }
+                    });
+                }
+                else if(type === 'backbone'){
+                    // let fd = new FormData();
+                    // fd.append('SearchType','backbone');
+                    // fd.append('name',document.getElementById('BackboneSearchInput').innerText);
+                    // fd.append('Ori',document.getElementById('OriSelect').innerText);
+                    // fd.append('Marker',document.getElementById('MarkerSelect').innerText);
+                    // fd.append('Enzyme',document.getElementById('BackboneEnzyme').innerText);
+                    // fd.append('Scar',document.getElementById('BackboneScar').innerText);
+                    // fd.append('page',page);
+                    // fd.append('page_size',10);
+                    const request_body = {"SearchType":'backbone',"name":document.getElementById('BackboneSearchInput').value,
+                    "Ori":document.getElementById("OriSelect").options[document.getElementById("OriSelect").selectedIndex].text,
+                    "Marker":document.getElementById("MarkerSelect").options[document.getElementById("MarkerSelect").selectedIndex].text,
+                    "Enzyme":document.getElementById("BackboneEnzyme").options[document.getElementById("BackboneEnzyme").selectedIndex].text,
+                    "Scar":document.getElementById("BackboneScar").options[document.getElementById("BackboneScar").selectedIndex].text,
+                    "page":page, "page_size":10}
+
+                    fetch(`/LabDatabase/filterdata`,{
+                        method:'POST',
+                        body: JSON.stringify(request_body),
+                        headers:{
+                            'X-CSRFToken':csrfToken,
+                            'Content-Type':"application/json",
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data =>{
+                        if(data.success){
+
+                        console.log(data);
+                        result = data.data;
+                        totalItems = data.pagination.total_count;
+                        totalPages = data.pagination.total_pages;
+                        currentPage = data.pagination.current_page;
+                        offset = data.pagination.offset;
+                        scar = document.getElementById('BackboneScar').options[document.getElementById('BackboneScar').selectedIndex].text
+                        tableBody.innerHTML = '';
+                        if (totalItems === 0) {
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">📭</div>
+                                            <div>没有找到数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        } else {
+                            result.forEach(item => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${item.id}</td>
+                                    <td>${item.name}</td>
+                                    <td>${item.marker}</td>
+                                    <td>${item.ori} bp</td>
+                                    <td>${item.species}</td>
+                                    <td>${scar}</td>
+                                    <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '活跃' : '非活跃'}</span></td>
+                                    <td class="action-cell">
+                                        <button class="btn btn-sm btn-outline-primary">查看</button>
+                                        <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            })
+                        }
+                        // 更新分页信息
+                        paginationInfo.textContent = `显示 ${totalItems} 条记录中的 ${offset} 到 ${offset+10} 条`;
+            
+                        // 生成分页控件
+                        pagination.innerHTML = '';
+            
+                        // 上一页按钮
+                        const prevLi = document.createElement('li');
+                        prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+                        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page - 1})">上一页</a>`;
+                        pagination.appendChild(prevLi);
+            
+                        // 页码按钮
+                        if(totalPages >= 10){
+                            if(currentPage + 10 < totalPages) {
+                                for (let i = currentPage; i <= currentPage+10; i++) {
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                            else{
+                                for(let i = totalPages - 10; i<=totalPages;i++){
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                        
+                        }
+                        else{
+                            for (let i = 1; i <= totalPages; i++) {
+                                const pageLi = document.createElement('li');
+                                pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                pagination.appendChild(pageLi);
+                            }
+                        }
+            
+                        // 下一页按钮
+                        const nextLi = document.createElement('li');
+                        nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+                        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page + 1})">下一页</a>`;
+                        pagination.appendChild(nextLi);
+                        }
+                        else{
+                            tableBody.innerHTML = '';
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">📭</div>
+                                            <div>没有找到数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    });
+                }
+                else if(type === 'plasmid'){
+                    // const fd = new FormData();
+                    // fd.append('SearchType','plasmid');
+                    // fd.append('name',docuemnt.getElementById('PlasmidSearchInput').innerText);
+                    // fd.append('OriClone',document.getElementById('OriCloneSelect').innerText);
+                    // fd.append('MarkerClone',document.getElementById('MarkerCloneSelect').innerText);
+                    // fd.append('OriHost',document.getElementById('OriHostSelect').innerText);
+                    // fd.append('MarkerHost',document.getElementById('MarkerHostSelect').innerText);
+                    // fd.append('Enzyme',document.getElementById('PlasmidEnzyme').innerText);
+                    // fd.append('Scar',document.getElementById('PlasmidScar').innerText);
+                    // fd.append('page',page);
+                    // fd.append('page_size',10);
+                    const request_body = {"SearchType":"plasmid", 'name':document.getElementById("PlasmidSearchInput").value,
+                                    "OriClone" : document.getElementById("OriCloneSelect").options[document.getElementById("OriCloneSelect").selectedIndex].text,
+                                    "MarkerClone" : document.getElementById("MarkerCloneSelect").options[document.getElementById("MarkerCloneSelect").selectedIndex].text,
+                                    "OriHost" : document.getElementById('OriHostSelect').options[document.getElementById('OriHostSelect').selectedIndex].text,
+                                    "MarkerHost" : document.getElementById('MarkerHostSelect').options[document.getElementById('MarkerHostSelect').selectedIndex].text,
+                                    "Enzyme" : document.getElementById('PlasmidEnzyme').options[document.getElementById('PlasmidEnzyme').selectedIndex].text,
+                                    "Scar" : document.getElementById('PlasmidScar').options[document.getElementById('PlasmidScar').selectedIndex].text,
+                                    "page" : page, "page_size" : 10}
+                    fetch(`/LabDatabase/filterdata`,{
+                        method:'POST',
+                        body: JSON.stringify(request_body),
+                        headers:{
+                            'X-CSRFToken':csrfToken,
+                            'Content-Type':"application/json",
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data =>{
+                        console.log(data);
+                        result = data.data;
+                        totalItems = data.pagination.total_count;
+                        totalPages = data.pagination.total_pages;
+                        currentPage = data.pagination.current_page;
+                        offset = data.pagination.offset;
+                        scar = document.getElementById('PlasmidScar').options[document.getElementById('PlasmidScar').selectedIndex].text;
+                        tableBody.innerHTML = '';
+                        if (totalItems === 0) {
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">📭</div>
+                                            <div>没有找到数据</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        } else {
+                            result.forEach(item => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${item.plasmidid}</td>
+                                    <td>${item.name}</td>
+                                    <td>${item.oricloning}</td>
+                                    <td>${item.orihost}</td>
+                                    <td>${item.markercloning}</td>
+                                    <td>${item.markerhost}</td>
+                                    <td>${item.level}</td>
+                                    <td>${scar}</td>
+                                    <td class="action-cell">
+                                        <button class="btn btn-sm btn-outline-primary">查看</button>
+                                        <button class="btn btn-sm btn-outline-secondary">编辑</button>
+                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            })
+                        }
+                        // 更新分页信息
+                        paginationInfo.textContent = `显示 ${totalItems} 条记录中的 ${offset} 到 ${offset+10} 条`;
+            
+                        // 生成分页控件
+                        pagination.innerHTML = '';
+            
+                        // 上一页按钮
+                        const prevLi = document.createElement('li');
+                        prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+                        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page - 1})">上一页</a>`;
+                        pagination.appendChild(prevLi);
+            
+                        // 页码按钮
+                        if(totalPages >= 10){
+                            if(currentPage + 10 < totalPages) {
+                                for (let i = currentPage; i <= currentPage+10; i++) {
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}', ${isSearch},${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                            else{
+                                for(let i = totalPages - 10; i<=totalPages;i++){
+                                    const pageLi = document.createElement('li');
+                                    pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                    pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${i})">${i}</a>`;
+                                    pagination.appendChild(pageLi);
+                                }
+                            }
+                        
+                        }
+                        else{
+                            for (let i = 1; i <= totalPages; i++) {
+                                const pageLi = document.createElement('li');
+                                pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+                                pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${i})">${i}</a>`;
+                                pagination.appendChild(pageLi);
+                            }
+                        }
+                    
+            
+                        // 下一页按钮
+                        const nextLi = document.createElement('li');
+                        nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+                        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage('${type}',${isSearch} ,${page + 1})">下一页</a>`;
+                        pagination.appendChild(nextLi);
+                    });
+                }
+            }
+            
+        }
+
+        // 切换页面
+        function changePage(type,isSearch,newPage) {
+            currentPage = newPage;
+            renderTable(type, isSearch,newPage);
+        }
+
+        function renderselect(){
+            const PartScar = document.getElementById('PartScar');
+            const OriSelect = document.getElementById('OriSelect');
+            const MarkerSelect = document.getElementById('MarkerSelect');
+            const BackboneScar = document.getElementById('BackboneScar');
+            const OriCloneSelect = document.getElementById('OriCloneSelect');
+            const MarkerCloneSelect = document.getElementById('MarkerCloneSelect');
+            const OriHostSelect = document.getElementById('OriHostSelect');
+            const MarkerHostSelect = document.getElementById('MarkerHostSelect');
+            const PlasmidScar = document.getElementById('PlasmidScar');
+            //PartScarSelect
+            fetch('/WebDatabase/getPartScarList')
+            .then(response => response.json())
+            .then(data =>{
+                if(data.success){
+                    let partscar = data.data;
+                    partscar.forEach(item =>{
+                        const scaroption = document.createElement('option');
+                        scaroption.innerText = item;
+                        PartScar.appendChild(scaroption);
+                    });
+                }
+            });
+            //Backbone Ori Select
+            fetch('/WebDatabase/getBackboneValueList/ori')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let orilist = data.data;
+                    console.log(orilist);
+                    orilist.forEach(item => {
+                        const orioption = document.createElement('option');
+                        orioption.innerText = item;
+                        OriSelect.appendChild(orioption);
+                    })
+                }
+            });
+            //Backbone Marker Select
+            fetch('/WebDatabase/getBackboneValueList/marker')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let markerlist = data.data;
+
+                    markerlist.forEach(item => {
+                        const markeroption = document.createElement('option');
+                        markeroption.innerText = item;
+                        MarkerSelect.appendChild(markeroption);
+                    })
+                }
+            });
+            //Backbone Scar Select
+            fetch('/WebDatabase/getBackboneScarList')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let Backbonescar = data.data;
+                    Backbonescar.forEach(item =>{
+                        const scaroption = document.createElement('option');
+                        scaroption.innerText = item;
+                        BackboneScar.appendChild(scaroption);
+                    });
+                }
+            });
+
+            //Plasmid Ori Clone Select
+            fetch('/WebDatabase/getPlasmidValueList/oricloning')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let PlasmidOriCloning = data.data;
+                    PlasmidOriCloning.forEach(item =>{
+                        const orioption = document.createElement('option');
+                        orioption.innerText = item;
+                        OriCloneSelect.appendChild(orioption);
+                    });
+                }
+            });
+
+            //Plasmid Marker Clone Select
+            fetch('/WebDatabase/getPlasmidValueList/markercloning')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let PlasmidMarkerCloning = data.data;
+                    PlasmidMarkerCloning.forEach(item =>{
+                        const Markeroption = document.createElement('option');
+                        Markeroption.innerText = item;
+                        MarkerCloneSelect.appendChild(Markeroption);
+                    });
+                }
+            });
+
+
+            //Plasmid Ori Host Select
+            fetch('/WebDatabase/getPlasmidValueList/orihost')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let PlasmidMarkerCloning = data.data;
+                    PlasmidMarkerCloning.forEach(item =>{
+                        const Orioption = document.createElement('option');
+                        Orioption.innerText = item;
+                        OriHostSelect.appendChild(Orioption);
+                    });
+                }
+            });
+
+            //Plasmid Marker Host Select
+            fetch('/WebDatabase/getPlasmidValueList/markerhost')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let PlasmidMarkerCloning = data.data;
+                    PlasmidMarkerCloning.forEach(item =>{
+                        const markeroption = document.createElement('option');
+                        markeroption.innerText = item;
+                        MarkerHostSelect.appendChild(markeroption);
+                    });
+                }
+            });
+
+            //Plasmid Scar Select
+            fetch('/WebDatabase/getPlasmidScarList')
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    let Plasmidscarlist = data.data;
+                    Plasmidscarlist.forEach(item =>{
+                        const PlasmidScarOption = document.createElement('option');
+                        PlasmidScarOption.innerText = item;
+                        PlasmidScar.appendChild(PlasmidScarOption);
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
