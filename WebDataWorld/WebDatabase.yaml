@@ -7,6 +7,7 @@ info:
 
 servers:
   - url: 'http://10.30.76.2:8000/WebDatabase'
+  - url: 'http://10.30.76.2:8000/LabDatabase'
 tags:
   - name: Strain
     description: Function of strain data
@@ -68,6 +69,19 @@ paths:
         - Part
       description: List all parts.
       operationId: part
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: if page is null, return all data, else return offset:offset+pagesize data
+          schema:
+            type: integer
+        - name: page_size
+          required: false
+          in: query
+          description: size of page when page is not null
+          schema:
+            type: integer
       responses:
         '200':
           description: Get All Parts and List All Parts
@@ -676,6 +690,76 @@ paths:
             text/plain:
               schema: 
                 type: string
+  /PartFilter:
+    post:
+      summary: search part by multiple info
+      tags:
+        - Part
+      description: search part by multiple info
+      operationId: PartFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                Enzyme:
+                  type: string
+                Scar:
+                  type: string
+                name:
+                  type: string
+                page:
+                  type: integer
+                page_size:
+                  type: integer
+      responses:
+        '200':
+          description: return part value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean_values
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PartSimple'
+                  pagination:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                          total_pages:
+                            type: integer
+                          total_count:
+                            type: integer
+                          has_next:
+                            type: boolean_values
+                          has_previous:
+                            type: boolean_values
+                          page_size:
+                            type: integer
+                          offset:
+                            type: integer
+                  
+        '400':
+          description: Name cannot be empty
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean_values
+                  error:
+                    type: string
   /PlasmidName:
     get:
       summary: List plasmid data by name
@@ -2566,9 +2650,709 @@ paths:
             application/json:
               schema:
                 type: string
+  /login:
+    post:
+      summary: login UI
+      responses:
+        description: show login UI, rediect to index page if successfully login
 
 
-  
+  /logout:
+    post:
+      summary: logout function
+      responses:
+        description: logout and delete cookie and session information
+  /register:
+    post:
+      summary: show register ui
+      responses:
+        description: show login page if successfully register
+  /PartNameFilter:
+    get:
+      summary: get simple part information by part name
+      tags:
+        - Part
+      description: get simple part information which name like provided name
+      operationId: PartNameFilter
+      responses: 
+        '200':
+          description: Get part List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  schema:
+                    $ref: '#/components/schemas/PartSimple'
+        '400':
+          description: Parameter name is empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: catch exceptions
+          content:
+            application/json:
+              schema:
+                type: string
+  /BackboneNameFilter:
+    get:
+      summary: get simple backbone information by backbone name
+      tags:
+        - Backbone
+      description: get simple Backbone information which name like provided name
+      operationId: BackboneNameFilter
+      responses:
+        '200':
+          description: Get Backbone List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  schema:
+                    $ref: '#/components/schemas/BackboneSimple'
+        '400':
+          description: Parameter name is empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: catch exceptions
+          content:
+            application/json:
+              schema:
+                type: string
+  /PlasmidNameFilter:
+    get:
+      summary: get simple Plasmid information by plasmid name
+      tags:
+        - Plasmid
+      description: get simple plasmid information which name like provided name
+      operationId: PlasmidNameFilter
+      responses:
+        '200':
+          description: Get Plasmid List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  schema:
+                    $ref: '#/components/schemas/PlasmidSimple'
+        '400':
+          description: Parameter name is empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: catch exceptions
+          content:
+            application/json:
+              schema:
+                type: string
+  /AddPartParent:
+    post:
+      summary: Add Plasmid parent part information
+      tags:
+        - Plasmid
+      description: Add Plasmid parent part information
+      operationId: AddPartParent
+      requestBody: 
+        content:
+          application/json:
+            type: object
+            schema:
+              properties:
+                SonPlasmidName:
+                  type: string
+                ParentPartName:
+                  type: string
+      responses:
+        '200':
+          description: successfully add parent part information
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Parameters name cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: No such plasmid or parent part
+          content:
+            application/json:
+              schema:
+                type: string
+  /AddBackboneParent:
+    post:
+      summary: Add Plasmid parent part information
+      tags:
+        - Plasmid
+      description: Add Plasmid parent part information
+      operationId: AddPartParent
+      requestBody: 
+        content:
+          application/json:
+            type: object
+            schema:
+              properties:
+                SonPlasmidName:
+                  type: string
+                ParentPartName:
+                  type: string
+      responses:
+        '200':
+          description: successfully add parent part information
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Parameters name cannot be empty
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: No such plasmid or parent part
+          content:
+            application/json:
+              schema:
+                type: string
+  /GetPartParent:
+    get:
+      summary:  get plasmid part information
+      tags:
+        - Plasmid
+      description: get plasmid's part information
+      operationId: GetParentPart
+      parameters:
+        - name: plasmidid
+          in: query
+          required: true
+          description: plasmid id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: return parent part list
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  $ref: '#/Components/Schemas/ParentPartInfo'
+  /GetBackboneParent:
+    get:
+      summary:  get plasmid backbone information
+      tags:
+        - Plasmid
+      description: get plasmid's backbone information
+      operationId: GetParentBackbone
+      parameters:
+        - name: plasmidid
+          in: query
+          required: true
+          description: plasmid id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: return parent backbone list
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  $ref: '#/Components/Schemas/ParentBackboneInfo'
+  /GetPlasmidParent:
+    get:
+      summary: get plasmid's plasmid information
+      tags:
+        - Plasmid
+      description: get plasmid's parent plasmid information
+      operationId: GetParentParent
+      parameters:
+        - name: plasmidid
+          in: query
+          required: true
+          description: plasmid id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: return parent plasmid list
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  $ref: '#/Components/Schemas/ParentPlasmidInfo'
+  /GetPlasmidSon:
+    get:
+      summary: get plasmid's son plasmid information
+      tags:
+        - Plasmid
+      description: get plasmid's son plasmid information
+      operationId: GetSonPlasmid
+      parameters:
+        - name: plasmidid
+          in: query
+          required: true
+          description: plasmid id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: return son plasmid list
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  $ref: '#/Components/Schemas/ParentPlasmidInfo'
+  /getPartValueList<str:column>:
+    get:
+      summary: get each type value of provided part column name
+      tags:
+        - Part
+      description: get each type value of provided part column name
+      operationId: getPartValueList
+      parameters:
+        - name: column name
+          in: path
+          required: true
+          description: part column name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: return part column value
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: column value is empty
+          content:
+            application/json:
+            schema:
+              type: string
+  /getBackboneValueList/<str:column>:
+    get:
+      summary: get each type value of provided backbone column name
+      tags:
+        - Backbone
+      description: get each type value of provided backbone column name
+      operationId: getBackboneValueList
+      parameters:
+        - name: column name
+          in: path
+          required: true
+          description: backbone column name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: return backbone column value
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: column value is empty
+          content:
+            application/json:
+            schema:
+              type: string
+  /getPlasmidValueList/<str:column>:
+    get:
+      summary: get each type value of provided plasmid column name
+      tags:
+        - Plasmid
+      description: get each type value of provided plasmid column name
+      operationId: getPlasmidValueList
+      parameters:
+        - name: column name
+          in: path
+          required: true
+          description: plasmid column name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: return plasmid column value
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: column value is empty
+          content:
+            application/json:
+            schema:
+              type: string
+  /getPartScarList:
+    get:
+      summary: get all part scar type
+      tags:
+        - Part
+      description: get all part scar type
+      operationId: getPartScarList
+      responses:
+        '200':
+          description: return part scar type
+          content:
+            application/json:
+              type: object
+              schema:
+                success:
+                  type: boolean_values
+                data:
+                  type: array
+                  schema:
+                    type: string
+  /getBackboneScarList:
+    get:
+      summary: get all backbone scar type
+      tags:
+        - Backbone
+      description: get all backbone scar type
+      operationId: getBackboneScarList
+      responses:
+        '200':
+          description: return backbone scar type
+          content:
+            application/json:
+              type: object
+              schema:
+                success:
+                  type: boolean_values
+                data:
+                  type: array
+                  schema:
+                    type: string
+  /getPlasmidScarList:
+    get:
+      summary: get all plasmid scar type
+      tags:
+        - Plasmid
+      description: get all plasmid scar type
+      operationId: getPlasmidScarList
+      responses:
+        '200':
+          description: return plasmid scar type
+          content:
+            application/json:
+              type: object
+              schema:
+                success:
+                  type: boolean_values
+                data:
+                  type: array
+                  schema:
+                    type: string
+  /getPartScar:
+    get:
+      summary: get scar information of provided part
+      tags:
+        - Part
+      description: get scar information of provided part
+      operationId: getPartScar
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: part name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: return part scar information
+          content:
+            application/json:
+            schema:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  type: object
+                  schema:
+                    $ref: '#/Components/Schemas/PartScarInfo'
+        '400':
+          description: No such scar information
+          content:
+            application/json:
+            type: object
+            schema:
+              success:
+                type: boolean_values
+              error:
+                type: string
+  /setPartScar:
+    post:
+      summary: set part scar information
+      tags:
+        - Part
+      description: set part scar information
+      operationId: setPartScar
+      requestBody:
+        content:
+          application/json:
+            type: object
+            schema:
+              properties:
+                name:
+                  type: string
+                bsmbi:
+                  type: string
+                bsai:
+                  type: string
+                bbsi:
+                  type: string
+                aari:
+                  type: string
+                sapi:
+                  type: string
+      responses:
+        '200':
+          description: successfully add part scar information
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+        '400':
+          description: Parameters name cannot be empty
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+        '404':
+          description: No such part
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+  /getBackboneScar:
+    get:
+      summary: get backbone scar information
+      tags:
+        - Backbone
+      description: get backbone scar information
+      operationId: getBackboneScar
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: backbone name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successfully get backbone scar information
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                scar_info:
+                  $ref: '#/Components/Schemas/BackboneScarInfo'
+        '400':
+          description: Parameters name cannot be empty\ No such scar information
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+        '404':
+          description: No such part
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+  /setBackboneScar:
+    post:
+      summary: set backbone scar information
+      tags:
+        - Backbone
+      description: set backbone scar information
+      operationId: setBackboneScar
+      requestBody:
+        content:
+          application/json:
+            type: object
+            schema:
+              properties:
+                name:
+                  type: string
+                bsmbi:
+                  type: string
+                bsai:
+                  type: string
+                bbsi:
+                  type: string
+                aari:
+                  type: string
+                sapi:
+                  type: string
+      responses:
+        '200':
+          description: successfully add backbone scar information
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+        '400':
+          description: Parameters name cannot be empty\just post request
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+        '404':
+          description: No such backbone
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+  /getPlasmidScar:
+    get:
+      summary: get plasmid scar information
+      tags:
+        - Plasmid
+      description: get plasmid scar information
+      operationId: getPlasmidScar
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: plasmid name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successfully get plasmid scar information
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                scar_info:
+                  $ref: '#/Components/Schemas/PlasmidScarInfo'
+        '400':
+          description: Parameters name cannot be empty\ No such scar information
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+
+  /setPlasmidScar:
+    post:
+      summary: set plasmid scar information
+      tags:
+        - Plasmid
+      description: set plasmid scar information
+      operationId: setPlasmidScar
+      requestBody:
+        content:
+          application/json:
+            type: object
+            schema:
+              properties:
+                name:
+                  type: string
+                bsmbi:
+                  type: string
+                bsai:
+                  type: string
+                bbsi:
+                  type: string
+                aari:
+                  type: string
+                sapi:
+                  type: string
+      responses:
+        '200':
+          description: successfully add plasmid scar information
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+        '400':
+          description: Parameters name cannot be empty\just post request
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
+        '404':
+          description: No such plasmid
+          content:
+            application/json:
+              schema:
+                success:
+                  type: boolean_values
+                error:
+                  type: string
 
 
 components:
@@ -3126,18 +3910,123 @@ components:
           type: number
         kx2:
           type: number
-            
+
+
+    PartSimple:
+      type: object
+      properties:
+        partid:
+          type: integer
+        name:
+          type: string
+        sourceorganism:
+          type: string
+        reference:
+          type: string
     
-      
+    BackboneSimple:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        ori:
+          type: string
+        marker:
+          type: string
+        species:
+          type: string
 
+    PlasmidSimple:
+      type: object
+      properties:
+        plasmidid:
+          type: integer
+        name:
+          type: string
+        oricloning:
+          type: string
+        orihost:
+          type: string
+        markercloning:
+          type: string
+        markerhost:
+          type: string
 
+    ParentPartInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        note:
+          type: string
+    
+    ParentBackboneInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        notes:
+          type: string
+    
+    ParentPlasmidInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        note:
+          type: string
 
+    PartScarInfo:
+      type: object
+      properties:
+        partscarid:
+          type: integer
+        part_id:
+          type: integer
+        bsmbi:
+          type: string
+        bsai:
+          type: string
+        bbsi:
+          type: string
+        aari:
+          type: string
+        sapi:
+          type: string
 
-        
-
-
-
-
-
-
-  
+    BackboneScarInfo:
+      type: object
+      properties:
+        backbonescarid:
+          type: integer
+        backboneid:
+          type: integer
+        bsmbi:
+          type: string
+        bsai:
+          type: string
+        bbsi:
+          type: string
+        aari:
+          type: string
+        sapi:
+          type: string
+    PlasmidScarInfo:
+      type: object
+      properties:
+        plasmidscarid:
+          type: integer
+        plasmidid:
+          type: integer
+        bsmbi:
+          type: string
+        bsai:
+          type: string
+        bbsi:
+          type: string
+        aari:
+          type: string
+        sapi:
+          type: string

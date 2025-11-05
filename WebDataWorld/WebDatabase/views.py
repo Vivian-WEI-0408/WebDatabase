@@ -199,8 +199,8 @@ def SearchByPartNameFilter(request):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
-                promoterResult = list(Parttable.objects.only('partid','name','sourceorganism','reference').filter(name__icontains = Name,type=Type).values())
-                if(len(promoterResult) > 0):
+                promoterResult = list(Parttable.objects.filter(name__icontains = Name,type=Type).values('partid','name','sourceorganism','reference'))
+                if(len(promoterResult[0]) > 0):
                     return JsonResponse(data=promoterResult,status=200,safe=False)
                 else:
                     return JsonResponse(data = [],status=200,safe=False)
@@ -214,7 +214,7 @@ def SearchByBackboneNameFilter(request):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
-                backboneResult = list(Backbonetable.objects.only('id','name','ori','marker','species').filter(name__icontains = Name).values())
+                backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','ori','marker','species'))
                 if(len(backboneResult) > 0):
                     return JsonResponse(data=backboneResult,status=200,safe=False)
                 else:
@@ -230,7 +230,7 @@ def SearchByPlasmidNameFilter(request):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
-                plasmidResult = list(Plasmidneed.objects.only('plasmidid','name','oricloning','orihost','markercloning','markerhost').filter(name__icontains=Name).values())
+                plasmidResult = list(Plasmidneed.objects.filter(name__icontains=Name).values('plasmidid','name','oricloning','orihost','markercloning','markerhost'))
                 if(len(plasmidResult) > 0):
                     return JsonResponse(data = list(plasmidResult.values),status=200,safe=False)
                 else:
@@ -1945,8 +1945,8 @@ def AddParentPart(request):
         data = json.loads(request.body)
         sonPlasmidName = data['SonPlasmidName']
         ParentPartName = data['ParentPartName']
-        print(sonPlasmidName)
-        print(ParentPartName)
+        # print(sonPlasmidName)
+        # print(ParentPartName)
         if(sonPlasmidName == None or sonPlasmidName == "" or ParentPartName == None or ParentPartName == ""):
             return JsonResponse(data="PlasmidName or PartName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
