@@ -42,5 +42,4 @@ urlpatterns = [
     path("download/<str:type>",views.download_template,name="downloadtemplate"),
     # path("downloadBackboneTemplate",views.backbonetemplate,name="downBackboneTemplate"),
     # path("downloadPlasmidTemplate",views.plasmidtemplate,name="downPlasmidTemplate"),
-
 ]

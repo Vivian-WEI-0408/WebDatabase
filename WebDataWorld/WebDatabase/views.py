@@ -2037,9 +2037,9 @@ def getPartScar(request):
         name = request.GET.get('name')
         if(name != None and name != ""):
             part_object = Parttable.objects.filter(name = name).first()
-            scar_info = Partscartable.objects.filter(partid = part_object).first()
+            scar_info = Partscartable.objects.filter(partid = part_object).first().values()
             if(scar_info != None):
-                return JsonResponse(data = {'success':True,'scar_info':scar_info},status = 200, safe = False)
+                return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
                 return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
         else:
