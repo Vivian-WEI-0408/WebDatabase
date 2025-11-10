@@ -1,9 +1,5 @@
-import pandas as pd
-import numpy as np
 from django.core.exceptions import ValidationError
 import logging
-# from WebDatabase.models import Parttable,Backbonetable,Plasmidneed,\
-#                                Parentparttable,Parentbackbonetable,Parentplasmidtable
 import requests
 from .ControllerModule import FittingLabels
 from .CaculateModule.ScarIdentify import scarFunction
@@ -35,7 +31,6 @@ class ExcelProcessor:
         'PartName': 'name',
         'Alias': 'Alias', 
         'Type': 'Type',
-        'LengthOfSequence': 'Lengthinlevel0',
         'Sequence': 'Level0Sequence',
         'Species': 'SourceOrganism',
     }
@@ -43,7 +38,6 @@ class ExcelProcessor:
     BACKBONE_COLUMN_MAPPING = {
         'BackboneName':'name',
         'Alias':'alias',
-        'Length of Sequence': 'length',
         'Sequence':'sequence',
         'Species':'species',
         'Note':'Note',
@@ -53,16 +47,16 @@ class ExcelProcessor:
         'PlasmidName':'name',
         'Alias':'alias',
         'Level':'level',
-        'Length Of Sequence':'length',
         'Sequence':'sequenceConfirm',
         'ParentPart':'',
         'ParentBackbone':'',
+        'ParentPlasmid':'',
         'ParentSourceNote':'',
     }
     
     PART_REQUIRED_COLUMNS = ['PartName','Alias','Type','Sequence','Species']
     BACKBONE_REQUIRED_COLUMNS = ['BackboneName','Alias','Sequence','Species','Note',]
-    PLASMID_REQUIRED_COLUMNS = ['PlasmidName','Alias','Level','Sequence','ParentSourceNote',]
+    PLASMID_REQUIRED_COLUMNS = ['PlasmidName','Alias','Level','Sequence',]
     
     PLASMID_PARENT_COLUMNS = ['ParentPart','ParentBackbone','ParentPlasmid','ParentSourceNote']
     @classmethod
@@ -116,11 +110,13 @@ class ExcelProcessor:
         elif(type == 'plasmid'):
             for col in cls.PLASMID_REQUIRED_COLUMNS:
                 if not row_data.get(col):
+                    print("required")
                     errors.append(f'第 {row_index} 行：{col}为必填项')
             if( not row_data.get(cls.PLASMID_PARENT_COLUMNS[0]) and not row_data.get(cls.PLASMID_PARENT_COLUMNS[1]) and 
                 not row_data.get(cls.PLASMID_PARENT_COLUMNS[2]) and not row_data.get(cls.PLASMID_PARENT_COLUMNS[3])):
+                print("parent")
                 errors.append(f'Parent 信息需至少填写一项')
-        
+                
         return errors
     
     @classmethod
@@ -163,7 +159,7 @@ class ExcelProcessor:
                         scar_data_body = {'name':row['PartName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
                         scar_response = session.post(f'{BASE_URL}/setPartScar',json=scar_data_body,cookies=django_request.COOKIES)
                         if(response.status_code == 200 and scar_response.status_code == 200):
-                            return True
+                            continue
             elif(type == 'backbone'):
                 for index, row in df.iterrows():
                     row_data = row.to_dict()
@@ -185,11 +181,12 @@ class ExcelProcessor:
                         scar_result_list = scarFunction(row['Sequence'])
                         scar_data_body = {'name':row['BackboneName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
                         scar_response = session.post(f'{BASE_URL}/setBackboneScar',json=scar_data_body,cookies=django_request.COOKIES)
-                        if(response.status_code == 200):
-                            return True
+                        if(response.status_code == 200 and scar_response.status_code == 200):
+                            continue
             elif(type == 'plasmid'):
                 for index, row in df.iterrows():
                     row_data = row.to_dict()
+                    print(row_data)
                     row_errors = cls.validate_row_data(row_data, index + 2,type)  # +2 因为 Excel 从第2行开始数据
                     if row_errors:
                         error_rows.extend(row_errors)
@@ -199,7 +196,9 @@ class ExcelProcessor:
                         OriHost = "default"
                         MarkerClone = "default"
                         MarkerHost = "default"
+                        print(OriClone)
                         OriAndMarkerLabel = FittingLabels(row['Sequence'])
+                        print(OriAndMarkerLabel)
                         if(len(OriAndMarkerLabel["Origin"]) == 1):
                             OriClone = OriAndMarkerLabel['Origin'][0]
                         elif(len(OriAndMarkerLabel["Origin"]) == 2):
@@ -211,9 +210,9 @@ class ExcelProcessor:
                             MarkerClone = OriAndMarkerLabel['Marker'][0]
                             MarkerHost = OriAndMarkerLabel['Marker'][1]
                         data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'oriclone':OriClone,'orihost':OriHost,'markerclone':MarkerClone,'markerhost':MarkerHost,'level':row['Level'],'sequence':row['Sequence'],'ParentInfo':row['ParentSourceNote']}
-                        # print(data_body)
+                        print(data_body)
                         response = session.post(f'{BASE_URL}/AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
-                        # print(response.status_code)
+                        print(response.status_code)
                         scar_result_list = scarFunction(row['Sequence'])
                         scar_data_body = {'name':row['PlasmidName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
                         scar_response = session.post(f'{BASE_URL}/setPlasmidScar',json=scar_data_body,cookies=django_request.COOKIES)
@@ -229,7 +228,8 @@ class ExcelProcessor:
                                 ParentPartResponse = session.post(f'{BASE_URL}/AddPartParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentPartResponse.status_code != 200):
                                     if(response.status_code == 200):
-                                        return {'success':False,'error':'Plasmid upload success, Parent part upload fail'}
+                                        continue
+                                        # return {'success':False,'error':'Plasmid upload success, Parent part upload fail'}
                                 # return {'success':False,'error':response.json()}
                         if(ParentBackbone != ""):
                             ParentBackboneList = ParentBackbone.split(',')
@@ -238,7 +238,8 @@ class ExcelProcessor:
                                 ParentBackboneResponse = session.post(f'{BASE_URL}/AddBackboneParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentBackboneResponse.status_code != 200):
                                     if(response.status_code == 200):
-                                        return {'success':False,'error':'Plasmid upload success, Parent Backbone upload fail'}
+                                        continue
+                                        # return {'success':False,'error':'Plasmid upload success, Parent Backbone upload fail'}
                         if(ParentPlasmid != ""):
                             ParentPlasmidList = ParentPlasmid.split(',')
                             for each_plasmid in ParentPlasmidList:
@@ -246,7 +247,8 @@ class ExcelProcessor:
                                 ParentPlasmidResponse = session.post(f'{BASE_URL}/AddPlasmidParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentPlasmidResponse.status_code != 200):
                                     if(response.status_code == 200):
-                                        return {'success':False,'error':'Plasmid upload success, Parent plasmid upload fail'}
+                                        continue
+                                        # return {'success':False,'error':'Plasmid upload success, Parent plasmid upload fail'}
             return {'success':True}
         except Exception as e:
             logger.error(f"处理 Excel 文件失败: {str(e)}")
