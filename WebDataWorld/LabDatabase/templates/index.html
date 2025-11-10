@@ -1121,7 +1121,7 @@
                                         <td>${item.sourceorganism}</td>
                                         <td>${item.reference}</td>
                                         <td class="action-cell">
-                                            <button class="btn btn-sm btn-outline-primary">查看</button>
+                                            <button class="btn btn-sm btn-outline-primary"  onclick="window.location.href='/LabDatabase/part/${item.partid}'">查看</button>
                                             <button class="btn btn-sm btn-outline-secondary">编辑</button>
                                             <button class="btn btn-sm btn-outline-danger">删除</button>
                                         </td>
@@ -1252,7 +1252,7 @@
                                     <td>${scar}</td>
                                     <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '活跃' : '非活跃'}</span></td>
                                     <td class="action-cell">
-                                        <button class="btn btn-sm btn-outline-primary">查看</button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/backbone/${item.id}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
                                         <button class="btn btn-sm btn-outline-danger">删除</button>
                                     </td>
@@ -1384,7 +1384,7 @@
                                     <td>${item.level}</td>
                                     <td>${scar}</td>
                                     <td class="action-cell">
-                                        <button class="btn btn-sm btn-outline-primary">查看</button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
                                         <button class="btn btn-sm btn-outline-danger">删除</button>
                                     </td>

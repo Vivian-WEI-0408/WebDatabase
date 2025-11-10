@@ -2640,6 +2640,7 @@ def ImportDataset():
 #         ControllerModule.OriKmer.add_sequence(key,ControllerModule.OriginDict[key])
     
 def FittingLabels(sequence):
+    print(sequence)
     MarkerLabel = []
     OriginLabel = []
     MarkerResult = MarkerKmer.query(sequence)
@@ -2680,5 +2681,6 @@ def FittingLabels(sequence):
             similarity  = round(identical / match_length,3)
             if(similarity >= 0.998):
                 OriginLabel.append({"Name":seq_Name,"q_start":q_start,"q_end":q_end})
+    print({"Marker":MarkerLabel,"Origin":OriginLabel})
     return {"Marker":MarkerLabel,"Origin":OriginLabel}
     

@@ -7,7 +7,6 @@ info:
 
 servers:
   - url: 'http://10.30.76.2:8000/WebDatabase'
-  - url: 'http://10.30.76.2:8000/LabDatabase'
 tags:
   - name: Strain
     description: Function of strain data
@@ -84,13 +83,40 @@ paths:
             type: integer
       responses:
         '200':
-          description: Get All Parts and List All Parts
+          description: List All Parts (no page data)
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/part'
+        '200/1':
+          description: Get one page parts (with page data)
+          content:
+            application/json:
+              success:
+                type: boolean_values
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PartSimple'
+              pagination:
+                properties:
+                  current_page:
+                    type: integer
+                  total_pages:
+                    type: integer
+                  total_count:
+                    type: integer
+                  has_next:
+                    type: boolean_values
+                  has_previous:
+                    type: boolean_values
+                  page_size:
+                    type: integer
+                  offset:
+                    type: integer
+                  
         '404':
           description: No part data
           content:
@@ -384,40 +410,40 @@ paths:
               schema:
                 type: string
   /SearchRPU:
-     get:
-         summary: Search Part RPU By Part ID
-         tags:
-           - Part
-         operationId: SearchRPU
-         description: Return Part RPU Data
-         parameters:
-           - name: partID
-             required: true
-             in: query
-             description: part id
-             schema:
-               type: string
-         responses:
-           '200':
-             description: Return Part RPU Data
-             content:
-               application/json:
+    get:
+        summary: Search Part RPU By Part ID
+        tags:
+          - Part
+        operationId: SearchRPU
+        description: Return Part RPU Data
+        parameters:
+            name: partID
+            required: true
+            in: query
+            description: part id
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Return Part RPU Data
+            content:
+              application/json:
                   schema:
                     type: array
                     items:
                       $ref: '#/components/schemas/PartRPU'
-           '400':
-             description: parameter ID is empty
-             content:
-               text/plain:
-                 schema:
-                   type: string
-           '404':
-             description: Part RPU Data doesn't exist
-             content:
-               text/plain:
-                 schema:
-                   type: string
+          '400':
+            description: parameter ID is empty
+            content:
+              text/plain:
+                schema:
+                  type: string
+          '404':
+            description: Part RPU Data doesn't exist
+            content:
+              text/plain:
+                schema:
+                  type: string
   /PartID:
     get:
       summary: Get Part ID by name
@@ -3893,6 +3919,7 @@ components:
         kx2:
           type: number
 
+
     LBDNRSimple:
       type: object
       required:
@@ -3919,6 +3946,8 @@ components:
           type: integer
         name:
           type: string
+        type:
+          type: integer
         sourceorganism:
           type: string
         reference:

@@ -176,7 +176,7 @@ def DataFilter(request):
                 return JsonResponse(str(e),status = 400, safe=False)
         elif(type == "plasmid"):
             try:
-                request_body = {'oriClone':data.get('OriClone'),'markerClone':data.get('MarkerClone'),'oriHost':data.get('OriHost'),'markerHost':data.get('MarkerHost'),'Enzyme':data.get('Enzyme'),'Scar':data.get('Scar'),'name':data.get('name'),'page':page,"page_size":10}
+                request_body = {'oriClone':data.get('OriClone',""),'markerClone':data.get('MarkerClone',""),'oriHost':data.get('OriHost',""),'markerHost':data.get('MarkerHost',""),'Enzyme':data.get('Enzyme',""),'Scar':data.get('Scar',""),'name':data.get('name',""),'page':page,"page_size":10}
                 plasmidResponse = session.post(f'{Base_URL}PlasmidFilter',json = request_body,cookies=request.COOKIES)
                 if(plasmidResponse.status_code == 200):
                     plasmid = plasmidResponse.json()
@@ -243,9 +243,9 @@ def UploadFile(request):
         )
         thread.daemon = True
         thread.start()
-        return JsonResponse(data={'success':True})
+        return JsonResponse(data={'success':True},status = 200, safe=False)
     else:
-        return JsonResponse({'success':False,'message':'Upload record is empty'})
+        return JsonResponse({'success':False,'message':'Upload record is empty'},status = 400, safe = False)
     
 
 # def UploadPartFile(request):
