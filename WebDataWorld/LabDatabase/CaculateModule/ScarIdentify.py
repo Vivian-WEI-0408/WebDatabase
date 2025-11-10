@@ -38,7 +38,53 @@ class ScarIdentify:
             scar = {"start":"","end":""}
         return {"enzyme_name":enzyme, "site_number":len(Site),"Scar":scar}
         # return self.number_of_site(enzyme)
+    def enzyme_position_fit(self,enzyme_name):
+        enzyme = Restriction.__dict__[enzyme_name]
+        Site = self.number_of_site(enzyme)
+        if(len(Site) % 2 == 0):
+            return Site
+        else:
+            return []
 
+def scarPosition(seq):
+    SI = ScarIdentify(seq)
+    scar_list = []
+    for enzyme in type2s_enzymes:
+        scar = SI.enzyme_position_fit(enzyme)
+        scar_name_list = []
+        for each_position in scar:
+            each_str = scarName(seq[each_position-1:each_position+3])
+            scar_name_list.append(each_str)
+        scar_list.append({enzyme:{"index":scar,"name":scar_name_list}})
+    return scar_list
+
+def scarName(seq):
+    scar_str = ""
+    if(seq.upper() == "GCTT"):
+        scar_str = "E"
+    elif(seq.upper() == "CTGA"):
+        scar_str += "F"
+    elif(seq.upper() == "TACG"):
+        scar_str = "G"
+    elif(seq.upper() == "TTCC"):
+        scar_str += "H"
+    elif(seq.upper() == "GTGC"):
+        scar_str += "A"
+    elif(seq.upper() == "ATCA"):
+        scar_str += "A*"
+    elif(seq.upper() == "AATG"):
+        scar_str += "B"
+    elif(seq.upper() == "TAAA"):
+        scar_str += "C"
+    elif(seq.upper() == "CCTC"):
+        scar_str += "D"
+    elif(seq.upper() == "AGGT"):
+        scar_str += "I"
+    elif(seq.upper() == "TGTC"):
+        scar_str += "K"
+    else:
+        scar_str = "undefine"
+    return scar_str
 def scarFunction(seq):
 
     SI = ScarIdentify(seq)
