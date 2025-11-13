@@ -176,6 +176,7 @@ def DataFilter(request):
                 backboneResponse = session.post(f'{Base_URL}BackboneFilter',json=request_body,cookies=request.COOKIES)
                 if(backboneResponse.status_code == 200):
                     backbone = backboneResponse.json()
+                    print(backbone)
                     return JsonResponse(backbone,status=200,safe=False)
                 else:
                     raise requests.exceptions.RequestException
