@@ -32,7 +32,7 @@ class SequenceAnnotator:
         accession = "."
         version = "1.0"
         Keywords = "."
-        with open(f'WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\{self.name}.gbk','w') as file:
+        with open(rf'C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\{self.name}.gbk','w') as file:
             file.write(("LOCUS       Exported              {0:>6} bp DNA     {1:>8} CST \
                         {2}\n").format(len(self.sequence),"circular",datetime.datetime.now().strftime(DATE_FORMAT)))
             file.write("DEFINITION  {}\n".format(definition))

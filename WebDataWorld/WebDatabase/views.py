@@ -793,6 +793,23 @@ def SearchPlasmidSequenceByName(request):
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Plasmid Not Found'})
 
+def SearchPlasmidSequenceByID(request):
+    if(request.method == "GET"):
+        id = request.GET.get('plasmidid')
+        if(id == None or id == 0):
+            return JsonResponse(data="id cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
+        PlasmidList = list(Plasmidneed.objects.filter(plasmidid = id).values('sequenceconfirm'))
+        if(len(PlasmidList) > 0):
+            return JsonResponse(data = {'success':True, "data":PlasmidList[0]}, status=200, safe = False)
+                # return JsonResponse({'code':200,'status':'success','data':result})
+        else:
+            return JsonResponse(data={'success':False, "data":"No such Plasmid"}, status=404,safe=False)
+                # return JsonResponse({'code':204,'status':'failed','data':'Plasmid Not Found'})
+    else:
+        return JsonResponse(data={"success":False,'data':'Just GET method'}, status=404,safe=False)
+        # return JsonResponse({'code':204,'status':'failed','data':'Plasmid Not Found'})
+
 def SearchByOriClone(request):
     if(request.method == "GET"):
         Ori = request.GET.get('oriClone')
@@ -1337,7 +1354,7 @@ def SearchByBackboneID(request):
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':"Plamsid Not Found"})
 
-def SearchByBackboneSeq(request):
+def  SearchByBackboneSeq(request):
     if(request.method == "GET"):
         Seq = request.GET.get('seq')
         if(Seq == None or Seq == ""):
@@ -1350,6 +1367,21 @@ def SearchByBackboneSeq(request):
         else:
             return JsonResponse(data="No such backbone", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
+
+def GetBackboneSeqByID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('backboneid')
+        if(ID ==None or ID == 0):
+            return JsonResponse(data = {'success':False,'data':"Parameter is empty"},status=404, safe = False)
+        else:
+            BackboneSeq = list(Backbonetable.objects.filter(id=ID).values('sequence'))
+            if(len(BackboneSeq) > 0):
+                return JsonResponse(data = {'success':True, 'data':BackboneSeq[0]},status = 200, safe = False)
+            else:
+                return JsonResponse(data = {'success':False,'data':"No such backbone"},status = 404, safe=False)
+    else:
+        return JsonResponse(data = {'success':False,'data':'Only Get method'},status = 400, safe = False)
+
 
 def SearchByBackboneSpecies(request):
     if(request.method == "GET"):
@@ -1912,6 +1944,22 @@ def GetPartIDByName(request):
                 return JsonResponse(data = "No such part",status=404, safe=False)
         else:
             return JsonResponse(data = "Name cannot be empty",status=400,safe=False)
+
+def GetPartSeqByID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('partid')
+        if(ID == None or ID == 0):
+            return JsonResponse(data = {"success":False,"data":"Parameter is empty"}, status = 400, safe = False)
+        else:
+            sequence = list(Parttable.objects.filter(partid = ID).values('level0sequence'))
+            if(len(sequence) > 0):
+                return JsonResponse(data = {'success':True,'data':sequence[0]}, status = 200, safe = False)
+            else:
+                return JsonResponse(data = {'success':False, "data":"No such part"},status = 404, safe = False)
+    else:
+        return JsonResponse(data = {'success':False,'data':'Only GET method'},status = 404, safe = False)
+
+
 
 
 def GetBackboneIDByName(request):

@@ -1,5 +1,5 @@
 from numpy import identity
-from KmerIndex import KmerIndex
+from . import KmerIndex
 
 class featureIdentify:
     def __init__(self):
@@ -12,14 +12,14 @@ class featureIdentify:
         self.TerminatorFeatureDict = {}
         self.miscFeatureDict = {}
         self.primerBindDict = {}
-        self.OriginFeatureKmer = KmerIndex()
-        self.CDSFeatureKmer = KmerIndex()
-        self.PromoterFeatureKmer = KmerIndex()
-        self.TerminatorFeatureKmer = KmerIndex()
-        self.miscFeatureKmer = KmerIndex()
-        self.primerBindKmer = KmerIndex()
+        self.OriginFeatureKmer = KmerIndex.KmerIndex()
+        self.CDSFeatureKmer = KmerIndex.KmerIndex()
+        self.PromoterFeatureKmer = KmerIndex.KmerIndex()
+        self.TerminatorFeatureKmer = KmerIndex.KmerIndex()
+        self.miscFeatureKmer = KmerIndex.KmerIndex()
+        self.primerBindKmer = KmerIndex.KmerIndex()
         type = ""
-        with open('WebDataWorld\LabDatabase\CaculateModule\BasicFeature.txt','r') as file:
+        with open(r'C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase\CaculateModule\BasicFeature.txt','r') as file:
             lines = file.readlines()
             for line in lines:
                 line = line.strip('\n')

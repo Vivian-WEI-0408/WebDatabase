@@ -11,6 +11,10 @@ class WebDataWorldTestCase(TestCase):
     def setUp(self):
         # self.BASE_URL = 'http://127.0.0.1:8000'
         self.client = Client()
+        self.client.headers.update({
+        'User-Agent':'Django-App/1.0',
+        'Content-Type':'application/json',
+    })
         self.client.session['info'] = {"uid":8,'uname':"root"}
         # self.client.session['info'] = {"uid": 8, 'uname': "root"}
 
@@ -102,7 +106,11 @@ class WebDataWorldTestCase(TestCase):
         # response = self.client.post('/WebDatabase/UpdatePart',{"OriginalName":"testA","Name":"testDjango","Alias":"test"})
         # self.assertEqual(response.status_code, 200)
         # self.assertEqual(response.content, b'"Updated part data"')
-
+    
+    def test_PartFilterT(self):
+        response = self.client.post('/WebDatabase/PartFilter',data = {"name":"pro","Type":"promoter",'Enzyme':'','Scar':"",'page':1,'page_size':10})
+        print(response.status_code)
+        print(response.json())
 
 
 

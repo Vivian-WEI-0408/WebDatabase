@@ -13,9 +13,16 @@ import openpyxl
 import os
 import pandas as pd
 import json
+from Bio.Seq import Seq
+# from .FeatureIdentify import featureIdentify
+# from CaculateModule.FileGenerator import SequenceAnnotator
+# from CaculateModule.ScarIdentify import scarPosition
 # from .forms import FileUploadForm
+from .CaculateModule.FeatureIdentify import featureIdentify
+from .CaculateModule.FileGenerator import SequenceAnnotator
+from .CaculateModule.ScarIdentify import scarPosition
 
-Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Base_URL = "http://10.30.76.2:8004/WebDatabase/"
 
 # class User_auth(MiddlewareMixin):
 
@@ -187,7 +194,19 @@ def DataFilter(request):
                 return JsonResponse(str(e),status = 400, safe=False)
 
 def UploadPartMap(request):
-    pass
+    if(request.method == 'POST' and request.FILES):
+        file = request.FILES.get('file')
+        title = request.POST.get('title', file.name)
+        thread = threading.Thread(
+            target = process_excel_async,
+            args= (file,request)
+        )
+        thread.daemon = True
+        thread.start()
+        return JsonResponse(data={'success':True},status = 200, safe=False)
+    else:
+        return JsonResponse({'success':False,'message':'Upload record is empty'},status = 400, safe = False)
+    
 
 def UploadBackboneMap(request):
     pass
@@ -237,6 +256,7 @@ def UploadFile(request):
     if(request.method == 'POST' and request.FILES):
         file = request.FILES.get('file')
         title = request.POST.get('title', file.name)
+        # print(title)
         thread = threading.Thread(
             target = process_excel_async,
             args= (file,request)
@@ -326,6 +346,94 @@ def plasmid_detail_show(request,plasmidid):
                                     'plasmidparent':plasmidParentPlasmid.json()['data'][0] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'][0] if len(plasmidSonPlasmid.json()['data']) > 0 else []})
         else:
             return render(request,'error.html',{'error':plasmidResponse.text})
+
+def downloadPartMap(request,partid):
+    if(request.method == "GET"):
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent':'Django-App/1.0',
+            'Content-Type':'application/json',
+        })
+        sequence = (session.get(f'{Base_URL}GetPartSeqByID?partid={partid}',cookies = request.COOKIES)).json()['data']['level0sequence'].lower()
+        print(sequence)
+        seq_obj = Seq(sequence)
+        seq_reverse = str(seq_obj.reverse_complement())
+        fi = featureIdentify()
+        feature_list = fi.featureMatch(sequence)
+        reverse_feature_list = fi.featureMatch(seq_reverse)
+        scar_list = scarPosition(sequence)
+        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partid}')
+        thread = threading.Thread(
+            target = sa.GenerateGBKFile(),
+            args= ()
+        )
+        thread.daemon = True
+        thread.start()
+        # sa.GenerateGBKFile()
+        map_path = rf'.\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\part-{partid}.gbk'
+        if(os.path.exists(map_path)):
+            response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'part-{partid}.gbk')
+            return response
+        else:
+            return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
+
+def downloadBackboneMap(request,backboneid):
+    if(request.method == "GET"):
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent':'Django-App/1.0',
+            'Content-Type':'application/json',
+        })
+        sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={backboneid}',cookies = request.COOKIES)).json()['data']['sequence'].lower()
+        seq_obj = Seq(sequence)
+        seq_reverse = str(seq_obj.reverse_complement())
+        fi = featureIdentify()
+        feature_list = fi.featureMatch(sequence)
+        reverse_feature_list = fi.featureMatch(seq_reverse)
+        scar_list = scarPosition(sequence)
+        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneid}')
+        thread = threading.Thread(
+            target = sa.GenerateGBKFile(),
+            args= ()
+        )
+        thread.daemon = True
+        thread.start()
+        # sa.GenerateGBKFile()
+        map_path = rf'.\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\backbone-{backboneid}.gbk'
+        if(os.path.exists(map_path)):
+            response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'backbone-{backboneid}.gbk')
+            return response
+        else:
+            return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
+
+def downloadPlasmidMap(request,plasmidid):
+    if(request.method == "GET"):
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent':'Django-App/1.0',
+            'Content-Type':'application/json',
+        })
+        sequence = (session.get(f'{Base_URL}PlasmidSeqByID?plasmidid={plasmidid}',cookies = request.COOKIES)).json()['data']['sequenceconfirm'].lower()
+        seq_obj = Seq(sequence)
+        seq_reverse = str(seq_obj.reverse_complement())
+        fi = featureIdentify()
+        feature_list = fi.featureMatch(sequence)
+        reverse_feature_list = fi.featureMatch(seq_reverse)
+        scar_list = scarPosition(sequence)
+        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidid}')
+        thread = threading.Thread(
+            target = sa.GenerateGBKFile(),
+            args= ()
+        )
+        thread.daemon = True
+        thread.start()
+        # sa.GenerateGBKFile()
+        map_path = rf'.\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\plasmid-{plasmidid}.gbk'
+        if(os.path.exists(map_path)):
+            response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'plasmid-{plasmidid}.gbk')
+            return response
+        else:
+            return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
 
 
 def delete_part(request,partid):

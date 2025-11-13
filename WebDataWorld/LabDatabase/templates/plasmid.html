@@ -485,7 +485,7 @@
                     </div>
                 </div>
                 <div class="download-section">
-                    <button class="btn"><i>📥</i> 下载质粒图谱</button>
+                    <button class="btn" id = "downMapButton"><i>📥</i> 下载质粒图谱</button>
                     <button class="btn"><i>🧬</i> 下载序列文件</button>
                     <button class="btn"><i>📋</i> 下载详细说明</button>
                 </div>
@@ -523,7 +523,11 @@
                 this.style.zIndex = '1';
             });
         });
-        
+        document.getElementById('downMapButton').addEventListener('click',function(){
+            let pathname_list = window.location.pathname.split('/');
+            let plasmidid = pathname_list[pathname_list.length -1];
+            window.location.href = `/LabDatabase/downloadPlasmidMap/${plasmidid}`;
+        })
         // 下载按钮交互
         document.querySelectorAll('.btn').forEach(button => {
             button.addEventListener('click', function() {

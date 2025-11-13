@@ -122,6 +122,36 @@
             color: #666;
             margin-bottom: 5px;
         }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a6fc4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #0d4d8a;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .download-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
         
         .reference-link {
             color: #1a6fc4;
@@ -238,11 +268,26 @@
                     </li>
                 </ul>
             </div>
+            <div class="download-section">
+                <button class="btn" id="downPartMapButton"><i>📥</i> 下载质粒图谱</button>
+                <button class="btn"><i>🧬</i> 下载序列文件</button>
+                <button class="btn"><i>📋</i> 下载详细说明</button>
+            </div>
         </div>
+
         
         <footer>
             <p>基因元件数据库 &copy; 2023 | 最后更新: 2023年11月15日</p>
         </footer>
     </div>
+
+    <script>
+        document.getElementById('downPartMapButton').addEventListener('click',function(){
+            let pathname_list = window.location.pathname.split('/');
+            let partid = pathname_list[pathname_list.length -1];
+            console.log(partid);
+            window.location.href = `/LabDatabase/downloadPartMap/${partid}`;
+        })
+    </script>
 </body>
 </html>

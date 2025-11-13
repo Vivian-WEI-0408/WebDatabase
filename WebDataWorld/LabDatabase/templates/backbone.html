@@ -100,6 +100,13 @@
             gap: 20px;
             margin-top: 20px;
         }
+
+        .download-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
         
         .feature-card {
             background-color: #f8f9fa;
@@ -416,7 +423,7 @@
                     </div>
                 </div>
                 <div class="download-section">
-                    <button class="btn"><i>📥</i> 下载载体图谱</button>
+                    <button class="btn" id="downPartMapButton"><i>📥</i> 下载载体图谱</button>
                     <button class="btn"><i>🧬</i> 下载序列文件</button>
                     <button class="btn"><i>📋</i> 下载详细说明</button>
                 </div>
@@ -448,6 +455,12 @@
     </div>
 
     <script>
+
+        document.getElementById('downPartMapButton').addEventListener('click',function(){
+            let pathname_list = window.location.pathname.split('/');
+            let backboneid = pathname_list[pathname_list.length -1];
+            window.location.href = `/LabDatabase/downloadBackboneMap/${backboneid}`;
+        })
         // 简单的载体图谱交互效果
         document.querySelectorAll('.plasmid-label').forEach(label => {
             label.addEventListener('mouseover', function() {

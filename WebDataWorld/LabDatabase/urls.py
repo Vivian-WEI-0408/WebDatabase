@@ -40,6 +40,9 @@ urlpatterns = [
 
     #download templates
     path("download/<str:type>",views.download_template,name="downloadtemplate"),
-    # path("downloadBackboneTemplate",views.backbonetemplate,name="downBackboneTemplate"),
-    # path("downloadPlasmidTemplate",views.plasmidtemplate,name="downPlasmidTemplate"),
+    
+    #download part map
+    path("downloadPlasmidMap/<int:plasmidid>",views.downloadPlasmidMap,name="downloadPlasmidMap"),
+    path("downloadBackboneMap/<int:backboneid>",views.downloadBackboneMap,name="downloadBackboneMap"),
+    path("downloadPartMap/<int:partid>",views.downloadPartMap,name="downloadPartMap"),
 ]
