@@ -2,10 +2,14 @@ import django.core.exceptions
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.core import serializers
+from django.db.utils import OperationalError
 import math
 import json
 import uuid
+from django.db import transaction
+import time
 from django.utils import timezone
+from django.db.models import Q
 from django.utils.deprecation import MiddlewareMixin
 from .models import (Backbonetable,Parentplasmidtable,
                     Partrputable,Parttable,Plasmidneed,
@@ -82,7 +86,7 @@ def PartDataALL(request):
             offset = (page -1)*page_size
             total_count = Parttable.objects.count()
             total_pages = (total_count + page_size -1) // page_size
-            query_set = Parttable.objects.order_by('name').values('partid','name','type','sourceorganism','reference')[offset:offset+page_size]
+            query_set = Parttable.objects.order_by('name').values('partid','name','alias','type','sourceorganism','reference')[offset:offset+page_size]
             # query_set = Parttable.objects.only('partid','name','type','sourceorganism','reference').order_by('name')[offset:offset+page_size]
             has_next = page < total_pages
             has_previous = page > 1
@@ -133,33 +137,49 @@ def PartFilter(request):
             scarpartid = list(Partscartable.objects.filter(sapi = Scar).values('partid'))
         if(Enzyme != "" and len(scarpartid) == 0):
             return JsonResponse(data={'success':False,'error':'No data'}, status = 400, safe = False)
-        result = Parttable.objects
+        # result = Parttable.objects
         PartResult = []
         if(len(scarpartid) != 0):
             for each_id in scarpartid:
+                result = Parttable.objects
                 result = result.filter(partid = each_id['partid'])
                 if(type != "" and result != None):
                     # 'partid','name','type','sourceorganism','reference'
                     result = result.filter(type = type)
                 if(name != "" and result != None):
-                    result = result.filter(name__icontains = name)
+                    result = result.filter(Q(name__icontains = name) | Q(alias__icontains = name))
                 if(result != None):
-                    PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
+                    PartResult.append(list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference'))[0])
         else:
+            result = Parttable.objects
             if(type != "" and result != None):
                 # 'partid','name','type','sourceorganism','reference'
                 result = result.filter(type = type)
             if(name != "" and result != None):
                 print(name)
-                result = result.filter(name__icontains = name)
+                result = result.filter(Q(name__icontains = name) | Q(alias__icontains = name))
             if(result != None):
-                PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
-        if(len(PartResult[0]) != 0):
-            total_count = len(PartResult[0])
+                PartResult = (list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference')))
+        print(PartResult)
+        if(len(PartResult) != 0):
+            total_count = len(PartResult)
             total_pages = (total_count + page_size -1) // page_size
             has_next = page < total_pages
             has_previous = page > 1
-            return JsonResponse(data = {'success':True, 'data': list(PartResult[0][offset:offset+page_size]),
+            if(len(PartResult) > page_size):
+                return JsonResponse(data = {'success':True, 'data': list(PartResult[offset:offset+page_size]),
+                                        'pagination':{
+                                            'current_page' : page,
+                                            'total_pages' : total_pages,
+                                            'total_count' : total_count,
+                                            'has_next' : has_next,
+                                            'has_previous' : has_previous,
+                                            'page_size' : page_size,
+                                            'offset' : offset
+                                            }
+                                        },status = 200, safe = False)
+            else:
+                return JsonResponse(data = {'success':True, 'data': list(PartResult[:]),
                                         'pagination':{
                                             'current_page' : page,
                                             'total_pages' : total_pages,
@@ -611,7 +631,7 @@ def PlasmidDataALL(request):
             total_count = Plasmidneed.objects.count()
             total_pages = (total_count + page_size -1) // page_size
             # query_set = Plasmidneed.objects.only('plasmidid','name','oricloning','orihost','markercloning','markerhost','level').all().order_by('name')[offset:offset+page_size]
-            query_set = (Plasmidneed.objects.order_by('name').values('plasmidid','name','oricloning','orihost','markercloning','markerhost','level'))[offset:offset+page_size]
+            query_set = (Plasmidneed.objects.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level'))[offset:offset+page_size]
             has_next = page < total_pages
             has_previous = page > 1
             return JsonResponse(data={'success':True,
@@ -630,7 +650,7 @@ def PlasmidDataALL(request):
         
 
 #Plasmid Filter
-#PartFilter
+
 def PlasmidFilter(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
@@ -658,10 +678,10 @@ def PlasmidFilter(request):
             scarplasmidid = list(Plasmidscartable.objects.filter(sapi = Scar).values('plasmidid'))
         if(Enzyme != "" and len(scarplasmidid) == 0):
             return JsonResponse(data={'success':False,'error':'No data'}, status = 404, safe = False)
-        result = Plasmidneed.objects
         PlasmidResult = []
         if(len(scarplasmidid) != 0):
             for each_id in scarplasmidid:
+                result = Plasmidneed.objects
                 result = result.filter(plasmidid = each_id['plasmidid'])
                 if(OriClone != '' and result != None):
                     # 'partid','name','type','sourceorganism','reference'
@@ -673,11 +693,12 @@ def PlasmidFilter(request):
                 if(MarkerHost != '' and result != None):
                     result = result.filter(markerhost = MarkerHost)
                 if(Name != '' and result != None):
-                    result = result.filter(name__icontains = Name)
+                    result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                 if(result != None):
                     # 'plasmidid','name','oricloning','orihost','markercloning','markerhost','level'
-                    PlasmidResult.append(result.order_by('name').values('plasmidid','name','oricloning','orihost','markercloning','markerhost','level'))
+                    PlasmidResult.append(list(result.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level'))[0])
         else:
+            result = Plasmidneed.objects
             if(OriClone != "" and result != None):
                 # 'partid','name','type','sourceorganism','reference'
                 result = result.filter(oricloning = OriClone)
@@ -688,15 +709,27 @@ def PlasmidFilter(request):
             if(MarkerHost != '' and result != None):
                 result = result.filter(markerhost = MarkerHost)
             if(Name != "" and result != None):
-                result = result.filter(name__icontains = Name)
+                result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
             if(result != None):
-                PlasmidResult.append(result.order_by('name').values('plasmidid','name','oricloning','orihost','markercloning','markerhost','level'))
-        if(len(PlasmidResult[0]) != 0):
-            total_count = len(PlasmidResult[0])
+                PlasmidResult = (list(result.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level')))
+        if(len(PlasmidResult) != 0):
+            total_count = len(PlasmidResult)
             total_pages = (total_count + page_size -1) // page_size
             has_next = page < total_pages
             has_previous = page > 1
-            return JsonResponse(data = {'success':True, 'data': list(PlasmidResult[0][offset:offset+page_size]),
+            if(len(PlasmidResult) < page_size):
+                return JsonResponse(data = {'success':True, 'data': list(PlasmidResult[:]),
+                                        'pagination':{
+                                            'current_page' : page,
+                                            'total_pages' : total_pages,
+                                            'total_count' : total_count,
+                                            'has_next' : has_next,
+                                            'has_previous' : has_previous,
+                                            'page_size' : page_size,
+                                            'offset' : offset
+                                            }
+                                        })
+            return JsonResponse(data = {'success':True, 'data': list(PlasmidResult[offset:offset+page_size]),
                                         'pagination':{
                                             'current_page' : page,
                                             'total_pages' : total_pages,
@@ -1204,7 +1237,7 @@ def BackboneDataALL(request):
             offset = (page -1)*page_size
             total_count = Backbonetable.objects.count()
             total_pages = (total_count + page_size -1) // page_size
-            query_set = Backbonetable.objects.order_by('name').values('id','name','marker','ori','species')[offset:offset+page_size]
+            query_set = Backbonetable.objects.order_by('name').values('id','name','alias','marker','ori','species')[offset:offset+page_size]
             # query_set = Backbonetable.objects.only('id','name','marker','ori','species').all().order_by('name')[offset:offset+page_size]
 
             has_next = page < total_pages
@@ -1228,7 +1261,7 @@ def BackboneDataALL(request):
 def BackboneFilter(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
+        # print(data)
         ori = data['ori']
         marker = data['marker']
         Enzyme = data['Enzyme']
@@ -1251,31 +1284,41 @@ def BackboneFilter(request):
             scarBackboneid = list(Backbonescartable.objects.filter(sapi = Scar).values('backboneid'))
         if(Enzyme != "" and len(scarBackboneid) == 0):
             return JsonResponse(data={'success':False,'error':'No data'}, status = 404, safe = False)
-        result = Backbonetable.objects
+        # print(scarBackboneid)
         BackboneResult = []
+        # print(scarBackboneid)
         if(len(scarBackboneid) != 0):
             for each_id in scarBackboneid:
+                # print(each_id)
+                result = Backbonetable.objects
                 result = result.filter(id = each_id['backboneid'])
+                # print(result)
                 if(ori != "" and result != None):
                     # 'partid','name','type','sourceorganism','reference'
                     result = result.filter(ori = ori)
+                    # print(result.values())
                 if(marker != "" and result != None):
                     result = result.filter(marker = marker)
                 if(Name != "" and result != None):
-                    result = result.filter(name__icontains = Name)
-                if(result != None):
-                    BackboneResult.append(result.order_by('name').values('id','name','marker','ori','species'))
+                    result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                if(len(result) != 0):
+                    # print(result.order_by('name').values('id','name','marker','ori','species'))
+                    # PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
+                    BackboneResult.append(list(result.order_by('name').values('id','name','alias','marker','ori','species'))[0])
         else:
+            result = Backbonetable.objects
             if(ori != "" and result != None):
                 result = result.filter(ori = ori)
             if(marker != "" and result != None):
                 result = result.filter(marker = marker)
             if(Name != "" and result != None):
-                result = result.filter(name__icontains = Name)
+                result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
             if(result != None):
-                BackboneResult.append(result.order_by('name').values('id','name','marker','ori','species'))
-        if(len(BackboneResult[0]) != 0):
-            total_count = len(BackboneResult[0])
+                # print(result.order_by('name').values('name'))
+                BackboneResult = (list(result.order_by('name').values('id','name','alias','marker','ori','species')))
+        print(BackboneResult)
+        if(len(BackboneResult) != 0):
+            total_count = len(BackboneResult)
             total_pages = (total_count + page_size -1) // page_size
             has_next = page < total_pages
             has_previous = page > 1
@@ -1292,7 +1335,8 @@ def BackboneFilter(request):
             #                               'offset':offset
             #                               }
             #                             },status = 200, safe=False
-            return JsonResponse(data = {'success':True, 'data': list(BackboneResult[0][offset:offset+page_size]),
+            if(len(BackboneResult) < page_size):
+                return JsonResponse(data = {'success':True, 'data': list(BackboneResult[:]),
                                         'pagination':{
                                             'current_page' : page,
                                             'total_pages' : total_pages,
@@ -1303,6 +1347,19 @@ def BackboneFilter(request):
                                             'offset' : offset
                                             }
                                         })
+            else:
+                return JsonResponse(data = {'success':True, 'data': list(BackboneResult[offset:offset+page_size]),
+                                        'pagination':{
+                                            'current_page' : page,
+                                            'total_pages' : total_pages,
+                                            'total_count' : total_count,
+                                            'has_next' : has_next,
+                                            'has_previous' : has_previous,
+                                            'page_size' : page_size,
+                                            'offset' : offset
+                                            }
+                                        })
+            
         else:
             return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
             
@@ -2056,14 +2113,27 @@ def setPartScar(request):
         aari = data['aari']
         sapi = data['sapi']
         if(name != None and name != ""):
-            part_obj = Parttable.objects.filter(name = name).first()
-            if(part_obj == None):
-                return JsonResponse(data = {'success':False, 'error':'No such part'},status = 404, safe= False)
-            if(Partscartable.objects.filter(partid = part_obj) != None):
-                Partscartable.objects.filter(partid = part_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-            else:
-                Partscartable.objects.create(partid = part_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-            return JsonResponse(data = {'success':True}, status = 200, safe = False)
+            start_time = time.time()
+            max_wait_time = 20
+            while time.time() - start_time < max_wait_time:
+                try:
+                    with transaction.atomic():
+                        # part_obj = Parttable.objects.filter(name = name).first()
+                        part_obj = Parttable.objects.select_for_update().get(name=name)
+                        if(len(Partscartable.objects.filter(partid = part_obj)) != 0):
+                            Partscartable.objects.filter(partid = part_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+                        else:
+                            Partscartable.objects.create(partid = part_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+                        return JsonResponse(data = {'success':True}, status = 200, safe = False)
+                except Parttable.DoesNotExist:
+                    time.sleep(0.5)
+                    continue
+                except OperationalError as e:
+                    if 'lock' in str(e).lower():
+                        time.sleep(0.5)
+                        continue
+                    raise
+            return JsonResponse(data={'success':False,'error':'time out'},stauts = 400, safe = False)
         else:
             return JsonResponse(data={'success':False,'error':'Name cannot be empty'},stauts = 400, safe = False)
     else:
@@ -2089,7 +2159,6 @@ def getBackboneScar(request):
 def setBackboneScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
-        print(data)
         name = data['name']
         bsmbi = data['bsmbi']
         bsai = data['bsai']
@@ -2097,15 +2166,28 @@ def setBackboneScar(request):
         aari = data['aari']
         sapi = data['sapi']
         if(name != None and name != ""):
-            backbone_obj = Backbonetable.objects.filter(name = name).first()
-            if(backbone_obj == None):
-                print("No Backbone")
-                return JsonResponse(data = {'success':False, 'error':'No such backbone'},status = 404, safe= False)
-            if(Backbonescartable.objects.filter(backboneid = backbone_obj) != None):
-                Backbonescartable.objects.filter(backboneid = backbone_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-            else:
-                Backbonescartable.objects.create(backboneid = backbone_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-            return JsonResponse(data = {'success':True}, status = 200, safe = False)
+            start_time = time.time()
+            max_wait_time = 20
+            while time.time() - start_time < max_wait_time:
+                try:
+                    with transaction.atomic():
+                        # backbone_obj = Backbonetable.objects.filter(name = name).first()
+                        backbone_obj = Backbonetable.objects.select_for_update().get(name = name)
+                        if(len(Backbonescartable.objects.filter(backboneid = backbone_obj)) != 0):
+                            Backbonescartable.objects.filter(backboneid = backbone_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+                        else:
+                            Backbonescartable.objects.create(backboneid = backbone_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+                        return JsonResponse(data = {'success':True}, status = 200, safe = False)
+                except Backbonetable.DoesNotExist:
+                    time.sleep(0.5)
+                    print("7777777")
+                    continue
+                except OperationalError as e:
+                    if 'lock' in str(e).lower():
+                        time.sleep(0.5)
+                        continue
+                    raise
+            return JsonResponse(data={'success':False,'error':'time out'},stauts = 400, safe = False)
         else:
             return JsonResponse(data={'success':False,'error':'Name cannot be empty'},status = 400, safe = False)
     else:
@@ -2138,14 +2220,28 @@ def setPlasmidScar(request):
         aari = data['aari']
         sapi = data['sapi']
         if(name != None and name != ""):
-            plasmid_obj = Plasmidneed.objects.filter(name = name).first()
-            if(plasmid_obj == None):
-                return JsonResponse(data = {'success':False, 'error':'No such plasmid'},status = 404, safe= False)
-            if(Plasmidscartable.objects.filter(plasmidid = plasmid_obj) != None):
-                Plasmidscartable.objects.filter(plasmidid = plasmid_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-            else:
-                Plasmidscartable.objects.create(plasmidid = plasmid_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-            return JsonResponse(data = {'success':True}, status = 200, safe = False)
+            start_time = time.time()
+            max_wait_time = 20
+            while time.time() - start_time < max_wait_time:
+                try:
+                    with transaction.atomic():
+                        # plasmid_obj = Plasmidneed.objects.filter(name = name).first()
+                        plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
+                    if(len(Plasmidscartable.objects.filter(plasmidid = plasmid_obj)) != 0):
+                        Plasmidscartable.objects.filter(plasmidid = plasmid_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+                    else:
+                        Plasmidscartable.objects.create(plasmidid = plasmid_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+                    return JsonResponse(data = {'success':True}, status = 200, safe = False)
+                except Plasmidneed.DoesNotExist:
+                    time.sleep(0.5)
+                    continue
+                except OperationalError as e:
+                    if 'lock' in str(e).lower():
+                        time.sleep(0.5)
+                        continue
+                    raise
+            return JsonResponse(data={'success':False,'error':'time out'},stauts = 400, safe = False)
+
         else:
             return JsonResponse(data={'success':False,'error':'Name cannot be empty'},stauts = 400, safe = False)
     else:
