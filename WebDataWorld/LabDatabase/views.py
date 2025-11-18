@@ -335,7 +335,7 @@ def downloadPartMap(request,partid):
         thread.daemon = True
         thread.start()
         # sa.GenerateGBKFile()
-        map_path = rf'.\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\part-{partid}.gbk'
+        map_path = rf'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\part-{partid}.gbk'
         if(os.path.exists(map_path)):
             response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'part-{partid}.gbk')
             return response
@@ -364,7 +364,7 @@ def downloadBackboneMap(request,backboneid):
         thread.daemon = True
         thread.start()
         # sa.GenerateGBKFile()
-        map_path = rf'.\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\backbone-{backboneid}.gbk'
+        map_path = rf'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\backbone-{backboneid}.gbk'
         if(os.path.exists(map_path)):
             response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'backbone-{backboneid}.gbk')
             return response
@@ -393,7 +393,7 @@ def downloadPlasmidMap(request,plasmidid):
         thread.daemon = True
         thread.start()
         # sa.GenerateGBKFile()
-        map_path = rf'.\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\plasmid-{plasmidid}.gbk'
+        map_path = rf'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\plasmid-{plasmidid}.gbk'
         if(os.path.exists(map_path)):
             response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'plasmid-{plasmidid}.gbk')
             return response

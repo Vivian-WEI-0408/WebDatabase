@@ -9,3 +9,7 @@
 <p>admin.py 用户创建管理页面</p>
 <p>app.py 应用配置</p>
 <p>tests.py 创建测试</p>
+<p>LabDatabase/views.py中的Base_URL需要根据具体环境更改</p>
+<p>LabDatabase/CaculateModule/FileGenerator.py中的GenerateFile文件夹地址需要根据具体环境更改</p>
+<p>LabDatabase/views.py中的downloadmap中的GenerateFile文件夹地址需要根据具体环境更改</p>
+<p>LabDatabase/views.py中的downloadTemplate中的文件地址需要根据具体环境更改</p>
