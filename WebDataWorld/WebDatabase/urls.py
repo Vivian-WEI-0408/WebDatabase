@@ -68,6 +68,7 @@ urlpatterns = [
     path("deletePlasmidFile",views.deletePlasmidFileAddress,name="deletePlasmidFile"),
     path("deletePlasmidParent",views.DeleteParentPlasmid,name="deletePlasmidParent"),
     path("PlasmidFilter",views.PlasmidFilter,name="PlasmidFilter"),
+    path("UpdateParentInfo",views.AddPlasmidParentInfo,name="UpdateParentInfo"),
 
     path("Backbone",views.BackboneDataALL,name="Backbone"),
     path("BackboneName",views.SearchByBackboneName,name="BackboneName"),

@@ -5,6 +5,7 @@ from .ControllerModule import FittingLabels
 from .CaculateModule.ScarIdentify import scarFunction
 from django.db import transaction
 from django.db import DatabaseError
+import time
 
 BASE_URL = 'http://10.30.76.2:8000/WebDatabase'
 logger = logging.getLogger(__name__)
@@ -173,9 +174,9 @@ class ExcelProcessor:
                         Marker = ""
                         OriAndMarkerLabel = FittingLabels(row['Sequence'])
                         # print(OriAndMarkerLabel)
-                        if(len(OriAndMarkerLabel["Origin"][0]) != 0):
+                        if(len(OriAndMarkerLabel["Origin"]) != 0):
                             Ori = OriAndMarkerLabel["Origin"][0]['Name']
-                        if(len(OriAndMarkerLabel["Marker"][0]) != 0):
+                        if(len(OriAndMarkerLabel["Marker"]) != 0):
                             Marker = OriAndMarkerLabel["Marker"][0]['Name']
                         data_body = {'name':row['BackboneName'],'alias':row['Alias'],'sequence':row['Sequence'],'ori':Ori,'marker':Marker,'species':row['Species'],'note':row['Note'],'copynumber':''}
                         # print(data_body)
@@ -199,15 +200,17 @@ class ExcelProcessor:
                         OriHost = "default"
                         MarkerClone = "default"
                         MarkerHost = "default"
+                        ParentPlasmidExtraNote = ""
+                        ParentPlasmidExtraNote_Flag = False
                         print(OriClone)
                         OriAndMarkerLabel = FittingLabels(row['Sequence'])
                         print(OriAndMarkerLabel)
-                        if(len(OriAndMarkerLabel["Origin"][0]) == 1):
+                        if(len(OriAndMarkerLabel["Origin"]) == 1):
                             OriClone = OriAndMarkerLabel['Origin'][0]['Name']
-                        elif(len(OriAndMarkerLabel["Origin"][0]) >= 2):
+                        elif(len(OriAndMarkerLabel["Origin"]) >= 2):
                             OriClone = OriAndMarkerLabel['Origin'][0]['Name']
                             OriHost = OriAndMarkerLabel['Origin'][1]['Name']
-                        if(len(OriAndMarkerLabel["Marker"][0]) == 1):
+                        if(len(OriAndMarkerLabel["Marker"]) == 1):
                             MarkerClone = OriAndMarkerLabel["Marker"][0]['Name']
                         elif(len(OriAndMarkerLabel['Marker']) >= 2):
                             MarkerClone = OriAndMarkerLabel['Marker'][0]['Name']
@@ -215,6 +218,8 @@ class ExcelProcessor:
                         data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'oriclone':OriClone,'orihost':OriHost,'markerclone':MarkerClone,'markerhost':MarkerHost,'level':row['Level'],'sequence':row['Sequence'],'ParentInfo':row['ParentSourceNote']}
                         print(data_body)
                         response = session.post(f'{BASE_URL}/AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
+                        if(response.status_code != 200):
+                            continue
                         print(response.status_code)
                         scar_result_list = scarFunction(row['Sequence'])
                         scar_data_body = {'name':row['PlasmidName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
@@ -230,6 +235,8 @@ class ExcelProcessor:
                                 request_body = {'SonPlasmidName':row['PlasmidName'],'ParentPartName':each_part}
                                 ParentPartResponse = session.post(f'{BASE_URL}/AddPartParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentPartResponse.status_code != 200):
+                                    ParentPlasmidExtraNote += f"Part({each_part})"
+                                    print(ParentPlasmidExtraNote)
                                     if(response.status_code == 200):
                                         continue
                                         # return {'success':False,'error':'Plasmid upload success, Parent part upload fail'}
@@ -240,6 +247,8 @@ class ExcelProcessor:
                                 request_body = {'SonPlasmidName':row['PlasmidName'],'ParentBackboneName':each_backbone}
                                 ParentBackboneResponse = session.post(f'{BASE_URL}/AddBackboneParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentBackboneResponse.status_code != 200):
+                                    ParentPlasmidExtraNote += f'Backbone({each_backbone})'
+                                    print(ParentPlasmidExtraNote)
                                     if(response.status_code == 200):
                                         continue
                                         # return {'success':False,'error':'Plasmid upload success, Parent Backbone upload fail'}
@@ -249,9 +258,14 @@ class ExcelProcessor:
                                 request_body = {'SonPlasmidName':row['PlasmidName'],'ParentPlasmidName':each_plasmid}
                                 ParentPlasmidResponse = session.post(f'{BASE_URL}/AddPlasmidParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentPlasmidResponse.status_code != 200):
+                                    ParentPlasmidExtraNote += f'Plasmid({each_plasmid})'
+                                    print(ParentPlasmidExtraNote)
                                     if(response.status_code == 200):
                                         continue
                                         # return {'success':False,'error':'Plasmid upload success, Parent plasmid upload fail'}
+                        time.sleep(1)
+                        request_body = {"PlasmidName":row["PlasmidName"],"PlasmidParentInfo":ParentPlasmidExtraNote}
+                        session.post(f'{BASE_URL}/UpdateParentInfo',json=request_body,cookies=django_request.COOKIES)
             return {'success':True}
         except Exception as e:
             logger.error(f"处理 Excel 文件失败: {str(e)}")

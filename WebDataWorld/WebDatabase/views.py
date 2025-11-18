@@ -1066,22 +1066,27 @@ def AddParentPlasmid(request):
         if(sonPlasmidName == None or sonPlasmidName == "" or ParentPlasmidName == None or ParentPlasmidName == ""):
             return JsonResponse(data="SonPlasmidName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
-        sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
-        if(sonPlasmidID == None):
-            return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
-        parentPlasmidList = ParentPlasmidName.split(',')
-        if(len(parentPlasmidList) == 0):
-            return JsonResponse(data="No such ParentPlasmid", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
-        for parent in parentPlasmidList:
-            parentplasmidID = Plasmidneed.objects.filter(name=parent).first()
-            if(parentplasmidID != None):
-                Parentplasmidtable.objects.create(sonplasmidid=sonPlasmidID, parentplasmidid=parentplasmidID)
-            else:
-                return JsonResponse(data="Parent Plasmid Not Found", status=404,safe=False)
-                # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
-        return JsonResponse(data="Parent Plasmid Added", status=200,safe=False)
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    sonPlasmidObj = Plasmidneed.objects.select_for_update().get(name = sonPlasmidName)
+                    parentPlasmidObj = Plasmidneed.objects.filter(name = ParentPlasmidName).first()
+                    if(parentPlasmidObj == None):
+                        return JsonResponse(data={"success":False},status=404,safe=False)
+                    if(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidObj,parentplasmidid = parentPlasmidObj).count() == 0):
+                        Parentplasmidtable.objects.create(sonplasmidid=sonPlasmidObj,parentplasmidid = parentPlasmidObj)
+                    return JsonResponse(data={"success":True},status=200,safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
 
 def GetParentPart(request):
@@ -2044,33 +2049,86 @@ def GetPlasmidIDByName(request):
             return JsonResponse(data = "Name cannot be empty",status=400,safe=False)
 
 
+def AddPlasmidParentInfo(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        plasmidName = data["PlasmidName"]
+        ParentInfo = data["PlasmidParentInfo"]
+        print(data)
+        if(plasmidName == "" or ParentInfo == ""):
+            print("empty")
+            return JsonResponse(data = {"success":False,"data":"Parameter is empty"},status = 400, safe=False)
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    Plasmidneed.objects.filter(name=plasmidName).update(CustomParentInfo = ParentInfo)
+                    return JsonResponse(data = {"success":True,"data":"success upload"},status=200, safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        print("timeout")
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
+    
 def AddParentPart(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
+        print(data)
         sonPlasmidName = data['SonPlasmidName']
         ParentPartName = data['ParentPartName']
+        print(sonPlasmidName)
         # print(sonPlasmidName)
         # print(ParentPartName)
         if(sonPlasmidName == None or sonPlasmidName == "" or ParentPartName == None or ParentPartName == ""):
             return JsonResponse(data="PlasmidName or PartName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
-        sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
-        if(sonPlasmidID == None):
-            return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
-        parentPartList = ParentPartName.split(',')
-        if(len(parentPartList) == 0):
-            return JsonResponse(data="No such ParentPart", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
-        for parent in parentPartList:
-            parentpartID = Parttable.objects.filter(name=parent).first()
-            if(parentpartID != None):
-                Parentparttable.objects.create(sonplasmidid=sonPlasmidID, parentpartid=parentpartID)
-            else:
-                return JsonResponse(data="Parent Part Not Found", status=404,safe=False)
-                # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
-        return JsonResponse(data="Parent Part Added", status=200,safe=False)
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    sonPlasmidObj = Plasmidneed.objects.select_for_update().get(name = sonPlasmidName)
+                    parentPartObj = Parttable.objects.filter(name = ParentPartName).first()
+                    if(parentPartObj == None):
+                        return JsonResponse(data={"success":False},status=404,safe=False)
+                    if(Parentparttable.objects.filter(sonplasmidid = sonPlasmidObj,parentpartid = parentPartObj).count() == 0):
+                        Parentparttable.objects.create(sonplasmidid=sonPlasmidObj,parentpartid = parentPartObj)
+                    return JsonResponse(data={"success":True},status=200,safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except Parttable.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
+                # sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
+                # if(sonPlasmidID == None):
+                    # return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
+                    # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
+        # parentPartList = ParentPartName.split(',')
+        # if(len(parentPartList) == 0):
+        #     return JsonResponse(data="No such ParentPart", status=404,safe=False)
+        #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
+        # for parent in parentPartList:
+        #     parentpartID = Parttable.objects.filter(name=parent).first()
+        #     if(parentpartID != None):
+        #         Parentparttable.objects.create(sonplasmidid=sonPlasmidID, parentpartid=parentpartID)
+        #     else:
+        #         return JsonResponse(data="Parent Part Not Found", status=404,safe=False)
+        #         # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
+        # return JsonResponse(data="Parent Part Added", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
 
 def AddParentBackbone(request):
@@ -2078,25 +2136,53 @@ def AddParentBackbone(request):
         data = json.loads(request.body)
         sonPlasmidName = data['SonPlasmidName']
         ParentBackboneName = data['ParentBackboneName']
+        print(data)
         if(sonPlasmidName == None or sonPlasmidName == "" or ParentBackboneName == None or ParentBackboneName == ""):
             return JsonResponse(data="PlasmidName or BackboneName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
-        sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
-        if(sonPlasmidID == None):
-            return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
-        parentBackboneList = ParentBackboneName.split(',')
-        if(len(parentBackboneList) == 0):
-            return JsonResponse(data="No such Parent Backbone", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
-        for parent in parentBackboneList:
-            parentBackboneID = Backbonetable.objects.filter(name=parent).first()
-            if(parentBackboneID != None):
-                Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidID, parentbackboneid=parentBackboneID)
-            else:
-                return JsonResponse(data="Parent Backbone Not Found", status=404,safe=False)
-                # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
-        return JsonResponse(data="Parent Backbone Added", status=200,safe=False)
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    sonPlasmidObj = Plasmidneed.objects.select_for_update().get(name = sonPlasmidName)
+                    parentBackboneObj = Backbonetable.objects.filter(name = ParentBackboneName).first()
+                    # print(parentBackboneObj)
+                    if(parentBackboneObj == None):
+                        return JsonResponse(data={"success":False},status=404,safe=False)
+                    print(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count())
+                    if(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count() == 0):
+                        Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidObj,parentbackboneid = parentBackboneObj)
+                    return JsonResponse(data={"success":True},status=200,safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except Backbonetable.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
+
+        # sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
+        # if(sonPlasmidID == None):
+        #     return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
+        #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
+        # parentBackboneList = ParentBackboneName.split(',')
+        # if(len(parentBackboneList) == 0):
+        #     return JsonResponse(data="No such Parent Backbone", status=404,safe=False)
+        #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
+        # for parent in parentBackboneList:
+        #     parentBackboneID = Backbonetable.objects.filter(name=parent).first()
+        #     if(parentBackboneID != None):
+        #         Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidID, parentbackboneid=parentBackboneID)
+        #     else:
+        #         return JsonResponse(data="Parent Backbone Not Found", status=404,safe=False)
+        #         # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
+        # return JsonResponse(data="Parent Backbone Added", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
 
 def getPartValueList(request,column):
@@ -2154,6 +2240,7 @@ def getPartScar(request):
 def setPartScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
+        print(data)
         name = data['name']
         bsmbi = data['bsmbi']
         bsai = data['bsai']
@@ -2162,7 +2249,7 @@ def setPartScar(request):
         sapi = data['sapi']
         if(name != None and name != ""):
             start_time = time.time()
-            max_wait_time = 20
+            max_wait_time = 5
             while time.time() - start_time < max_wait_time:
                 try:
                     with transaction.atomic():
@@ -2215,7 +2302,7 @@ def setBackboneScar(request):
         sapi = data['sapi']
         if(name != None and name != ""):
             start_time = time.time()
-            max_wait_time = 20
+            max_wait_time = 5
             while time.time() - start_time < max_wait_time:
                 try:
                     with transaction.atomic():
@@ -2269,7 +2356,7 @@ def setPlasmidScar(request):
         sapi = data['sapi']
         if(name != None and name != ""):
             start_time = time.time()
-            max_wait_time = 20
+            max_wait_time = 5
             while time.time() - start_time < max_wait_time:
                 try:
                     with transaction.atomic():
