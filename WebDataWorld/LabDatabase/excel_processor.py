@@ -6,7 +6,7 @@ from .CaculateModule.ScarIdentify import scarFunction
 from django.db import transaction
 from django.db import DatabaseError
 
-BASE_URL = 'http://10.30.76.2:8000/WebDatabase'
+# BASE_URL = 'http://10.30.76.2:8004/WebDatabase'
 logger = logging.getLogger(__name__)
 
 def createSession(django_request):
@@ -56,9 +56,9 @@ class ExcelProcessor:
         'ParentSourceNote':'',
     }
     
-    PART_REQUIRED_COLUMNS = ['PartName','Alias','Type','Sequence','Species']
-    BACKBONE_REQUIRED_COLUMNS = ['BackboneName','Alias','Sequence','Species','Note',]
-    PLASMID_REQUIRED_COLUMNS = ['PlasmidName','Alias','Level','Sequence',]
+    PART_REQUIRED_COLUMNS = ['PartName','Alias','Type','Species']
+    BACKBONE_REQUIRED_COLUMNS = ['BackboneName','Alias','Species','Note',]
+    PLASMID_REQUIRED_COLUMNS = ['PlasmidName','Alias','Level',]
     
     PLASMID_PARENT_COLUMNS = ['ParentPart','ParentBackbone','ParentPlasmid','ParentSourceNote']
     @classmethod
@@ -104,24 +104,24 @@ class ExcelProcessor:
         if(type == 'part'):
             for col in cls.PART_REQUIRED_COLUMNS:
                 if not row_data.get(col):
-                    errors.append(f'第 {row_index} 行：{col}为必填项')
+                    errors.append(f'第 {row_index} 行：{col}为必填项\n')
         elif(type == 'backbone'):
             for col in cls.BACKBONE_REQUIRED_COLUMNS:
                 if not row_data.get(col):
-                    errors.append(f'第 {row_index} 行：{col}为必填项')
+                    errors.append(f'第 {row_index} 行：{col}为必填项\n')
         elif(type == 'plasmid'):
             for col in cls.PLASMID_REQUIRED_COLUMNS:
                 if not row_data.get(col):
                     print("required")
-                    errors.append(f'第 {row_index} 行：{col}为必填项')
+                    errors.append(f'第 {row_index} 行：{col}为必填项\n')
             if( not row_data.get(cls.PLASMID_PARENT_COLUMNS[0]) and not row_data.get(cls.PLASMID_PARENT_COLUMNS[1]) and 
                 not row_data.get(cls.PLASMID_PARENT_COLUMNS[2]) and not row_data.get(cls.PLASMID_PARENT_COLUMNS[3])):
                 print("parent")
-                errors.append(f'Parent 信息需至少填写一项')
+                errors.append(f'第 {row_index}行： Parent 信息需至少填写一项\n')
         return errors
     
     @classmethod
-    def process_excel_file(cls,django_request,upload_record, type):
+    def process_excel_file(cls,django_request,upload_record, type, BASE_URL):
         """处理 Excel 文件"""
         try:
             # 读取 Excel 文件
@@ -134,6 +134,7 @@ class ExcelProcessor:
             df = cls.clean_dataframe(df)
 
             error_rows = []
+            empty_seq_rows = []
             session = createSession(django_request)
             # session = requests.Session()
             # token = django_request.COOKIES.get('csrftoken')
@@ -155,12 +156,18 @@ class ExcelProcessor:
                     else:
                         # session = createSession(django_request)
                         data_body = {'name':row['PartName'],'alias':row['Alias'],'Level0Sequence':row['Sequence'],'source':row['Species'],'type':row['Type'],'note':""}
-                        response = session.post(f'{BASE_URL}/AddPartData',json=data_body,cookies=django_request.COOKIES)
-                        scar_result_list = scarFunction(row['Sequence'])
-                        scar_data_body = {'name':row['PartName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
-                        scar_response = session.post(f'{BASE_URL}/setPartScar',json=scar_data_body,cookies=django_request.COOKIES)
-                        if(response.status_code == 200 and scar_response.status_code == 200):
-                            continue
+                        response = session.post(f'{BASE_URL}AddPartData',json=data_body,cookies=django_request.COOKIES)
+                        if(response.status_code != 200):
+                            error_rows.append(f'第{index}行，{row["PartName"]} 添加数据失败\n')
+                        if(row['Sequence'] != ""):
+                            scar_result_list = scarFunction(row['Sequence'])
+                            scar_data_body = {'name':row['PartName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
+                            scar_response = session.post(f'{BASE_URL}setPartScar',json=scar_data_body,cookies=django_request.COOKIES)
+                            if(scar_response.status_code != 200):
+                                error_rows.append(f'第{index}行，{row["PartName"]} scar添加失败\n')
+                        else:
+                            empty_seq_rows.append(f'第{index}行，{row["PartName"]} 序列为空，请后续补充序列信息\n')
+                        
             elif(type == 'backbone'):
                 for index, row in df.iterrows():
                     row_data = row.to_dict()
@@ -171,21 +178,31 @@ class ExcelProcessor:
                     else:
                         Ori = ""
                         Marker = ""
-                        OriAndMarkerLabel = FittingLabels(row['Sequence'])
-                        # print(OriAndMarkerLabel)
-                        if(len(OriAndMarkerLabel["Origin"][0]) != 0):
-                            Ori = OriAndMarkerLabel["Origin"][0]['Name']
-                        if(len(OriAndMarkerLabel["Marker"][0]) != 0):
-                            Marker = OriAndMarkerLabel["Marker"][0]['Name']
+                        if(row['Sequence'] != ""):
+                            OriAndMarkerLabel = FittingLabels(row['Sequence'])
+                            # print(OriAndMarkerLabel)
+                            if(len(OriAndMarkerLabel["Origin"][0]) != 0):
+                                Ori = OriAndMarkerLabel["Origin"][0]['Name']
+                            if(len(OriAndMarkerLabel["Marker"][0]) != 0):
+                                Marker = OriAndMarkerLabel["Marker"][0]['Name']
+                        else:
+                            empty_seq_rows.append(f'第{index}行，{row["BackboneName"]} 序列为空，请后续补充序列信息\n')
                         data_body = {'name':row['BackboneName'],'alias':row['Alias'],'sequence':row['Sequence'],'ori':Ori,'marker':Marker,'species':row['Species'],'note':row['Note'],'copynumber':''}
                         # print(data_body)
-                        response = session.post(f'{BASE_URL}/AddBackbone',json=data_body,cookies=django_request.COOKIES)
-                        # print(response.status_code)
-                        scar_result_list = scarFunction(row['Sequence'])
-                        scar_data_body = {'name':row['BackboneName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
-                        scar_response = session.post(f'{BASE_URL}/setBackboneScar',json=scar_data_body,cookies=django_request.COOKIES)
-                        if(response.status_code == 200 and scar_response.status_code == 200):
+                        response = session.post(f'{BASE_URL}AddBackbone',json=data_body,cookies=django_request.COOKIES)
+                        if(response.status_code != 200):
+                            error_rows.append(f'第{index}行，{row["BackboneName"]} 添加数据失败\n')
                             continue
+                        # print(response.status_code)
+                        if(row['Sequence'] != ""):
+                            scar_result_list = scarFunction(row['Sequence'])
+                            scar_data_body = {'name':row['BackboneName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
+                            scar_response = session.post(f'{BASE_URL}setBackboneScar',json=scar_data_body,cookies=django_request.COOKIES)
+                            if(scar_response.status_code == 200):
+                                continue
+                            else:
+                                error_rows.append(f'第{index}行，{row["BackboneName"]} scar添加失败\n')
+                        
             elif(type == 'plasmid'):
                 for index, row in df.iterrows():
                     row_data = row.to_dict()
@@ -199,28 +216,35 @@ class ExcelProcessor:
                         OriHost = "default"
                         MarkerClone = "default"
                         MarkerHost = "default"
-                        print(OriClone)
-                        OriAndMarkerLabel = FittingLabels(row['Sequence'])
-                        print(OriAndMarkerLabel)
-                        if(len(OriAndMarkerLabel["Origin"][0]) == 1):
-                            OriClone = OriAndMarkerLabel['Origin'][0]['Name']
-                        elif(len(OriAndMarkerLabel["Origin"][0]) >= 2):
-                            OriClone = OriAndMarkerLabel['Origin'][0]['Name']
-                            OriHost = OriAndMarkerLabel['Origin'][1]['Name']
-                        if(len(OriAndMarkerLabel["Marker"][0]) == 1):
-                            MarkerClone = OriAndMarkerLabel["Marker"][0]['Name']
-                        elif(len(OriAndMarkerLabel['Marker']) >= 2):
-                            MarkerClone = OriAndMarkerLabel['Marker'][0]['Name']
-                            MarkerHost = OriAndMarkerLabel['Marker'][1]['Name']
-                        data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'oriclone':OriClone,'orihost':OriHost,'markerclone':MarkerClone,'markerhost':MarkerHost,'level':row['Level'],'sequence':row['Sequence'],'ParentInfo':row['ParentSourceNote']}
-                        print(data_body)
-                        response = session.post(f'{BASE_URL}/AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
-                        print(response.status_code)
-                        scar_result_list = scarFunction(row['Sequence'])
-                        scar_data_body = {'name':row['PlasmidName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
-                        scar_response = session.post(f'{BASE_URL}/setPlasmidScar',json=scar_data_body,cookies=django_request.COOKIES)
+                        # print(OriClone)
+                        if(row['Sequence'] != ""):
+                            OriAndMarkerLabel = FittingLabels(row['Sequence'])
+                            # print(OriAndMarkerLabel)
+                            if(len(OriAndMarkerLabel["Origin"][0]) == 1):
+                                OriClone = OriAndMarkerLabel['Origin'][0]['Name']
+                            elif(len(OriAndMarkerLabel["Origin"][0]) >= 2):
+                                OriClone = OriAndMarkerLabel['Origin'][0]['Name']
+                                OriHost = OriAndMarkerLabel['Origin'][1]['Name']
+                            if(len(OriAndMarkerLabel["Marker"][0]) == 1):
+                                MarkerClone = OriAndMarkerLabel["Marker"][0]['Name']
+                            elif(len(OriAndMarkerLabel['Marker']) >= 2):
+                                MarkerClone = OriAndMarkerLabel['Marker'][0]['Name']
+                                MarkerHost = OriAndMarkerLabel['Marker'][1]['Name']
+                            data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'oriclone':OriClone,'orihost':OriHost,'markerclone':MarkerClone,'markerhost':MarkerHost,'level':row['Level'],'sequence':row['Sequence'],'ParentInfo':row['ParentSourceNote']}
+                            # print(data_body)
+                        else:
+                            empty_seq_rows.append(f'第{index}行，{row["PlasmidName"]} 序列为空，请后续补充序列信息\n')
+                        response = session.post(f'{BASE_URL}AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
                         if(response.status_code != 200):
-                            return False
+                            error_rows.append(f'第{index}行，{row["PlasmidName"]}添加数据失败\n')
+                            continue
+                        # print(response.status_code)
+                        if(row['Sequence'] != ""):
+                            scar_result_list = scarFunction(row['Sequence'])
+                            scar_data_body = {'name':row['PlasmidName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
+                            scar_response = session.post(f'{BASE_URL}setPlasmidScar',json=scar_data_body,cookies=django_request.COOKIES)
+                            if(scar_response.status_code != 200):
+                                error_rows.append(f'第{index}行，{row["PlasmidName"]}scar添加失败\n')
                         ParentPart = row['ParentPart']
                         ParentBackbone = row['ParentBackbone']
                         ParentPlasmid = row['ParentPlasmid']
@@ -228,31 +252,28 @@ class ExcelProcessor:
                             ParentPartList = ParentPart.split(',')
                             for each_part in ParentPartList:
                                 request_body = {'SonPlasmidName':row['PlasmidName'],'ParentPartName':each_part}
-                                ParentPartResponse = session.post(f'{BASE_URL}/AddPartParent',json=request_body,cookies=django_request.COOKIES)
+                                ParentPartResponse = session.post(f'{BASE_URL}AddPartParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentPartResponse.status_code != 200):
-                                    if(response.status_code == 200):
-                                        continue
+                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Part 添加失败\n')
                                         # return {'success':False,'error':'Plasmid upload success, Parent part upload fail'}
                                 # return {'success':False,'error':response.json()}
                         if(ParentBackbone != ""):
                             ParentBackboneList = ParentBackbone.split(',')
                             for each_backbone in ParentBackboneList:
                                 request_body = {'SonPlasmidName':row['PlasmidName'],'ParentBackboneName':each_backbone}
-                                ParentBackboneResponse = session.post(f'{BASE_URL}/AddBackboneParent',json=request_body,cookies=django_request.COOKIES)
+                                ParentBackboneResponse = session.post(f'{BASE_URL}AddBackboneParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentBackboneResponse.status_code != 200):
-                                    if(response.status_code == 200):
-                                        continue
+                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Backbone 添加失败\n')
                                         # return {'success':False,'error':'Plasmid upload success, Parent Backbone upload fail'}
                         if(ParentPlasmid != ""):
                             ParentPlasmidList = ParentPlasmid.split(',')
                             for each_plasmid in ParentPlasmidList:
                                 request_body = {'SonPlasmidName':row['PlasmidName'],'ParentPlasmidName':each_plasmid}
-                                ParentPlasmidResponse = session.post(f'{BASE_URL}/AddPlasmidParent',json=request_body,cookies=django_request.COOKIES)
+                                ParentPlasmidResponse = session.post(f'{BASE_URL}AddPlasmidParent',json=request_body,cookies=django_request.COOKIES)
                                 if(ParentPlasmidResponse.status_code != 200):
-                                    if(response.status_code == 200):
-                                        continue
+                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Plasmid 添加失败\n')
                                         # return {'success':False,'error':'Plasmid upload success, Parent plasmid upload fail'}
-            return {'success':True}
+            return {'success':True,'error_rows':error_rows,'empty_sequence_rows':empty_seq_rows}
         except Exception as e:
             logger.error(f"处理 Excel 文件失败: {str(e)}")
             

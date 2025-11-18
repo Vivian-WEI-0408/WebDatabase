@@ -449,8 +449,12 @@ def AddPartData(request):
         print(data)
         name = data['name']
         alias = data['alias']
-        length = len(data['Level0Sequence'])
-        level0Seq = data['Level0Sequence']
+        if(data['Level0Sequence'] != ""):
+            length = len(data['Level0Sequence'])
+            level0Seq = data['Level0Sequence']
+        else:
+            length = 0
+            level0Seq = ""
         ConfirmedSequence = data['ConfirmedSequence'] if'ConfirmedSequence' in data else ""
         InsertSequence = data['InsertSequence'] if 'InsertSequence' in data else ""
         sourceOrganism = data['source'] if 'source' in data else ""
@@ -470,8 +474,8 @@ def AddPartData(request):
         elif(type.lower() == "carb"):
             type = 5
         username = request.session['info']['uname']
-        if(name == "" or name == None or level0Seq == ""):
-            return JsonResponse(data="Parameters name, sequence cannot be empty", status=400,safe=False)
+        if(name == "" or name == None):
+            return JsonResponse(data="Parameters name", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name or Sequence can not be empty'})
         if(Parttable.objects.filter(name=name).first() != None):
             Parttable.objects.filter(name = name).update(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
@@ -1035,7 +1039,7 @@ def AddPlasmidData(request):
         markerclone = data['markerclone']
         markerhost = data['markerhost']
         level = data['level']
-        length = len(data['sequence'])
+        length = len(data['sequence']) if data['sequence']!="" else 0
         sequence = data['sequence']
         plate = data['plate'] if 'plate' in data else ""
         state = data['state'] if 'state' in data else 0
@@ -1520,7 +1524,7 @@ def AddBackboneData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
-        length = len(data['sequence'])
+        length = len(data['sequence']) if data['sequence'] != "" else 0
         sequence = data['sequence']
         ori = data['ori']
         marker = data['marker']
@@ -1529,8 +1533,8 @@ def AddBackboneData(request):
         note = data['note'] if 'note' in data else ""
         alias = data['alias'] if 'alias' in data else ""
         username = request.session['info']['uname']
-        print(data)
-        if(name == None or name == "" or sequence == None or sequence == ""):
+        # print(data)
+        if(name == None or name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
         if(Backbonetable.objects.filter(name = name).first() != None):

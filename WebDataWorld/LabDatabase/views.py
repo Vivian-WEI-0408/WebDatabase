@@ -23,7 +23,8 @@ from .CaculateModule.FileGenerator import SequenceAnnotator
 from .CaculateModule.ScarIdentify import scarPosition
 
 Base_URL = "http://10.30.76.2:8004/WebDatabase/"
-
+Error_rows = []
+Empty_sequence_rows = []
 # class User_auth(MiddlewareMixin):
 
 #     def process_request(self,request):
@@ -39,56 +40,6 @@ Base_URL = "http://10.30.76.2:8004/WebDatabase/"
 
 #     def process_response(self,request,response):
 #         return response
-
-# class FileUploadView(View):
-#     def get(self, request):
-#         form = FileUploadForm()
-#         files = UploadedFile.objects.all()
-#         return render(request, 'file_upload.html', {
-#             'form': form,
-#             'files': files
-#         })
-    
-#     def post(self, request):
-#         form = FileUploadForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             uploaded_file = form.save()
-#             messages.success(request, f'文件 "{uploaded_file.title}" 上传成功！')
-#             return redirect('file_upload')
-#         else:
-#             messages.error(request, '文件上传失败，请检查表单错误。')
-#             files = UploadedFile.objects.all()
-#             return render(request, 'file_upload.html', {
-#                 'form': form,
-#                 'files': files
-#             })
-
-# def ajax_file_upload(request):
-#     """AJAX文件上传接口"""
-#     if request.method == 'POST' and request.FILES:
-#         file = request.FILES.get('file')
-#         title = request.POST.get('title', file.name)
-        
-#         # 创建文件记录
-#         uploaded_file = UploadedFile.objects.create(
-#             title=title,
-#             file=file,
-#             description=request.POST.get('description', '')
-#         )
-        
-#         return JsonResponse({
-#             'success': True,
-#             'file_id': uploaded_file.id,
-#             'file_name': uploaded_file.title,
-#             'file_url': uploaded_file.file.url,
-#             'file_size': uploaded_file.file_size,
-#             'message': '文件上传成功'
-#         })
-    
-#     return JsonResponse({
-#         'success': False,
-#         'message': '上传失败'
-#     })
 
 
 
@@ -248,7 +199,10 @@ def process_excel_async(upload_record,django_request):
         elif(excel_data.columns.tolist()[0] == "PlasmidName"):
             type = "plasmid"
         print(type)
-        result = ExcelProcessor.process_excel_file(django_request,excel_data,type)
+        result = ExcelProcessor.process_excel_file(django_request,excel_data,type,Base_URL)
+        Error_rows = result['error_rows']
+        Empty_sequence_rows = result['empty_sequence_rows']
+        # print(Empty_sequence_rows)
     except Exception as e:
         print(e.args)
 
@@ -264,7 +218,17 @@ def UploadFile(request):
         )
         thread.daemon = True
         thread.start()
-        return JsonResponse(data={'success':True},status = 200, safe=False)
+        print(len(Empty_sequence_rows))
+        if(len(Error_rows) == 0 and len(Empty_sequence_rows) == 0):
+            return JsonResponse(data={'success':True,'message':"文件上传成功"},status = 200, safe=False)
+        else:
+            message = ""
+            if(len(Error_rows) != 0):
+                message += "上传出错的行有以下：\n"+str(Error_rows)+"\n"
+            if(len(Empty_sequence_rows) != 0):
+                print("aaaaaaa")
+                message += "需要补充序列的有以下：\n"+str(Empty_sequence_rows)
+            return JsonResponse(data = {'success':True, 'message': message},status = 200, safe=False)
     else:
         return JsonResponse({'success':False,'message':'Upload record is empty'},status = 400, safe = False)
     
