@@ -5,6 +5,8 @@ from django.views import View
 from django.contrib import messages
 from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 from LabDatabase.excel_processor import ExcelProcessor
 import requests
 # from WebDatabase.models import UploadedFile
@@ -21,10 +23,12 @@ from Bio.Seq import Seq
 from .CaculateModule.FeatureIdentify import featureIdentify
 from .CaculateModule.FileGenerator import SequenceAnnotator
 from .CaculateModule.ScarIdentify import scarPosition
+import uuid
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
-Error_rows = []
-Empty_sequence_rows = []
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+
+
+TASK_STATUS_PREFIX = 'excel_task_'
 # class User_auth(MiddlewareMixin):
 
 #     def process_request(self,request):
@@ -187,8 +191,17 @@ def download_template(request,type):
         raise Http404('模板文件不存在')
 
 
-def process_excel_async(upload_record,django_request):
+def process_excel_async(upload_record,django_request,task_id):
+    Error_rows = []
+    Empty_sequence_rows = []
     try:
+        task_status = {
+            'status':'processing',
+            'progress':10,
+            'result':None,
+            'error':None
+        }
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
         file_content = upload_record.read()
         excel_data = pd.read_excel(io.BytesIO(file_content))
         print(excel_data.columns)
@@ -200,38 +213,89 @@ def process_excel_async(upload_record,django_request):
             type = "plasmid"
         print(type)
         result = ExcelProcessor.process_excel_file(django_request,excel_data,type,Base_URL)
-        Error_rows = result['error_rows']
-        Empty_sequence_rows = result['empty_sequence_rows']
+        task_status['progress'] = 100
+        task_status['status'] = 'completed'
+        Error_rows = result['error_row']
+        Empty_sequence_rows = result['empty_Seq_rows']
+        if len(Error_rows) == 0 and len(Empty_sequence_rows) == 0:
+            task_status['result'] = {
+                'success':True,
+                'message':"文件上传成功"
+            }
+        else:
+            message = ""
+            if(len(Error_rows) != 0):
+                message += "上传出错的有以下：\n"+str(Error_rows)+"/n"
+            if(len(Empty_sequence_rows) != 0):
+                message += "需要补充序列有以下：\n"+str(Empty_sequence_rows)
+            task_status['result'] = {
+                'success':True,
+                'message':message,
+            }
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
+        
         # print(Empty_sequence_rows)
     except Exception as e:
-        print(e.args)
+        task_status = {
+            'status':'failed',
+            'progress':100,
+            'result':None,
+            'error':str(e),
+        }
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
 
     # ExcelProcessor.process_excel_file(upload_record)
+@csrf_exempt
 def UploadFile(request):
     if(request.method == 'POST' and request.FILES):
         file = request.FILES.get('file')
         title = request.POST.get('title', file.name)
+
+        task_id = str(uuid.uuid4())
         # print(title)
+        task_status = {
+            'status':'processing',
+            'progress':0,
+            'result':None,
+            'error':None,
+        }
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
+
         thread = threading.Thread(
             target = process_excel_async,
-            args= (file,request)
+            args= (file,request,task_id)
         )
         thread.daemon = True
         thread.start()
-        print(len(Empty_sequence_rows))
-        if(len(Error_rows) == 0 and len(Empty_sequence_rows) == 0):
-            return JsonResponse(data={'success':True,'message':"文件上传成功"},status = 200, safe=False)
-        else:
-            message = ""
-            if(len(Error_rows) != 0):
-                message += "上传出错的行有以下：\n"+str(Error_rows)+"\n"
-            if(len(Empty_sequence_rows) != 0):
-                print("aaaaaaa")
-                message += "需要补充序列的有以下：\n"+str(Empty_sequence_rows)
-            return JsonResponse(data = {'success':True, 'message': message},status = 200, safe=False)
+        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件上传成功，正在处理中..."},status = 200, safe = False)
+    #     print(len(Empty_sequence_rows))
+    #     if(len(Error_rows) == 0 and len(Empty_sequence_rows) == 0):
+    #         return JsonResponse(data={'success':True,'message':"文件上传成功"},status = 200, safe=False)
+    #     else:
+    #         message = ""
+    #         if(len(Error_rows) != 0):
+    #             message += "上传出错的行有以下：\n"+str(Error_rows)+"\n"
+    #         if(len(Empty_sequence_rows) != 0):
+    #             print("aaaaaaa")
+    #             message += "需要补充序列的有以下：\n"+str(Empty_sequence_rows)
+    #         return JsonResponse(data = {'success':True, 'message': message},status = 200, safe=False)
     else:
-        return JsonResponse({'success':False,'message':'Upload record is empty'},status = 400, safe = False)
+        return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
     
+def task_status(request, task_id):
+    task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+    if(not task_status):
+        return JsonResponse({'error':"任务不存在或已过期"},status=404)
+    response_data = {
+        'task_id':task_id,
+        'status':task_status['status'],
+        'progress':task_status['progress'],
+    }
+    if task_status['status'] == 'completed':
+        response_data.update(task_status['result'])
+    elif task_status['status'] == 'failed':
+        response_data['error'] = task_status['error']
+    return JsonResponse(response_data)
 
 # def UploadPartFile(request):
 #     if request.method == 'POST' and request.FILES:

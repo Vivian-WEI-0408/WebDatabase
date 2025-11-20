@@ -177,14 +177,17 @@ class ExcelProcessor:
                         error_rows.extend(row_errors)
                         continue
                     else:
-                        Ori = ""
-                        Marker = ""
-                        OriAndMarkerLabel = FittingLabels(row['Sequence'])
-                        # print(OriAndMarkerLabel)
-                        if(len(OriAndMarkerLabel["Origin"]) != 0):
-                            Ori = OriAndMarkerLabel["Origin"][0]['Name']
-                        if(len(OriAndMarkerLabel["Marker"]) != 0):
-                            Marker = OriAndMarkerLabel["Marker"][0]['Name']
+                        Ori = "default"
+                        Marker = "default"
+                        if(row['Sequence'] != ""):
+                            OriAndMarkerLabel = FittingLabels(row['Sequence'])
+                            # print(OriAndMarkerLabel)
+                            if(len(OriAndMarkerLabel["Origin"]) != 0):
+                                Ori = OriAndMarkerLabel["Origin"][0]['Name']
+                            if(len(OriAndMarkerLabel["Marker"]) != 0):
+                                Marker = OriAndMarkerLabel["Marker"][0]['Name']
+                        else:
+                            empty_seq_rows.append(f'第{index}行，{row["BackboneName"]} 序列为空，请后续补充序列信息\n')
                         data_body = {'name':row['BackboneName'],'alias':row['Alias'],'sequence':row['Sequence'],'ori':Ori,'marker':Marker,'species':row['Species'],'note':row['Note'],'copynumber':''}
                         # print(data_body)
                         response = session.post(f'{BASE_URL}AddBackbone',json=data_body,cookies=django_request.COOKIES)
@@ -204,7 +207,7 @@ class ExcelProcessor:
             elif(type == 'plasmid'):
                 for index, row in df.iterrows():
                     row_data = row.to_dict()
-                    print(row_data)
+                    # print(row_data)
                     row_errors = cls.validate_row_data(row_data, index + 2,type)  # +2 因为 Excel 从第2行开始数据
                     if row_errors:
                         error_rows.extend(row_errors)
@@ -217,27 +220,30 @@ class ExcelProcessor:
                         ParentPlasmidExtraNote = ""
                         ParentPlasmidExtraNote_Flag = False
                         print(OriClone)
-                        OriAndMarkerLabel = FittingLabels(row['Sequence'])
-                        print(OriAndMarkerLabel)
-                        if(len(OriAndMarkerLabel["Origin"]) == 1):
-                            OriClone = OriAndMarkerLabel['Origin'][0]['Name']
-                        elif(len(OriAndMarkerLabel["Origin"]) >= 2):
-                            OriClone = OriAndMarkerLabel['Origin'][0]['Name']
-                            OriHost = OriAndMarkerLabel['Origin'][1]['Name']
-                        if(len(OriAndMarkerLabel["Marker"]) == 1):
-                            MarkerClone = OriAndMarkerLabel["Marker"][0]['Name']
-                        elif(len(OriAndMarkerLabel['Marker']) >= 2):
-                            MarkerClone = OriAndMarkerLabel['Marker'][0]['Name']
-                            MarkerHost = OriAndMarkerLabel['Marker'][1]['Name']
+                        if(row["Sequence"] != ""):
+                            OriAndMarkerLabel = FittingLabels(row['Sequence'])
+                            print(OriAndMarkerLabel)
+                            if(len(OriAndMarkerLabel["Origin"]) == 1):
+                                OriClone = OriAndMarkerLabel['Origin'][0]['Name']
+                            elif(len(OriAndMarkerLabel["Origin"]) >= 2):
+                                OriClone = OriAndMarkerLabel['Origin'][0]['Name']
+                                OriHost = OriAndMarkerLabel['Origin'][1]['Name']
+                            if(len(OriAndMarkerLabel["Marker"]) == 1):
+                                MarkerClone = OriAndMarkerLabel["Marker"][0]['Name']
+                            elif(len(OriAndMarkerLabel['Marker']) >= 2):
+                                MarkerClone = OriAndMarkerLabel['Marker'][0]['Name']
+                                MarkerHost = OriAndMarkerLabel['Marker'][1]['Name']
+                        else:
+                            empty_seq_rows.append(f'第{index}行，{row["PlasmidName"]} 序列为空，请后续补充序列信息\n')
                         data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'oriclone':OriClone,'orihost':OriHost,'markerclone':MarkerClone,'markerhost':MarkerHost,'level':row['Level'],'sequence':row['Sequence'],'ParentInfo':row['ParentSourceNote']}
                         print(data_body)
-                        response = session.post(f'{BASE_URL}/AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
+                        response = session.post(f'{BASE_URL}AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
                         if(response.status_code != 200):
                             continue
                         print(response.status_code)
                         scar_result_list = scarFunction(row['Sequence'])
                         scar_data_body = {'name':row['PlasmidName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
-                        scar_response = session.post(f'{BASE_URL}/setPlasmidScar',json=scar_data_body,cookies=django_request.COOKIES)
+                        scar_response = session.post(f'{BASE_URL}setPlasmidScar',json=scar_data_body,cookies=django_request.COOKIES)
                         if(response.status_code != 200):
                             error_rows.append(f'第{index}行，{row["PlasmidName"]}添加数据失败\n')
                             continue
@@ -259,7 +265,7 @@ class ExcelProcessor:
                                 if(ParentPartResponse.status_code != 200):
                                     ParentPlasmidExtraNote += f"Part({each_part})"
                                     print(ParentPlasmidExtraNote)
-                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Part 添加失败\n')
+                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Part 添加失败，ID已记录\n')
                                     if(response.status_code == 200):
                                         continue
                                         # return {'success':False,'error':'Plasmid upload success, Parent part upload fail'}
@@ -272,7 +278,7 @@ class ExcelProcessor:
                                 if(ParentBackboneResponse.status_code != 200):
                                     ParentPlasmidExtraNote += f'Backbone({each_backbone})'
                                     print(ParentPlasmidExtraNote)
-                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Backbone 添加失败\n')
+                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Backbone 添加失败, ID已记录\n')
                                     if(response.status_code == 200):
                                         continue
                                         # return {'success':False,'error':'Plasmid upload success, Parent Backbone upload fail'}
@@ -284,17 +290,16 @@ class ExcelProcessor:
                                 if(ParentPlasmidResponse.status_code != 200):
                                     ParentPlasmidExtraNote += f'Plasmid({each_plasmid})'
                                     print(ParentPlasmidExtraNote)
-                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Plasmid 添加失败\n')
+                                    error_rows.append(f'第{index}行，{row["PlasmidName"]} Parent Plasmid 添加失败，ID已记录\n')
                                     if(response.status_code == 200):
                                         continue
                                         # return {'success':False,'error':'Plasmid upload success, Parent plasmid upload fail'}
                         time.sleep(1)
                         request_body = {"PlasmidName":row["PlasmidName"],"PlasmidParentInfo":ParentPlasmidExtraNote}
                         session.post(f'{BASE_URL}/UpdateParentInfo',json=request_body,cookies=django_request.COOKIES)
-            return {'success':True}
+            return {'success':True,'error_row':error_rows,'empty_Seq_rows':empty_seq_rows}
         except Exception as e:
             logger.error(f"处理 Excel 文件失败: {str(e)}")
-            
             return {
                 'success': False,
                 'error': str(e)

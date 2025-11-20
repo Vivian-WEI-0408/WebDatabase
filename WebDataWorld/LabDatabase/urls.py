@@ -22,7 +22,7 @@ urlpatterns = [
 
     #Upload Excel File
     path("UploadFile",views.UploadFile,name="UploadFile"),
-
+    path("task_status/<str:task_id>",views.task_status,name="task_status"),
     #Search Information
     path("part/<int:partid>",views.part_detail_show,name="part_detail"),
     path("backbone/<int:backboneid>",views.backbone_detail_show,name="backbone_detail"),

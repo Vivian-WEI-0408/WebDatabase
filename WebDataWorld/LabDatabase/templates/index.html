@@ -617,7 +617,9 @@
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
+            var file_input = document.getElementById('batchFileInput');
             // 初始化所有标签页
+            
             renderTable('part',false, currentPages.part);
             renderTable('backbone',false,currentPages.backbone);
             renderTable('plasmid',false,currentPages.plasmid);
@@ -651,6 +653,7 @@
                         'X-CSRFToken': csrfToken,
                     }
                 });
+                var file_input = document.getElementById('batchFileInput');
                 file_input.innerText = '';
                 const batchUploadModal = bootstrap.Modal.getInstance(document.getElementById('batchUploadModal'));
                 batchUploadModal.hide();
@@ -667,7 +670,7 @@
             function pollTaskStatus(taskId){
                 const pollInterval = setInterval(async () => {
                     try {
-                        const response = await fetch(`/task-status/${taskId}`);
+                        const response = await fetch(`/LabDatabase/task_status/${taskId}`);
                         const result = await response.json();
                         
                         if(result.status === "completed"){
@@ -676,7 +679,7 @@
                         }
                         else if(result.status === "failed"){
                             clearInterval(pollInterval);
-                            displayError(result.error);
+                            displayError(result);
                         }
                     }
                     catch(error){
@@ -691,11 +694,11 @@
             }
 
             function displayResult(result){
-                if(result.success){
+                if(result.status === "completed"){
                     alert(result.message);
                 }
                 else{
-                    alert('处理失败：'+result.message)
+                    alert('处理失败：'+result.error)
                 }
             }
 
