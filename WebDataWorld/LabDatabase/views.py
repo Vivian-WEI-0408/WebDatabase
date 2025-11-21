@@ -152,14 +152,14 @@ def DataFilter(request):
 
 def UploadPartMap(request):
     if(request.method == 'POST' and request.FILES):
-        file = request.FILES.get('file')
-        title = request.POST.get('title', file.name)
-        thread = threading.Thread(
-            target = process_excel_async,
-            args= (file,request)
-        )
-        thread.daemon = True
-        thread.start()
+        # file = request.FILES.get('file')
+        # title = request.POST.get('title', file.name)
+        # thread = threading.Thread(
+        #     target = process_excel_async,
+        #     args= (file,request)
+        # )
+        # thread.daemon = True
+        # thread.start()
         return JsonResponse(data={'success':True},status = 200, safe=False)
     else:
         return JsonResponse({'success':False,'message':'Upload record is empty'},status = 400, safe = False)

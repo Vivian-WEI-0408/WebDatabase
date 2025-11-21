@@ -659,6 +659,7 @@
                 batchUploadModal.hide();
                 const result = await response.json()
                 if(result.task_id){
+                    alert(result.message);
                     pollTaskStatus(result.task_id);
                 }
                 else{
