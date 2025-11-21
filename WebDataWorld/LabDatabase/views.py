@@ -371,8 +371,9 @@ def plasmid_detail_show(request,plasmidid):
         if(plasmidResponse.status_code == 200 and plasmidParentPart.status_code == 200 and plasmidParentBackbone.status_code == 200 and
             plasmidParentPlasmid.status_code == 200 and plasmidSonPlasmid.status_code == 200):
             plasmid = plasmidResponse.json()[0]
-            return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'][0] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'][0] if len(plasmidParentBackbone.json()['data']) > 0 else [],
-                                    'plasmidparent':plasmidParentPlasmid.json()['data'][0] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'][0] if len(plasmidSonPlasmid.json()['data']) > 0 else []})
+            print(plasmidParentPart.json()['data'])
+            return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'] if len(plasmidParentBackbone.json()['data']) > 0 else [],
+                                    'plasmidparent':plasmidParentPlasmid.json()['data'] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'] if len(plasmidSonPlasmid.json()['data']) > 0 else []})
         else:
             return render(request,'error.html',{'error':plasmidResponse.text})
 
