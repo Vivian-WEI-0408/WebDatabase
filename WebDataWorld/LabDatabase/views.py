@@ -16,6 +16,7 @@ import os
 import pandas as pd
 import json
 from Bio.Seq import Seq
+import re
 # from .FeatureIdentify import featureIdentify
 # from CaculateModule.FileGenerator import SequenceAnnotator
 # from CaculateModule.ScarIdentify import scarPosition
@@ -371,8 +372,11 @@ def plasmid_detail_show(request,plasmidid):
         if(plasmidResponse.status_code == 200 and plasmidParentPart.status_code == 200 and plasmidParentBackbone.status_code == 200 and
             plasmidParentPlasmid.status_code == 200 and plasmidSonPlasmid.status_code == 200):
             plasmid = plasmidResponse.json()[0]
+            plasmidParentInfo = plasmid['CustomParentInfo']
+            pattern = r'\(([ a-zA-z0-9]+)\)'
+            matches = re.findall(pattern, plasmidParentInfo)
             return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'][0] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'][0] if len(plasmidParentBackbone.json()['data']) > 0 else [],
-                                    'plasmidparent':plasmidParentPlasmid.json()['data'][0] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'][0] if len(plasmidSonPlasmid.json()['data']) > 0 else []})
+                                    'plasmidparent':plasmidParentPlasmid.json()['data'][0] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'][0] if len(plasmidSonPlasmid.json()['data']) > 0 else [], 'ParentInfo':matches})
         else:
             return render(request,'error.html',{'error':plasmidResponse.text})
 

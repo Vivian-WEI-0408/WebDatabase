@@ -2080,6 +2080,8 @@ def AddPlasmidParentInfo(request):
         print("timeout")
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
+
+
     
 def AddParentPart(request):
     if(request.method == "POST"):
