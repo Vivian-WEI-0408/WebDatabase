@@ -191,7 +191,18 @@ def PartFilter(request):
                                             }
                                         },status = 200, safe = False)
         else:
-            return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
+            return JsonResponse(data = {'success':False, 'data': [],
+                                        'pagination':{
+                                            'current_page' : 0,
+                                            'total_pages' : 0,
+                                            'total_count' : 0,
+                                            'has_next' : 0,
+                                            'has_previous' : 0,
+                                            'page_size' : 0,
+                                            'offset' : 0
+                                            }
+                                        },status = 200, safe = False)
+            # return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
 
 
 #Search
@@ -745,7 +756,17 @@ def PlasmidFilter(request):
                                             }
                                         })
         else:
-            return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
+            return JsonResponse(data = {'success':False, 'data': [],
+                                        'pagination':{
+                                            'current_page' : 0,
+                                            'total_pages' : 0,
+                                            'total_count' : 0,
+                                            'has_next' : 0,
+                                            'has_previous' : 0,
+                                            'page_size' : 0,
+                                            'offset' : 0
+                                            }
+                                        },status = 200, safe = False)
 
 
 #search
@@ -1387,8 +1408,18 @@ def BackboneFilter(request):
                                         })
             
         else:
-            return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
-            
+            # return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
+            return JsonResponse(data = {'success':False, 'data': [],
+                                        'pagination':{
+                                            'current_page' : 0,
+                                            'total_pages' : 0,
+                                            'total_count' : 0,
+                                            'has_next' : 0,
+                                            'has_previous' : 0,
+                                            'page_size' : 0,
+                                            'offset' : 0
+                                            }
+                                        },status = 200, safe = False)
 
 
 

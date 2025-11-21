@@ -181,7 +181,7 @@ class ExcelProcessor:
                         Marker = "default"
                         if(row['Sequence'] != ""):
                             OriAndMarkerLabel = FittingLabels(row['Sequence'])
-                            # print(OriAndMarkerLabel)
+                            print(OriAndMarkerLabel)
                             if(len(OriAndMarkerLabel["Origin"]) != 0):
                                 Ori = OriAndMarkerLabel["Origin"][0]['Name']
                             if(len(OriAndMarkerLabel["Marker"]) != 0):
@@ -189,12 +189,12 @@ class ExcelProcessor:
                         else:
                             empty_seq_rows.append(f'第{index}行，{row["BackboneName"]} 序列为空，请后续补充序列信息\n')
                         data_body = {'name':row['BackboneName'],'alias':row['Alias'],'sequence':row['Sequence'],'ori':Ori,'marker':Marker,'species':row['Species'],'note':row['Note'],'copynumber':''}
-                        # print(data_body)
+                        print(data_body)
                         response = session.post(f'{BASE_URL}AddBackbone',json=data_body,cookies=django_request.COOKIES)
                         if(response.status_code != 200):
                             error_rows.append(f'第{index}行，{row["BackboneName"]} 添加数据失败\n')
                             continue
-                        # print(response.status_code)
+                        print(response.status_code)
                         if(row['Sequence'] != ""):
                             scar_result_list = scarFunction(row['Sequence'])
                             scar_data_body = {'name':row['BackboneName'],'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
@@ -203,6 +203,7 @@ class ExcelProcessor:
                                 continue
                             else:
                                 error_rows.append(f'第{index}行，{row["BackboneName"]} scar添加失败\n')
+                        
                         
             elif(type == 'plasmid'):
                 for index, row in df.iterrows():
@@ -297,6 +298,8 @@ class ExcelProcessor:
                         time.sleep(1)
                         request_body = {"PlasmidName":row["PlasmidName"],"PlasmidParentInfo":ParentPlasmidExtraNote}
                         session.post(f'{BASE_URL}UpdateParentInfo',json=request_body,cookies=django_request.COOKIES)
+            print(error_rows)
+            print(empty_seq_rows)
             return {'success':True,'error_row':error_rows,'empty_Seq_rows':empty_seq_rows}
         except Exception as e:
             logger.error(f"处理 Excel 文件失败: {str(e)}")

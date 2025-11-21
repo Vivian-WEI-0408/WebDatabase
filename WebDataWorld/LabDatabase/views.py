@@ -366,29 +366,34 @@ def plasmid_detail_show(request,plasmidid):
         })
         plasmidResponse = session.get(f'{Base_URL}PlasmidByID?ID={plasmidid}',cookies=request.COOKIES)
         plasmidParentPart = session.get(f'{Base_URL}GetPartParent?plasmidid={plasmidid}',cookies=request.COOKIES)
+        
         plasmidParentBackbone = session.get(f'{Base_URL}GetBackboneParent?plasmidid={plasmidid}',cookies=request.COOKIES)
+        
         plasmidParentPlasmid = session.get(f'{Base_URL}GetPlasmidParent?plasmidid={plasmidid}',cookies=request.COOKIES)
+        
         plasmidSonPlasmid = session.get(f'{Base_URL}GetPlasmidSon?plasmidid={plasmidid}',cookies = request.COOKIES)
         if(plasmidResponse.status_code == 200 and plasmidParentPart.status_code == 200 and plasmidParentBackbone.status_code == 200 and
             plasmidParentPlasmid.status_code == 200 and plasmidSonPlasmid.status_code == 200):
             plasmid = plasmidResponse.json()[0]
-            plasmidParentInfo = plasmid['CustomParentInfo']
-            pattern = r'(\w+)\(([ a-zA-z0-9]+)\)'
-            matches = re.findall(pattern, plasmidParentInfo)
             result = {
-                'Part':[],
-                "Backbone":[],
-                "Plasmid":[],
-            }
-            for component_type, letter in matches:
-                if(component_type == "Part"):
-                    result['Part'].append(letter)
-                elif(component_type == "Backbone"):
-                    result['Backbone'].append(letter)
-                elif(component_type == "Plasmid"):
-                    result['Plasmid'].append(letter)
-            return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'][0] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'][0] if len(plasmidParentBackbone.json()['data']) > 0 else [],
-                                    'plasmidparent':plasmidParentPlasmid.json()['data'][0] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'][0] if len(plasmidSonPlasmid.json()['data']) > 0 else [], 'ParentPartInfo':result["Part"],
+                    'Part':[],
+                    "Backbone":[],
+                    "Plasmid":[],
+                }
+            if(plasmid['CustomParentInfo'] != "" and plasmid['CustomParentInfo'] != 'None' and plasmid['CustomParentInfo'] != 'NULL'):
+                plasmidParentInfo = plasmid['CustomParentInfo']
+                pattern = r'(\w+)\(([ a-zA-z0-9]+)\)'
+                matches = re.findall(pattern, plasmidParentInfo)
+                print(result)
+                for component_type, letter in matches:
+                    if(component_type == "Part"):
+                        result['Part'].append(letter)
+                    elif(component_type == "Backbone"):
+                        result['Backbone'].append(letter)
+                    elif(component_type == "Plasmid"):
+                        result['Plasmid'].append(letter)
+            return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'] if len(plasmidParentBackbone.json()['data']) > 0 else [],
+                                    'plasmidparent':plasmidParentPlasmid.json()['data'] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'] if len(plasmidSonPlasmid.json()['data']) > 0 else [], 'ParentPartInfo':result["Part"],
                                     'ParentBackboneInfo':result['Backbone'],'ParentPlasmidInfo':result['Plasmid']})
         else:
             return render(request,'error.html',{'error':plasmidResponse.text})
