@@ -296,7 +296,7 @@ class ExcelProcessor:
                                         # return {'success':False,'error':'Plasmid upload success, Parent plasmid upload fail'}
                         time.sleep(1)
                         request_body = {"PlasmidName":row["PlasmidName"],"PlasmidParentInfo":ParentPlasmidExtraNote}
-                        session.post(f'{BASE_URL}/UpdateParentInfo',json=request_body,cookies=django_request.COOKIES)
+                        session.post(f'{BASE_URL}UpdateParentInfo',json=request_body,cookies=django_request.COOKIES)
             return {'success':True,'error_row':error_rows,'empty_Seq_rows':empty_seq_rows}
         except Exception as e:
             logger.error(f"处理 Excel 文件失败: {str(e)}")

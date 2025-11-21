@@ -202,6 +202,21 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
         
+        .hierarchy-item-warning {
+            background-color: lightslategray;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #1a6fc4;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .hierarchy-item-warning:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
         .item-name {
             font-weight: bold;
             color: #0d4d8a;
@@ -439,6 +454,11 @@
                                 <div class="item-desc">{{item.note}}</div>
                             </li>
                             {% endfor %}
+                            {% for item in ParentPartInfo%}
+                            <li class = "hierarchy-item-warning">
+                                <div class = "item-name">{{item}}</div>
+                            </li>
+                            {% endfor %}
                         <h3><i>⬆️</i> 上级载体</h3>
                         <p>构建此质粒所使用的载体：</p>
                             {% for item in backboneparent %}
@@ -447,12 +467,22 @@
                                 <div class="item-desc">{{item.note}}</div>
                             </li>
                             {% endfor %}
+                            {% for item in ParentBackboneInfo%}
+                            <li class = "hierarchy-item-warning">
+                                <div class = "item-name">{{item}}</div>
+                            </li>
+                            {% endfor %}
                         <h3><i>⬆️</i> 上级质粒</h3>
                         <p>构建此质粒所使用的质粒：</p>
                             {% for item in plasmidparent %}
                             <li class="hierarchy-item">
                                 <div class="item-name">{{item.name}}</div>
                                 <div class="item-desc">{{item.note}}</div>
+                            </li>
+                            {% endfor %}
+                            {% for item in ParentPlasmidInfo%}
+                            <li class = "hierarchy-item-warning">
+                                <div class = "item-name">{{item}}</div>
                             </li>
                             {% endfor %}
                         </ul>

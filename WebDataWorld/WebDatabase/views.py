@@ -1128,7 +1128,7 @@ def GetSonPlasmid(request):
         spResult = list(Parentplasmidtable.objects.filter(parentplasmidid = parentPlasmidid).values('sonplasmidid'))
         splist = []
         for each_id in spResult:
-            splist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['sonplasmidid']).values('name','note')))
+            splist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['sonplasmidid']).values('name','note'))[0])
         return JsonResponse(data = {'success':True, 'data':splist},status = 200, safe = False)
 
 #Update
