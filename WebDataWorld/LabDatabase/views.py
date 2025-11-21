@@ -380,7 +380,7 @@ def plasmid_detail_show(request,plasmidid):
                     "Backbone":[],
                     "Plasmid":[],
                 }
-            if(plasmid['CustomParentInfo'] != "" and plasmid['CustomParentInfo'] != 'None' and plasmid['CustomParentInfo'] != 'NULL'):
+            if(plasmid['CustomParentInfo'] != "" and plasmid['CustomParentInfo']!= None and plasmid['CustomParentInfo'] != 'None' and plasmid['CustomParentInfo'] != 'NULL'):
                 plasmidParentInfo = plasmid['CustomParentInfo']
                 pattern = r'(\w+)\(([ a-zA-z0-9]+)\)'
                 matches = re.findall(pattern, plasmidParentInfo)
