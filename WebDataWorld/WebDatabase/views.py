@@ -1066,20 +1066,24 @@ def AddPlasmidData(request):
         state = data['state'] if 'state' in data else 0
         note = data['note'] if 'note' in data else ""
         alias = data['alias']
+        username = request.session['info']['uname']
         ParentInfo = data['ParentInfo'] if 'ParentInfo' in data else ""
-        if(name == None or name == "" or level == None or level == "" or sequence == None or sequence == ""
+        if(name == None or name == "" or level == None or level == ""
                  or orihost == None or orihost == "" or markerclone == None or markerclone == "" or oriclone == None
                  or orihost == "" or markerhost == None or markerhost == ""):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
-            Plasmidneed.objects.create(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
+            with transaction.atomic():
+                Plasmidneed.objects.create(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
                                    markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
-                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
+                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo,user = username)
         else:
-            Plasmidneed.objects.filter(name=name).update(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
+            with transaction.atomic():
+                item = Plasmidneed.objects.select_for_update().get(name = name)
+                Plasmidneed.objects.filter(name=name).update(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
                                    markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
-                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
+                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo,user = username)
         return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Added'})
 
@@ -1569,7 +1573,7 @@ def AddBackboneData(request):
         note = data['note'] if 'note' in data else ""
         alias = data['alias'] if 'alias' in data else ""
         username = request.session['info']['uname']
-        # print(data)
+        print(data)
         if(name == None or name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
@@ -1630,8 +1634,31 @@ def UpdateBackboneData(request):
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Updated'})
 
+def UpdateBackboneCultureInformation(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        id = data['backboneid']
+        OriInfo = data['Ori']
+        MarkerInfo = data['Marker']
+        Backbonetable.objects.filter(id = id).update(ori = OriInfo,marker = MarkerInfo)
+        return JsonResponse(data = {'success':True},status = 200, safe=False)
+    
+
+def UpdatePlasmidCultureInformation(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        id = data['plasmidid']
+        OriInfo1 = data['Ori1']
+        OriInfo2 = data['Ori2']
+        MarkerInfo1 = data['Marker1']
+        MarkerInfo2 = data['Marker2']
+        Plasmidneed.objects.filter(plasmidid = id).update(oricloning = OriInfo1, orihost = OriInfo2, markercloning = MarkerInfo1, markerhost = MarkerInfo2)
+        return JsonResponse(data = {'success':True},status = 200, safe=False)
+
+
 def UpdateBackboneFileAddress(request):
     if(request.method == 'POST'):
+
         Name = request.POST.get('name')
         Address = request.POST.get('address')
         if(Name == None or Name == "" or Address == None or Address == ""):
