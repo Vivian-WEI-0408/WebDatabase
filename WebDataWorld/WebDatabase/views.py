@@ -1178,6 +1178,7 @@ def AddPlasmidData(request):
         state = data['state'] if 'state' in data else 0
         note = data['note'] if 'note' in data else ""
         alias = data['alias']
+        username = request.session['info']['uname']
         ParentInfo = data['ParentInfo'] if 'ParentInfo' in data else ""
         username = request.session.get('info')['uname']
         tag = "abnormal" if (len(ori) > 1 or len(marker) > 1) else "normal"
@@ -1185,10 +1186,9 @@ def AddPlasmidData(request):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
-            Plasmidneed.objects.create(name=name,  level = level, length = length, sequenceconfirm=sequence,
-                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo,user = username,tag = tag)
-            plasmidid = Plasmidneed.objects.filter(name = name).first()
-            Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmidid.plasmidid).delete()
+            Plasmidneed.objects.create(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
+                                   markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
+                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
         else:
             Plasmidneed.objects.filter(name=name).update(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo,user=username, tag = tag)
@@ -1839,7 +1839,7 @@ def AddBackboneData(request):
         note = data['note'] if 'note' in data else ""
         alias = data['alias'] if 'alias' in data else ""
         username = request.session['info']['uname']
-        # print(data)
+        print(data)
         if(name == None or name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
@@ -1916,8 +1916,31 @@ def UpdateBackboneData(request):
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Updated'})
 
+def UpdateBackboneCultureInformation(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        id = data['backboneid']
+        OriInfo = data['Ori']
+        MarkerInfo = data['Marker']
+        Backbonetable.objects.filter(id = id).update(ori = OriInfo,marker = MarkerInfo)
+        return JsonResponse(data = {'success':True},status = 200, safe=False)
+    
+
+def UpdatePlasmidCultureInformation(request):
+    if(request.method == 'POST'):
+        data = json.loads(request.body)
+        id = data['plasmidid']
+        OriInfo1 = data['Ori1']
+        OriInfo2 = data['Ori2']
+        MarkerInfo1 = data['Marker1']
+        MarkerInfo2 = data['Marker2']
+        Plasmidneed.objects.filter(plasmidid = id).update(oricloning = OriInfo1, orihost = OriInfo2, markercloning = MarkerInfo1, markerhost = MarkerInfo2)
+        return JsonResponse(data = {'success':True},status = 200, safe=False)
+
+
 def UpdateBackboneFileAddress(request):
     if(request.method == 'POST'):
+
         Name = request.POST.get('name')
         Address = request.POST.get('address')
         if(Name == None or Name == "" or Address == None or Address == ""):
