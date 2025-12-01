@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>质粒信息 - 基因元件数据库</title>
     <style>
         * {
@@ -318,6 +319,23 @@
             border-top: 4px solid #1a6fc4;
         }
         
+        .feature-detail-item {
+            display: flex;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #0d4d8a;
+        }
+        
+        .detail-value {
+            color: #555;
+        }
+
         .info-card h3 {
             color: #0d4d8a;
             margin-bottom: 10px;
@@ -415,8 +433,9 @@
         <div class="content">
             <div class="info-section">
                 <h2><i>📋</i> 基本信息</h2>
-                <div class="plasmid-name">{{plasmid.name}}</div>
-                <p>{{plasmid.note}}</p>
+                <h3><i class="fa-solid fa-user-secret"></i>  {{plasmid.user}}</h3>
+                <div class="plasmid-name">{{plasmid.name}}({{plasmid.alias}})</div>
+                
                 
                 <div class="info-grid">
                     <div class="info-card">
@@ -428,13 +447,43 @@
                         <p>{{plasmid.length}} bp</p>
                     </div>
                     <div class="info-card">
-                        <h3>选择标记</h3>
-                        <p>{{plasmid.markercloning}}/{{plasmid.markerhost}}</p>
+                        <h3>抗性标记</h3>
+                        <p>{{plasmid.marker_info}}</p>
                     </div>
-                    <!-- <div class="info-card">
-                        <h3>启动子</h3>
-                        <p>CMV 立即早期启动子</p>
-                    </div> -->
+                    <div class="info-card">
+                        <h3>复制起点</h3>
+                        <p>{{plasmid.ori_info}}</p>
+                    </div>
+                    <div class = "info-card">
+                        <h3>备注</h3>
+                        <p>{{plasmid.note}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3><i>🧪</i> scar</h3>
+                <div class="info-card">
+                    <div class="feature-detail-item">
+                        <div class="detail-label">BsmBI:</div>
+                        <div class="detail-value">{{scar.bsmbi}}</div>
+                    </div>
+                    <div class="feature-detail-item">
+                        <div class="detail-label">BsaI:</div>
+                        <div class="detail-value">{{scar.bsai}}</div>
+                    </div>
+                    <div class="feature-detail-item">
+                        <div class="detail-label">BbsI:</div>
+                        <div class="detail-value">{{scar.bbsi}}</div>
+                    </div>
+                    <div class="feature-detail-item">
+                        <div class="detail-label">AarI:</div>
+                        <div class="detail-value">{{scar.aari}}</div>
+                    </div>
+                    <div class="feature-detail-item">
+                        <div class="detail-label">SapI:</div>
+                        <div class="detail-value">{{scar.sapi}}</div>
+                    </div>
                 </div>
             </div>
             
@@ -507,11 +556,11 @@
                 <h2><i>🗺️</i> 质粒图谱</h2>
                 <p>{{plasmid.name}}质粒图谱显示主要功能元件的位置和方向：</p>
                 <div class="map-container">
-                    <div class="plasmid-map">
-                        <div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{plasmid.oricloning}}</div>
+                    <div class="plasmid-map" id = "plasmid-map-div">
+                        <!-- <div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{plasmid.oricloning}}</div>
                         <div class="plasmid-label" style="transform: rotate(72deg) translate(220px) rotate(-72deg);">{{plasmid.markercloning}}</div>
                         <div class="plasmid-label" style="transform: rotate(144deg) translate(220px) rotate(-144deg);">{{plasmid.orihost}}</div>
-                        <div class="plasmid-label" style="transform: rotate(216deg) translate(220px) rotate(-216deg);">{{plasmid.markerhost}}</div>
+                        <div class="plasmid-label" style="transform: rotate(216deg) translate(220px) rotate(-216deg);">{{plasmid.markerhost}}</div> -->
                     </div>
                 </div>
                 <div class="download-section">
@@ -539,7 +588,38 @@
     </div>
 
     <script>
-        // 质粒图谱交互效果
+
+        document.addEventListener("DOMContentLoaded", function(){
+            const plasmid_map_div = document.getElementById("plasmid-map-div");
+            // '<div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{backbone.marker}}</div>'
+            // '<div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">{{backbone.ori}}</div>'
+            ori_list = `{{plasmid.ori_info}}`.split(", ")
+            marker_list = `{{plasmid.marker_info}}`.split(", ")
+            ori_length = ori_list.length
+            marker_length = marker_list.length
+            total_num = ori_length + marker_length
+            each_deg = Math.floor(360 / total_num)
+            deg = 0
+            console.log(ori_list);
+            console.log(marker_list);
+            console.log(each_deg);
+            ori_list.forEach(item =>{
+                const tab = document.createElement("div");
+                tab.classList.add("plasmid-label");
+                tab.style.transform = `rotate(${deg}deg) translate(220px) rotate(-${deg}deg)`;
+                tab.innerText = item;
+                deg = deg + each_deg;
+                plasmid_map_div.appendChild(tab);
+            })
+            marker_list.forEach(item =>{
+                const tab = document.createElement("div");
+                tab.classList.add("plasmid-label");
+                tab.style.transform = `rotate(${deg}deg) translate(220px) rotate(-${deg}deg)`;
+                tab.innerText = item;
+                deg = deg + each_deg;
+                plasmid_map_div.appendChild(tab);
+            })
+            // 质粒图谱交互效果
         document.querySelectorAll('.plasmid-label').forEach(label => {
             label.addEventListener('mouseover', function() {
                 this.style.backgroundColor = 'rgba(255,255,255,0.9)';
@@ -553,6 +633,7 @@
                 this.style.zIndex = '1';
             });
         });
+        })
         document.getElementById('downMapButton').addEventListener('click',function(){
             let pathname_list = window.location.pathname.split('/');
             let plasmidid = pathname_list[pathname_list.length -1];

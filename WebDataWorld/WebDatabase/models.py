@@ -31,9 +31,9 @@ class Backbonetable(models.Model):
     species = models.CharField(db_column='Species', max_length=50, blank=True, null=True)  # Field name made lowercase.
     copynumber = models.CharField(db_column='CopyNumber', max_length=20, blank=True, null=True)  # Field name made lowercase.
     notes = models.TextField(db_column='Notes', blank=True, null=True)  # Field name made lowercase.
-    alias = models.CharField(db_column='Alias', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    alias = models.CharField(db_column='Alias', max_length=500, blank=True, null=True)  # Field name made lowercase.
     user = models.CharField(db_column='User', max_length=50)  # Field name made lowercase.
-
+    tag = models.CharField(db_column="tag",max_length=50)
     class Meta:
         managed = True
         db_table = 'backbonetable'
@@ -95,7 +95,7 @@ class Parttable(models.Model):
     note = models.TextField(db_column='Note', blank=True, null=True)  # Field name made lowercase.
     type = models.IntegerField(db_column='Type')  # Field name made lowercase.
     user = models.CharField(db_column='User', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    
+    tag = models.CharField(db_column="tag",max_length = 50)
 
 
     class Meta:
@@ -117,9 +117,10 @@ class Plasmidneed(models.Model):
     state = models.IntegerField(db_column='State',blank=True,null=True)  # Field name made lowercase.
     user = models.CharField(db_column='User', max_length=20)  # Field name made lowercase.
     note = models.CharField(db_column='Note', max_length=500, blank=True, null=True)  # Field name made lowercase.
-    alias = models.CharField(db_column='Alias', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    alias = models.CharField(db_column='Alias', max_length=500, blank=True, null=True)  # Field name made lowercase.
     CustomParentInfo = models.TextField(db_column='CustomParentInformation',blank=True,null=True)
-
+    tag = models.CharField(db_column="tag",max_length=50)
+    
     class Meta:
         managed = True
         db_table = 'plasmidneed'
@@ -299,3 +300,25 @@ class Plasmidscartable(models.Model):
     class Meta:
         managed = True
         db_table = 'Plasmidscartable'
+
+
+class Plasmid_Culture_Functions(models.Model):
+    pcfid = models.AutoField(primary_key=True)
+    plasmid_id = models.ForeignKey('Plasmidneed', models.CASCADE,db_column = "plasmid_id")
+    function_content = models.CharField(max_length=100)
+    function_type = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'plasmid_culture_functions'
+
+
+class Backbone_Culture_Functions(models.Model):
+    bcfid = models.AutoField(primary_key=True)
+    backbone_id = models.ForeignKey('Backbonetable', models.CASCADE, db_column="backbone_id")
+    function_content = models.CharField(max_length=50)
+    function_type = models.CharField(max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'backbone_culture_functions'

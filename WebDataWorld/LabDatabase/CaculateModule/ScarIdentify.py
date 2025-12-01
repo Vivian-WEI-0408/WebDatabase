@@ -16,7 +16,10 @@ CTGA   F
 TACG   G
 TTCC   H
 AGGT   I
+CACC   J
 TGTC   K
+CGCT   L
+CCGT   M
 '''
 
 type2s_enzymes = ["BsmBI","BsaI","BbsI","AarI","SapI"]
@@ -80,11 +83,18 @@ def scarName(seq):
         scar_str += "D"
     elif(seq.upper() == "AGGT"):
         scar_str += "I"
+    elif(seq.upper() == "CACC"):
+        scar_str += "J"
     elif(seq.upper() == "TGTC"):
         scar_str += "K"
+    elif(seq.upper() == "CGCT"):
+        scar_str += "L"
+    elif(seq.upper() == "CCGT"):
+        scar_str += "M"
     else:
         scar_str = "undefine"
     return scar_str
+
 def scarFunction(seq):
 
     SI = ScarIdentify(seq)
@@ -111,6 +121,16 @@ def scarFunction(seq):
                 scar_str += "C"
             elif(NoSite["Scar"]["start"].upper() == "CCTC"):
                 scar_str += "D"
+            elif(NoSite["Scar"]["start"].upper() == "AGGT"):
+                scar_str += "I"
+            elif(NoSite['Scar']["start"].upper() == "CACC"):
+                scar_str += "J"
+            elif(NoSite['Scar']["start"].upper() == "TGTC"):
+                scar_str += "K"
+            elif(NoSite['Scar']["start"].upper() == "CGCT"):
+                scar_str += "L"
+            elif(NoSite['Scar']["start"].upper() == "CCGT"):
+                scar_str += "M"
             if(NoSite["Scar"]["end"].upper() == "CTGA"):
                 scar_str += "F"
             elif(NoSite["Scar"]["end"].upper() == "TACG"):
@@ -131,6 +151,20 @@ def scarFunction(seq):
                 scar_str += "B"
             elif(NoSite["Scar"]["end"].upper() == "TAAA"):
                 scar_str += "C"
+            elif(NoSite["Scar"]["end"].upper() == "CCTC"):
+                scar_str += "D"
+            elif(NoSite["Scar"]["end"].upper() == "GCTT"):
+                scar_str += "E"
+            elif(NoSite["Scar"]["end"].upper() == "AGGT"):
+                scar_str += "I"
+            elif(NoSite['Scar']["end"].upper() == "CACC"):
+                scar_str += "J"
+            elif(NoSite['Scar']["end"].upper() == "TGTC"):
+                scar_str += "K"
+            elif(NoSite['Scar']["end"].upper() == "CGCT"):
+                scar_str += "L"
+            elif(NoSite['Scar']["end"].upper() == "CCGT"):
+                scar_str += "M"
         if(scar_str == ""):
             scar_list.append("Enzyme Not Available")
         else:

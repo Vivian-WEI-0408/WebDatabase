@@ -459,20 +459,12 @@
                         <form>
                         {% csrf_token %}
                         <div class="selector-div">
-                            <div> Ori(clone) </div>
-                            <select id = "OriCloneSelect">
+                            <div> Ori </div>
+                            <select id = "OriSelectPlasmid">
                                 <option></option>
                             </select>
-                            <div>Marker(clone)</div>
-                            <select id = "MarkerCloneSelect">
-                                <option></option>
-                            </select>
-                            <div>Ori(Host)</div>
-                            <select id = "OriHostSelect">
-                                <option></option>
-                            </select>
-                            <div>Marker(Host)</div>
-                            <select id = "MarkerHostSelect">
+                            <div>Marker</div>
+                            <select id = "MarkerSelectPlasmid">
                                 <option></option>
                             </select>
                             <div>Enzyme</div>
@@ -512,10 +504,8 @@
                                     <tr>
                                         <th>名称</th>
                                         <th>别名</th>
-                                        <th>Ori(Cloning)</th>
-                                        <th>Ori(Host)</th>
-                                        <th>Marker(Cloning)</th>
-                                        <th>Marker(Host)</th>
+                                        <th>Ori</th>
+                                        <th>Marker</th>
                                         <th>Level</th>
                                         <th>Scar</th>
                                     </tr>
@@ -554,7 +544,7 @@
                     <form id="uploadForm">
                         <div class="mb-3">
                             <label for="fileInput" class="form-label">选择图谱文件</label>
-                            <input class="form-control" type="file" id="fileInput">
+                            <input class="form-control" multiple type="file" id="fileInput" accept=".fasta, .gb, .gbk, .ape, .str, .dna">
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">描述</label>
@@ -564,7 +554,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="uploadBtn">上传</button>
+                    <button type="button" class="btn btn-primary" id="uploadBtnPart">上传元件图谱</button>
+                    <button type="button" class="btn btn-primary" id="uploadBtnBackbone">上传载体图谱</button>
+                    <button type="button" class="btn btn-primary" id="uploadBtnPlasmid">上传质粒图谱</button>
                 </div>
             </div>
         </div>
@@ -606,7 +598,6 @@
 
 
     <script>
-        
         // 分页设置
         const itemsPerPage = 10;
         let currentPages = {
@@ -617,7 +608,6 @@
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
-            var file_input = document.getElementById('batchFileInput');
             // 初始化所有标签页
             
             renderTable('part',false, currentPages.part);
@@ -625,17 +615,75 @@
             renderTable('plasmid',false,currentPages.plasmid);
             
             // 添加上传按钮事件监听
-            document.getElementById('uploadBtn').addEventListener('click', function() {
-                alert('上传功能将在实际系统中实现');
+            document.getElementById('uploadBtnPart').addEventListener('click', function() {
+                // alert('上传功能将在实际系统中实现');
                 const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+                var file_input = document.getElementById("fileInput");
+                // var files = file_input.files;
+                var files = file_input.files;
                 uploadModal.hide();
+                UploadFile(files, "part");
+            });
+
+
+            document.getElementById('uploadBtnBackbone').addEventListener('click', function() {
+                // alert('上传功能将在实际系统中实现');
+                const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+                var file_input = document.getElementById("fileInput");
+                var files = file_input.files;
+                uploadModal.hide();
+                UploadFile(files, "backbone");
+            });
+
+
+            document.getElementById('uploadBtnPlasmid').addEventListener('click', function() {
+                // alert('上传功能将在实际系统中实现');
+                const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+                var file_input = document.getElementById("fileInput");
+                console.log(file_input.files);
+                var files = file_input.files;
+                uploadModal.hide();
+                UploadFile(files, "plasmid");
             });
             
             document.getElementById('batchUploadBtn').addEventListener('click', function() {
                 var file_input = document.getElementById('batchFileInput');
-                var file = file_input.files[0];
+                var file = file_input.files;
                 batchUploadFile(file);
             });
+
+            async function UploadFile(files, type){
+                if(! files){
+                    alert('请选择上传文件');
+                    return;
+                }
+                let fd = new FormData();
+                console.log(files.length);
+                for (let i = 0;i<files.length;i++){
+                    let file = files[i];
+                    fd.append('files',file);
+                }
+                console.log(fd['files'])
+                fd.append('type',type);
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const response = await fetch("/LabDatabase/UploadMap",{
+                    method:'POST',
+                    body:fd,
+                    headers:{
+                        'X-CSRFToken':csrfToken,
+                    }
+                });
+                var file_input = document.getElementById("fileInput");
+                file_input.innerText = "";
+                const result = await response.json();
+                if(result.task_id){
+                    alert(result.message);
+                    pollTaskStatus(result.task_id);
+                }
+                else{
+                    displayResult(result);
+                }
+            }
 
             async function batchUploadFile(file){
                 if(!file){
@@ -697,7 +745,12 @@
 
             function displayResult(result){
                 if(result.status === "completed"){
-                    alert(result.message);
+                    if(result.message){
+                        alert(result.message);
+                    }
+                    else{
+                        alert("上传完成")
+                    }
                 }
                 else{
                     alert('处理失败：'+result.error)
@@ -730,16 +783,12 @@
             });
 
             document.getElementById('PlasmidSelectorReset').addEventListener('click',function(){
-                const OriCloneSelect = document.getElementById('OriCloneSelect');
-                const MarkerCloneSelect = document.getElementById('MarkerCloneSelect');
-                const OriHostSelect = document.getElementById('OriHostSelect');
-                const MarkerHostSelect = document.getElementById('MarkerCloneSelect');
+                const OriSelectPlasmid = document.getElementById('OriSelectPlasmid');
+                const MarkerSelectPlasmid = document.getElementById('MarkerSelectPlasmid');
                 const PlasmidEnzyme = document.getElementById('PlasmidEnzyme');
                 const PlasmidScar = document.getElementById('PlasmidScar');
-                OriCloneSelect.selectedIndex = 0;
-                MarkerCloneSelect.selectedIndex = 0;
-                OriHostSelect.selectedIndex = 0;
-                MarkerHostSelect.selectedIndex = 0;
+                OriSelectPlasmid.selectedIndex = 0;
+                MarkerSelectPlasmid.selectedIndex = 0;
                 PlasmidEnzyme.selectedIndex = 0;
                 PlasmidScar.selectedIndex = 0;
             });
@@ -775,15 +824,13 @@
             });
             //Plasmid
             document.getElementById('Plasmidsearchbutton').addEventListener('click',function(){
-                let oriClone = document.getElementById('OriCloneSelect').options[document.getElementById('OriCloneSelect').selectedIndex].text;
-                let markerClone = document.getElementById('MarkerCloneSelect').options[document.getElementById('MarkerCloneSelect').selectedIndex].text;
-                let oriHost = document.getElementById('OriHostSelect').options[document.getElementById('OriHostSelect').selectedIndex].text;
-                let markerHost = document.getElementById('MarkerHostSelect').options[document.getElementById('MarkerHostSelect').selectedIndex].text;
+                let ori = document.getElementById('OriSelectPlasmid').options[document.getElementById('OriSelectPlasmid').selectedIndex].text;
+                let marker = document.getElementById('MarkerSelectPlasmid').options[document.getElementById('MarkerSelectPlasmid').selectedIndex].text;
                 let Enzyme = document.getElementById('PlasmidEnzyme').options[document.getElementById('PlasmidEnzyme').selectedIndex].text;
                 let scar = document.getElementById("PlasmidScar").options[document.getElementById("PlasmidScar").selectedIndex].text;
                 let name = document.getElementById("PlasmidSearchInput").value;
                 console.log("testtest");
-                if(oriClone == "" && markerClone == "" && oriHost == "" && markerHost == "" && Enzyme == "" && scar == "" && name == ""){
+                if(ori == "" && marker == "" && Enzyme == "" && scar == "" && name == ""){
                     alert("请选择筛选标准");
                 }
                 else{
@@ -859,6 +906,7 @@
                                     <td>${PartType}</td>
                                     <td>${item.sourceorganism}</td>
                                     <td>${item.reference}</td>
+                                    <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/part/${item.partid}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
@@ -946,11 +994,11 @@
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
-                                    <td>${item.marker}</td>
-                                    <td>${item.ori}</td>
+                                    <td>${item.marker.join(", ")}</td>
+                                    <td>${item.ori.join(", ")}</td>
                                     <td>${item.species}</td>
                                     <td>${item.scar}</td>
-                                    <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '活跃' : '非活跃'}</span></td>
+                                    <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/backbone/${item.id}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
@@ -1034,15 +1082,18 @@
                         } else {
                             result.forEach(item => {
                                 const row = document.createElement('tr');
+                                var ori_list = item.ori_info;
+                                var marker_list = item.marker_info;
+                                console.log(ori_list);
+                                console.log(marker_list);
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
-                                    <td>${item.oricloning}</td>
-                                    <td>${item.orihost}</td>
-                                    <td>${item.markercloning}</td>
-                                    <td>${item.markerhost}</td>
+                                    <td>${item.ori_info.join(", ")}</td>
+                                    <td>${item.marker_info.join(", ")}</td>
                                     <td>${item.level}</td>
-                                    <td>${item.Scar}</td>
+                                    <td>${item.scar}</td>
+                                    <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
@@ -1164,6 +1215,7 @@
                                         <td>${PartType}</td>
                                         <td>${item.sourceorganism}</td>
                                         <td>${item.reference}</td>
+                                        <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                         <td class="action-cell">
                                             <button class="btn btn-sm btn-outline-primary"  onclick="window.location.href='/LabDatabase/part/${item.partid}'">查看</button>
                                             <button class="btn btn-sm btn-outline-secondary">编辑</button>
@@ -1271,7 +1323,7 @@
                         totalPages = data.pagination.total_pages;
                         currentPage = data.pagination.current_page;
                         offset = data.pagination.offset;
-                        scar = document.getElementById('BackboneScar').options[document.getElementById('BackboneScar').selectedIndex].text
+                        // scar = document.getElementById('BackboneScar').options[document.getElementById('BackboneScar').selectedIndex].text
                         tableBody.innerHTML = '';
                         if (totalItems === 0) {
                             tableBody.innerHTML = `
@@ -1290,11 +1342,11 @@
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
-                                    <td>${item.marker}</td>
-                                    <td>${item.ori}</td>
+                                    <td>${item.marker.join(", ")}</td>
+                                    <td>${item.ori.join(", ")}</td>
                                     <td>${item.species}</td>
-                                    <td>${scar}</td>
-                                    <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '活跃' : '非活跃'}</span></td>
+                                    <td>${item.scar}</td>
+                                    <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/backbone/${item.id}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
@@ -1379,10 +1431,8 @@
                     // fd.append('page',page);
                     // fd.append('page_size',10);
                     const request_body = {"SearchType":"plasmid", 'name':document.getElementById("PlasmidSearchInput").value,
-                                    "OriClone" : document.getElementById("OriCloneSelect").options[document.getElementById("OriCloneSelect").selectedIndex].text,
-                                    "MarkerClone" : document.getElementById("MarkerCloneSelect").options[document.getElementById("MarkerCloneSelect").selectedIndex].text,
-                                    "OriHost" : document.getElementById('OriHostSelect').options[document.getElementById('OriHostSelect').selectedIndex].text,
-                                    "MarkerHost" : document.getElementById('MarkerHostSelect').options[document.getElementById('MarkerHostSelect').selectedIndex].text,
+                                    "Ori" : document.getElementById("OriSelectPlasmid").options[document.getElementById("OriSelectPlasmid").selectedIndex].text,
+                                    "Marker" : document.getElementById("MarkerSelectPlasmid").options[document.getElementById("MarkerSelectPlasmid").selectedIndex].text,
                                     "Enzyme" : document.getElementById('PlasmidEnzyme').options[document.getElementById('PlasmidEnzyme').selectedIndex].text,
                                     "Scar" : document.getElementById('PlasmidScar').options[document.getElementById('PlasmidScar').selectedIndex].text,
                                     "page" : page, "page_size" : 10}
@@ -1402,7 +1452,8 @@
                         totalPages = data.pagination.total_pages;
                         currentPage = data.pagination.current_page;
                         offset = data.pagination.offset;
-                        scar = document.getElementById('PlasmidScar').options[document.getElementById('PlasmidScar').selectedIndex].text;
+                        // scar = data.scar;
+                        // scar = document.getElementById('PlasmidScar').options[document.getElementById('PlasmidScar').selectedIndex].text;
                         tableBody.innerHTML = '';
                         if (totalItems === 0) {
                             tableBody.innerHTML = `
@@ -1421,12 +1472,11 @@
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
-                                    <td>${item.oricloning}</td>
-                                    <td>${item.orihost}</td>
-                                    <td>${item.markercloning}</td>
-                                    <td>${item.markerhost}</td>
+                                    <td>${item.ori_info.join(", ")}</td>
+                                    <td>${item.marker_info.join(", ")}</td>
                                     <td>${item.level}</td>
-                                    <td>${scar}</td>
+                                    <td>${item.scar}</td>
+                                    <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
@@ -1500,10 +1550,8 @@
             const OriSelect = document.getElementById('OriSelect');
             const MarkerSelect = document.getElementById('MarkerSelect');
             const BackboneScar = document.getElementById('BackboneScar');
-            const OriCloneSelect = document.getElementById('OriCloneSelect');
-            const MarkerCloneSelect = document.getElementById('MarkerCloneSelect');
-            const OriHostSelect = document.getElementById('OriHostSelect');
-            const MarkerHostSelect = document.getElementById('MarkerHostSelect');
+            const OriSelectPlasmid = document.getElementById('OriSelectPlasmid');
+            const MarkerSelectPlasmid = document.getElementById('MarkerSelectPlasmid');
             const PlasmidScar = document.getElementById('PlasmidScar');
             //PartScarSelect
             fetch('/WebDatabase/getPartScarList')
@@ -1561,61 +1609,33 @@
             });
 
             //Plasmid Ori Clone Select
-            fetch('/WebDatabase/getPlasmidValueList/oricloning')
+            fetch('/WebDatabase/getPlasmidValueList/ori')
             .then(response => response.json())
             .then(data => {
                 if(data.success){
-                    let PlasmidOriCloning = data.data;
-                    PlasmidOriCloning.forEach(item =>{
+                    let PlasmidOri = data.data;
+                    PlasmidOri.forEach(item =>{
                         const orioption = document.createElement('option');
                         orioption.innerText = item;
-                        OriCloneSelect.appendChild(orioption);
+                        OriSelectPlasmid.appendChild(orioption);
                     });
                 }
             });
 
             //Plasmid Marker Clone Select
-            fetch('/WebDatabase/getPlasmidValueList/markercloning')
+            fetch('/WebDatabase/getPlasmidValueList/marker')
             .then(response => response.json())
             .then(data => {
                 if(data.success){
-                    let PlasmidMarkerCloning = data.data;
-                    PlasmidMarkerCloning.forEach(item =>{
+                    let PlasmidMarker = data.data;
+                    PlasmidMarker.forEach(item =>{
                         const Markeroption = document.createElement('option');
                         Markeroption.innerText = item;
-                        MarkerCloneSelect.appendChild(Markeroption);
+                        MarkerSelectPlasmid.appendChild(Markeroption);
                     });
                 }
             });
 
-
-            //Plasmid Ori Host Select
-            fetch('/WebDatabase/getPlasmidValueList/orihost')
-            .then(response => response.json())
-            .then(data => {
-                if(data.success){
-                    let PlasmidMarkerCloning = data.data;
-                    PlasmidMarkerCloning.forEach(item =>{
-                        const Orioption = document.createElement('option');
-                        Orioption.innerText = item;
-                        OriHostSelect.appendChild(Orioption);
-                    });
-                }
-            });
-
-            //Plasmid Marker Host Select
-            fetch('/WebDatabase/getPlasmidValueList/markerhost')
-            .then(response => response.json())
-            .then(data => {
-                if(data.success){
-                    let PlasmidMarkerCloning = data.data;
-                    PlasmidMarkerCloning.forEach(item =>{
-                        const markeroption = document.createElement('option');
-                        markeroption.innerText = item;
-                        MarkerHostSelect.appendChild(markeroption);
-                    });
-                }
-            });
 
             //Plasmid Scar Select
             fetch('/WebDatabase/getPlasmidScarList')

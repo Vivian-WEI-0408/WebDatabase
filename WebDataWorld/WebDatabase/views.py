@@ -16,11 +16,12 @@ from .models import (Backbonetable,Parentplasmidtable,
                     Straintable,TbBackboneUserfileaddress,
                     TbPartUserfileaddress,TbPlasmidUserfileaddress,
                     Testdatatable,User,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
-                    Parentparttable, Partscartable, Backbonescartable, Plasmidscartable)
+                    Parentparttable, Partscartable, Backbonescartable, Plasmidscartable, \
+                    Plasmid_Culture_Functions,Backbone_Culture_Functions)
 from django.views.decorators.csrf import csrf_exempt
-from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
-    PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
-    TbPartUserfileaddressSerializer,TbPlasmidUserfileaddressSerializer,TestdatatableSerializer
+# from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
+#     PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
+#     TbPartUserfileaddressSerializer,TbPlasmidUserfileaddressSerializer,TestdatatableSerializer
 
 #----------------------------------------------------------
 #用户登录验证(中间件)
@@ -86,12 +87,12 @@ def PartDataALL(request):
             offset = (page -1)*page_size
             total_count = Parttable.objects.count()
             total_pages = (total_count + page_size -1) // page_size
-            query_set = Parttable.objects.order_by('name').values('partid','name','alias','type','sourceorganism','reference')[offset:offset+page_size]
+            query_set = list(Parttable.objects.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag'))[offset:offset+page_size]
             # query_set = Parttable.objects.only('partid','name','type','sourceorganism','reference').order_by('name')[offset:offset+page_size]
             has_next = page < total_pages
             has_previous = page > 1
             return JsonResponse(data={'success':True,
-                                      'data':list(query_set),
+                                      'data':query_set,
                                       'pagination':{
                                           'current_page' : page,
                                           'total_pages' : total_pages,
@@ -149,7 +150,7 @@ def PartFilter(request):
                 if(name != "" and result != None):
                     result = result.filter(Q(name__icontains = name) | Q(alias__icontains = name))
                 if(result != None):
-                    PartResult.append(list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference'))[0])
+                    PartResult.append(list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag'))[0])
         else:
             result = Parttable.objects
             if(type != "" and result != None):
@@ -159,7 +160,7 @@ def PartFilter(request):
                 print(name)
                 result = result.filter(Q(name__icontains = name) | Q(alias__icontains = name))
             if(result != None):
-                PartResult = (list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference')))
+                PartResult = (list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag')))
         print(PartResult)
         if(len(PartResult) != 0):
             total_count = len(PartResult)
@@ -238,6 +239,18 @@ def SearchByPartNameFilter(request):
             except Exception as e:
                 return JsonResponse(data = str(e),status=404,safe=False)
 
+def getBackboneOriAndMarker(Backboneid):
+    ori_list = []
+    marker_list = []
+    ori_info = Backbone_Culture_Functions.objects.filter(backbone_id = Backboneid,function_type = 'ori').values('function_content')
+    # print(ori_info)
+    marker_info = Backbone_Culture_Functions.objects.filter(backbone_id = Backboneid,function_type = 'marker').values('function_content')
+    for each_ori in ori_info:
+        ori_list.append(each_ori['function_content'])
+    for each_marker in marker_info:
+        marker_list.append(each_marker['function_content'])
+    return [ori_list, marker_list]
+
 def SearchByBackboneNameFilter(request):
     if(request.method == "GET"):
         Name = request.GET.get('keywords')
@@ -245,7 +258,13 @@ def SearchByBackboneNameFilter(request):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
-                backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','ori','marker','species'))
+                # backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','ori','marker','species'))
+                backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','species'))
+                #TODO: 标记ori，marker
+                for each in backboneResult:
+                    info_list = getBackboneOriAndMarker(each['id'])
+                    each['ori'] = info_list[0]
+                    each['marker'] = info_list[1]
                 if(len(backboneResult) > 0):
                     return JsonResponse(data=backboneResult,status=200,safe=False)
                 else:
@@ -261,9 +280,13 @@ def SearchByPlasmidNameFilter(request):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
-                plasmidResult = list(Plasmidneed.objects.filter(name__icontains=Name).values('plasmidid','name','oricloning','orihost','markercloning','markerhost'))
+                plasmidResult = list(Plasmidneed.objects.filter(name__icontains=Name).values('plasmidid','name'))
                 if(len(plasmidResult) > 0):
-                    return JsonResponse(data = list(plasmidResult.values),status=200,safe=False)
+                    for each in plasmidResult:
+                        info_list = getOriAndMarker(each['plasmidid'])
+                        each['ori_info'] = info_list[0]
+                        each['marker_info'] = info_list[1]
+                    return JsonResponse(data = plasmidResult,status=200,safe=False)
                 else:
                     return JsonResponse(data = [],status=200,safe=False)
             except Exception as e:
@@ -629,13 +652,37 @@ def deletePartFile(request):
 
 #---------------------------------------------------------------
 #pladmid need
+
+def getOriAndMarker(plasmid_id):
+    ori_list = []
+    marker_list = []
+    ori_info = Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmid_id,function_type = 'ori').values('function_content')
+    # print(ori_info)
+    marker_info = Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmid_id,function_type = 'marker').values('function_content')
+    for each_ori in ori_info:
+        ori_list.append(each_ori['function_content'])
+    for each_marker in marker_info:
+        marker_list.append(each_marker['function_content'])
+    return [ori_list, marker_list]
+
+def getdefaultplasmidscar(plasmidid):
+    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
+    return scar_info
+
 def PlasmidDataALL(request):
     if(request.method == "GET"):
         page = int(request.GET.get('page',0))
         if(page == 0):
-            PlasmidData = Plasmidneed.objects.all().order_by('name')
+            PlasmidData = list(Plasmidneed.objects.all().order_by('name').values())
             if(len(PlasmidData) > 0):
-                return JsonResponse(data=list(PlasmidData.values()), status=200,safe=False)
+                for each in PlasmidData:
+                    info_list = getOriAndMarker(each['plasmidid'])
+                    each['ori_info'] = info_list[0]
+                    each['marker_info'] = info_list[1]
+                    print(each['plasmidid'])
+                    each['scar'] = getdefaultplasmidscar(each['plasmidid'])
+                    print(each)
+                return JsonResponse(data=PlasmidData, status=200,safe=False)
                 # return JsonResponse({'code':200,'data':list(PartData.values())})
             else:
                 return JsonResponse(data="No plasmid", status=404,safe=False)
@@ -646,11 +693,18 @@ def PlasmidDataALL(request):
             total_count = Plasmidneed.objects.count()
             total_pages = (total_count + page_size -1) // page_size
             # query_set = Plasmidneed.objects.only('plasmidid','name','oricloning','orihost','markercloning','markerhost','level').all().order_by('name')[offset:offset+page_size]
-            query_set = (Plasmidneed.objects.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level'))[offset:offset+page_size]
+            query_set = list(Plasmidneed.objects.order_by('name').values('plasmidid','name','alias','level','tag'))[offset:offset+page_size]
+            for each_plasmid in query_set:
+                info_list = getOriAndMarker(each_plasmid['plasmidid'])
+                each_plasmid['ori_info'] = info_list[0]
+                each_plasmid['marker_info'] = info_list[1]
+                each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
+                print(each_plasmid)
+            # print(query_set)
             has_next = page < total_pages
             has_previous = page > 1
             return JsonResponse(data={'success':True,
-                                      'data':list(query_set),
+                                      'data':query_set,
                                       'pagination':{
                                           'current_page' : page,
                                           'total_pages' : total_pages,
@@ -670,16 +724,13 @@ def PlasmidFilter(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
         Name = data['name']
-        OriClone = data['oriClone']
-        MarkerClone = data['markerClone']
-        OriHost = data['oriHost']
-        MarkerHost = data['markerHost']
+        Ori = data['ori']
+        Marker = data['marker']
         Enzyme = data['Enzyme']
         Scar = data['Scar']
         page = data['page']
         page_size = data['page_size']
         offset = (page -1)*page_size
-
         scarplasmidid = []
         if(Enzyme == "BsmBI"):
             scarplasmidid = list(Plasmidscartable.objects.filter(bsmbi = Scar).values('plasmidid'))
@@ -697,36 +748,90 @@ def PlasmidFilter(request):
         if(len(scarplasmidid) != 0):
             for each_id in scarplasmidid:
                 result = Plasmidneed.objects
+                if(Ori != ""):
+                    Ori_result = Plasmid_Culture_Functions.objects.filter(plasmid_id = each_id['plasmidid'], function_content = Ori, function_type="ori").values()
+                    if(Ori_result == None):
+                        continue
+                if(Marker != ""):
+                    Marker_result = Plasmid_Culture_Functions.objects.filter(plasmid_id = each_id['plasmidid'],function_content = Marker, function_type="marker").values()
+                    if(Marker_result == None):
+                        continue
                 result = result.filter(plasmidid = each_id['plasmidid'])
-                if(OriClone != '' and result != None):
-                    # 'partid','name','type','sourceorganism','reference'
-                    result = result.filter(oricloning=OriClone)
-                if(OriHost != "" and result != None):
-                    result = result.filter(orihost = OriHost)
-                if(MarkerClone != '' and result != None):
-                    result = result.filter(markercloning = MarkerClone)
-                if(MarkerHost != '' and result != None):
-                    result = result.filter(markerhost = MarkerHost)
                 if(Name != '' and result != None):
                     result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                 if(result != None):
+                    temp_result = list(result.order_by('name').values('plasmidid','name','alias','level','tag'))[0]
                     # 'plasmidid','name','oricloning','orihost','markercloning','markerhost','level'
-                    PlasmidResult.append(list(result.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level'))[0])
+                    info_list = getOriAndMarker(temp_result['plasmidid'])
+                    temp_result['ori_info'] = info_list[0]
+                    temp_result['marker_info'] = info_list[1]
+                    temp_result['scar'] = Scar
+                    PlasmidResult.append(temp_result)
         else:
-            result = Plasmidneed.objects
-            if(OriClone != "" and result != None):
-                # 'partid','name','type','sourceorganism','reference'
-                result = result.filter(oricloning = OriClone)
-            if(OriHost != "" and result != None):
-                result = result.filter(orihost = OriHost)
-            if(MarkerClone != '' and result != None):
-                result = result.filter(markercloning = MarkerClone)
-            if(MarkerHost != '' and result != None):
-                result = result.filter(markerhost = MarkerHost)
-            if(Name != "" and result != None):
-                result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
-            if(result != None):
-                PlasmidResult = (list(result.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level')))
+            Ori_plasmid_id_list = set()
+            Marker_plasmid_id_list = set()
+            final_plasmid_id_list = set()
+            if(Ori != ""):
+                Ori_result = Plasmid_Culture_Functions.objects.filter(function_content = Ori, function_type="ori").values("plasmid_id")
+                for each in Ori_result:
+                    Ori_plasmid_id_list.add(each['plasmid_id'])
+            if(Marker != ""):
+                Marker_result = Plasmid_Culture_Functions.objects.filter(function_content = Marker, function_type="marker").values("plasmid_id")
+                for each in Marker_result:
+                    Marker_plasmid_id_list.add(each['plasmid_id'])
+            if(Ori != "" and Marker != ""):
+                final_plasmid_id_list = Ori_plasmid_id_list & Marker_plasmid_id_list
+            else:
+                final_plasmid_id_list = Ori_plasmid_id_list | Marker_plasmid_id_list
+            # print(Ori_plasmid_id_list)
+            # print(Marker_plasmid_id_list)
+            # print(final_plasmid_id_list)
+            if(len(final_plasmid_id_list) == 0):
+                # if(Name != "" and result != None):
+                #     result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                # if(result != None):
+                if(Ori != "" or Marker != ""):
+                    return JsonResponse(data = {'success':False, 'data': [],
+                                        'pagination':{
+                                            'current_page' : 0,
+                                            'total_pages' : 0,
+                                            'total_count' : 0,
+                                            'has_next' : 0,
+                                            'has_previous' : 0,
+                                            'page_size' : 0,
+                                            'offset' : 0
+                                            }
+                                        },status = 200, safe = False)
+                    # PlasmidResult = (list(result.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level')))
+                else:
+                    PlasmidResult = []
+                    result = Plasmidneed.objects
+                    if(Name != "" and result != None):
+                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                    if(len(result) != 0):
+                        temp_result = list(result.values('plasmidid','name','alias','level','tag'))
+                        print(temp_result)
+                        for each in temp_result:
+                            info_list = getOriAndMarker(each['plasmidid'])
+                            each['ori_info'] = info_list[0]
+                            each['marker_info'] = info_list[1]
+                            each['scar'] = Plasmidscartable.objects.filter(plasmidid = each['plasmidid']).first().bbsi
+                            PlasmidResult.append(each)
+            else:
+                PlasmidResult = []
+                for each_id in final_plasmid_id_list:
+                    result = Plasmidneed.objects.filter(plasmidid = each_id)
+                    if(Name != "" and result != None):
+                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                    if(len(result) != 0):
+                        print(result)
+                        temp_result = (list(result.values('plasmidid','name','alias','level','tag')))[0]
+                        info_list = getOriAndMarker(temp_result['plasmidid'])
+                        temp_result['ori_info'] = info_list[0]
+                        temp_result['marker_info'] = info_list[1]
+                        temp_result['scar'] = Plasmidscartable.objects.filter(plasmidid = temp_result['plasmidid']).first().bbsi
+                        PlasmidResult.append(temp_result)
+        # print(PlasmidResult)
         if(len(PlasmidResult) != 0):
             total_count = len(PlasmidResult)
             total_pages = (total_count + page_size -1) // page_size
@@ -791,9 +896,13 @@ def SearchByPlasmidID(request):
         if(ID == None or ID == ""):
             return JsonResponse(data="ID cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(plasmidid=ID)
+        PlasmidList = list(Plasmidneed.objects.filter(plasmidid=ID).values())
         if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200,safe=False)
+            for each in PlasmidList:
+                info_list = getOriAndMarker(each['plasmidid'])
+                each["ori_info"] = info_list[0]
+                each["marker_info"] = info_list[1]
+            return JsonResponse(data=PlasmidList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -805,9 +914,13 @@ def SearchByPlasmidAlterName(request):
         if(AlterName == None or AlterName == ""):
             return JsonResponse(data="AlterName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(alter_name=AlterName)
+        PlasmidList = list(Plasmidneed.objects.filter(alter_name=AlterName).values())
         if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
+            for each in PlasmidList:
+                info_list = getOriAndMarker(each['plasmidid'])
+                each['ori_info'] = info_list[0]
+                each['marker_info'] = info_list[0]
+            return JsonResponse(data=PlasmidList, status=200)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -819,9 +932,13 @@ def SearchByPlasmidSeq(request):
         if(Seq == None or Seq == ""):
             return JsonResponse(data="Seq cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Seq can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(sequenceconfirm__contains=Seq)
+        PlasmidList = list(Plasmidneed.objects.filter(sequenceconfirm__contains=Seq).values())
         if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
+            for each in PlasmidList:
+                info_list = getOriAndMarker(each['plasmidid'])
+                each['ori_info'] = info_list[0]
+                each['marker_info'] = info_list[1]
+            return JsonResponse(data=PlasmidList, status=200,safe = False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -868,59 +985,44 @@ def SearchPlasmidSequenceByID(request):
         return JsonResponse(data={"success":False,'data':'Just GET method'}, status=404,safe=False)
         # return JsonResponse({'code':204,'status':'failed','data':'Plasmid Not Found'})
 
-def SearchByOriClone(request):
+def SearchByOri(request):
     if(request.method == "GET"):
         Ori = request.GET.get('oriClone')
         if(Ori == None or Ori == ""):
             return JsonResponse(data="OriClone cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Ori can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(oricloning=Ori)
-        if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
+        plasmid_ori_result = list(Plasmid_Culture_Functions.objects.filter(function_content = Ori, function_type = "ori").values("plasmid_id").distinct())
+        Plasmid_result = []
+        for each in plasmid_ori_result:
+            temp_plasmid = list(Plasmidneed.objects.filter(plasmidid = each['plasmid_id']).first())[0]
+            info_list = getOriAndMarker(each['plasmid_id'])
+            temp_plasmid["ori_info"] = info_list[0]
+            temp_plasmid["marker_info"] = info_list[1]
+            Plasmid_result.append(temp_plasmid)
+        if(len(Plasmid_result) > 0):
+            return JsonResponse(data=Plasmid_result, status=200, safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
             # return JsonResponse({'code':200,'status':'failed','data':'Plasmid Not Found'})
 
 
-
-def SearchByOriHost(request):
-    if(request.method == "GET"):
-        Ori = request.GET.get('oriHost')
-        if(Ori == None or Ori == ""):
-            return JsonResponse(data="OriHost cannot be empty", status=400,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Ori can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(orihost=Ori)
-        if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
-            # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
-        else:
-            return JsonResponse(data="No such Plasmid", status=404,safe=False)
-            # return JsonResponse({'code':204,'status':'failed','data':"Plasmid Not Found"})
-
-def SearchByMarkerClone(request):
-    if(request.method == "GET"):
-        marker = request.GET.get('markerClone')
-        if(marker == None or marker ==""):
-            return JsonResponse(data="MarkerClone cannot be empty", status=400,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Marker can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(markercloning=marker)
-        if (len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
-            # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
-        else:
-            return JsonResponse(data="No such Plasmid", status=404,safe=False)
-            # return JsonResponse({'code':204,'status':'failed','data':'Plasmid Not Found'})
-
-def SearchByMarkerHost(request):
+def SearchByMarker(request):
     if(request.method == "GET"):
         Marker = request.GET.get('markerHost')
         if(Marker == None or Marker == ""):
             return JsonResponse(data="Marker cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Marker can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(markerhost=Marker)
-        if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
+        plasmid_marker_result = list(Plasmid_Culture_Functions.objects.filter(function_content = Marker, function_type = "marker").values("plasmid_id").distinct())
+        Plasmid_result = []
+        for each in plasmid_marker_result:
+            temp_plasmid = list(Plasmidneed.objects.filter(plasmidid = each['plasmid_id']).first())[0]
+            info_list = getOriAndMarker(each['plasmid_id'])
+            temp_plasmid["ori_info"] = info_list[0]
+            temp_plasmid["marker_info"] = info_list[1]
+            Plasmid_result.append(temp_plasmid)
+        if(len(Plasmid_result) > 0):
+            return JsonResponse(data=Plasmid_result, status=200, safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -932,9 +1034,13 @@ def SearchByLevel(request):
         if(Level == None or Level == ""):
             return JsonResponse(data="Level cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Level can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(level=Level)
+        PlasmidList = list(Plasmidneed.objects.filter(level=Level).values())
         if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
+            for each in PlasmidList:
+                info_list = getOriAndMarker(each['plasmidid'])
+                each['ori_info'] = info_list[0]
+                each['marker_info'] = info_list[1]
+            return JsonResponse(data=PlasmidList, status=200, safe = False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -947,9 +1053,13 @@ def SearchByPlate(request):
         if(Plate == None or Plate == ""):
             return JsonResponse(data="Plate cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plate can not be empty'})
-        PlasmidList = Plasmidneed.objects.filter(plate=Plate)
+        PlasmidList = list(Plasmidneed.objects.filter(plate=Plate).values())
         if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200)
+            for each in PlasmidList:
+                info_list = getOriAndMarker(each['plasmidid'])
+                each['ori_info'] = info_list[0]
+                each['marker_info'] = info_list[1]
+            return JsonResponse(data=PlasmidList, status=200, safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -1055,10 +1165,12 @@ def AddPlasmidData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
-        oriclone = data['oriclone']
-        orihost = data['orihost']
-        markerclone = data['markerclone']
-        markerhost = data['markerhost']
+        ori = data['ori']
+        marker = data['marker']
+        # oriclone = data['oriclone']
+        # orihost = data['orihost']
+        # markerclone = data['markerclone']
+        # markerhost = data['markerhost']
         level = data['level']
         length = len(data['sequence']) if data['sequence']!="" else 0
         sequence = data['sequence']
@@ -1067,19 +1179,24 @@ def AddPlasmidData(request):
         note = data['note'] if 'note' in data else ""
         alias = data['alias']
         ParentInfo = data['ParentInfo'] if 'ParentInfo' in data else ""
-        if(name == None or name == "" or level == None or level == "" or sequence == None or sequence == ""
-                 or orihost == None or orihost == "" or markerclone == None or markerclone == "" or oriclone == None
-                 or orihost == "" or markerhost == None or markerhost == ""):
+        username = request.session.get('info')['uname']
+        tag = "abnormal" if (len(ori) > 1 or len(marker) > 1) else "normal"
+        if(name == None or name == "" or level == None or level == "" or sequence == None):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
-            Plasmidneed.objects.create(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
-                                   markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
-                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
+            Plasmidneed.objects.create(name=name,  level = level, length = length, sequenceconfirm=sequence,
+                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo,user = username,tag = tag)
+            plasmidid = Plasmidneed.objects.filter(name = name).first()
+            Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmidid.plasmidid).delete()
         else:
-            Plasmidneed.objects.filter(name=name).update(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
-                                   markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
-                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
+            Plasmidneed.objects.filter(name=name).update(name=name, level = level, length = length, sequenceconfirm=sequence,
+                                   plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo,user=username, tag = tag)
+            plasmidid = Plasmidneed.objects.filter(name = name).first()
+        for each in ori:
+            Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidid, function_content = each, function_type = "ori")
+        for each in marker:
+            Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidid, function_content = each, function_type = "marker")
         return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Added'})
 
@@ -1164,10 +1281,8 @@ def UpdatePlasmidData(request):
             return JsonResponse(data="No such OriginName", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'OriginName Not Found'})
         newName = request.POST.get('newName')
-        newOriCloning = request.POST.get('newOriCloning')
-        newOriHost = request.POST.get('newOriHost')
-        newMarkerCloning = request.POST.get('newMarkerCloning')
-        newMarkerHost = request.POST.get('newMarkerHost')
+        newOri = request.POST.get('newOri')
+        newMarker = request.POST.get('newMarker')
         newLevel = request.POST.get('newLevel')
         newLength = len(request.POST.get('newSequence'))
         newSequence = request.POST.get('newSequence')
@@ -1176,14 +1291,17 @@ def UpdatePlasmidData(request):
         newUser = request.session.get('info')['uname']
         newNote = request.POST.get('newNote')
         newAlias = request.POST.get('newAlias')
-        if(newName == None or newName == "" or newOriCloning == None or newOriCloning == "" or newOriHost == None or newOriHost == ""
-          or newMarkerHost == None or newMarkerHost == "" or newMarkerCloning == None or newMarkerCloning == "" or newSequence == None
-          or newSequence == ""):
+        tag = "abnormal" if(len(newOri) > 1 or len(newMarker) > 1) else "normal"
+        if(newName == None or newName == "" or newSequence == None or newSequence == ""):
             return JsonResponse(data="New Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Ori,Marker,Sequence can not be empty'})
-        Plasmidneed.objects.filter(plasmidid=PlasmidID).update(name=newName,oricloning=newOriCloning,orihost=newOriHost,markercloning=newMarkerCloning,
-                                                               markerhost=newMarkerHost,level=newLevel,length=newLength,sequenceconfirm=newSequence,
-                                                               plate=newPlate,alias=newAlias,state = newState,newUser=newUser,newNote=newNote)
+        Plasmidneed.objects.filter(plasmidid=PlasmidID).update(name=newName,level=newLevel,length=newLength,sequenceconfirm=newSequence,
+                                                               plate=newPlate,alias=newAlias,state = newState,user=newUser,newNote=newNote,tag = tag)
+        Plasmid_Culture_Functions.objects.filter(plasmid_id = PlasmidID).delete()
+        for each in newOri:
+            Plasmid_Culture_Functions.objects.create(plasmid_id = PlasmidID, function_content = each, function_type = "ori")
+        for each in newMarker:
+            Plasmid_Culture_Functions.objects.create(plasmid_id = PlasmidID, function_content = each, function_type = "marker")
         return JsonResponse(data="Plasmid Data Updated", status=200)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Updated'})
 
@@ -1219,6 +1337,10 @@ def deletePlasmidData(request):
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
         Parentplasmidtable.objects.filter(sonplasmidid=PlasmidID).delete()
         Parentplasmidtable.objects.filter(parenplasmidid=PlasmidID).delete()
+        Parentparttable.objects.filter(sonplasmidid = PlasmidID).delete()
+        Parentbackbonetable.objects.filter(sonplasmidid = PlasmidID).delete()
+        Plasmidscartable.objects.filter(plasmidid = PlasmidID).delete()
+        Plasmid_Culture_Functions.objects.filter(plasmid_id = PlasmidID).delete()
         TbPlasmidUserfileaddress.objects.filter(plasmidid=PlasmidID).delete()
         Plasmidneed.objects.filter(name=name).delete()
         return JsonResponse(data="Plasmid Data Deleted", status=200)
@@ -1255,6 +1377,40 @@ def DeleteParentPlasmid(request):
         return JsonResponse(data="ParentPlasmid Deleted", status=200)
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Deleted'})
 
+def setPlasmidCulture(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        plasmidName = data["name"]
+        Ori_list = data["ori"]
+        Marker_list = data["marker"]
+        print(data)
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    plasmidid = Plasmidneed.objects.filter(name=plasmidName).first()
+                    print(plasmidid)
+                    Plasmid_culture_exist = Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmidid).values()
+                    if(len(Plasmid_culture_exist) != 0):
+                        Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmidid).delete()
+                    for each_ori in Ori_list:
+                        print(each_ori)
+                        Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidid,function_content = each_ori, function_type = "ori")
+                    for each_marker in Marker_list:
+                        print(each_marker)
+                        Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidid,function_content = each_marker, function_type="marker")
+                    return JsonResponse(data = {"success":True,"data":"success upload"},status=200, safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        print("timeout")
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 
 
@@ -1267,14 +1423,23 @@ def DeleteParentPlasmid(request):
 
 #----------------------------------------------------------
 #Backbone table
+def getdefaultbackbonescar(backboneid):
+    scar_info = Backbonescartable.objects.filter(backboneid = backboneid).first().bbsi
+    return scar_info
 #Search
 def BackboneDataALL(request):
     if(request.method == "GET"):
         page = int(request.GET.get('page',0))
         if(page == 0):
-            BackboneData = Backbonetable.objects.all().order_by('name')
+            BackboneData = Backbonetable.objects.all().order_by('name').values()
             if(len(BackboneData) > 0):
-                return JsonResponse(data={'success': True, 'data':list(BackboneData.values())}, status=200,safe=False)
+                BackboneData = list(BackboneData)
+                for each in BackboneData:
+                    info_list = getBackboneOriAndMarker(each['id'])
+                    each['ori'] = info_list[0]
+                    each['marker'] = info_list[1]
+                    each['scar'] = getdefaultbackbonescar(each['id'])
+                return JsonResponse(data={'success': True, 'data':BackboneData}, status=200,safe=False)
                 # return JsonResponse({'code':200,'data':list(PartData.values())})
             else:
                 return JsonResponse(data={'success':False, 'error':"No such backbone"}, status=404,safe=False)
@@ -1284,13 +1449,18 @@ def BackboneDataALL(request):
             offset = (page -1)*page_size
             total_count = Backbonetable.objects.count()
             total_pages = (total_count + page_size -1) // page_size
-            query_set = Backbonetable.objects.order_by('name').values('id','name','alias','marker','ori','species')[offset:offset+page_size]
+            query_set = Backbonetable.objects.order_by('name').values('id','name','alias','marker','ori','species','tag')[offset:offset+page_size]
             # query_set = Backbonetable.objects.only('id','name','marker','ori','species').all().order_by('name')[offset:offset+page_size]
-
+            query_set = list(query_set)
+            for each in query_set:
+                info_list = getBackboneOriAndMarker(each['id'])
+                each['ori'] = info_list[0]
+                each['marker'] = info_list[1]
+                each['scar'] = getdefaultbackbonescar(each['id'])
             has_next = page < total_pages
             has_previous = page > 1
             return JsonResponse(data={'success':True,
-                                      'data':list(query_set),
+                                      'data':query_set,
                                       'pagination':{
                                           'current_page' : page,
                                           'total_pages' : total_pages,
@@ -1317,7 +1487,6 @@ def BackboneFilter(request):
         page = data['page']
         page_size = data['page_size']
         offset = (page -1)*page_size
-
         scarBackboneid = []
         if(Enzyme == "BsmBI"):
             scarBackboneid = list(Backbonescartable.objects.filter(bsmbi = Scar).values('backboneid'))
@@ -1339,30 +1508,95 @@ def BackboneFilter(request):
                 # print(each_id)
                 result = Backbonetable.objects
                 result = result.filter(id = each_id['backboneid'])
+                if(ori != ""):
+                    ori_result = Backbone_Culture_Functions.objects.filter(backbone_id =each_id['backboneid']).values()
+                    if(len(ori_result) == 0):
+                        continue
+                if(marker != ""):
+                    marker_result = Backbone_Culture_Functions.objects.filter(backbone_id = each_id['backboneid'].values())
+                    if(len(marker_result) == 0):
+                        continue
                 # print(result)
-                if(ori != "" and result != None):
-                    # 'partid','name','type','sourceorganism','reference'
-                    result = result.filter(ori = ori)
-                    # print(result.values())
-                if(marker != "" and result != None):
-                    result = result.filter(marker = marker)
+                # if(ori != "" and result != None):
+                #     # 'partid','name','type','sourceorganism','reference'
+                #     result = result.filter(ori = ori)
+                #     # print(result.values())
+                # if(marker != "" and result != None):
+                #     result = result.filter(marker = marker)
                 if(Name != "" and result != None):
                     result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                 if(len(result) != 0):
                     # print(result.order_by('name').values('id','name','marker','ori','species'))
                     # PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
-                    BackboneResult.append(list(result.order_by('name').values('id','name','alias','marker','ori','species'))[0])
+                    temp_result = list(result.order_by('name').values('id','name','alias','species','tag'))[0]
+                    info_list = getBackboneOriAndMarker(temp_result['id'])
+                    temp_result['ori'] = info_list[0]
+                    temp_result['marker'] = info_list[1]
+                    temp_result['scar'] = Scar
+                    BackboneResult.append(temp_result)
         else:
-            result = Backbonetable.objects
-            if(ori != "" and result != None):
-                result = result.filter(ori = ori)
-            if(marker != "" and result != None):
-                result = result.filter(marker = marker)
-            if(Name != "" and result != None):
-                result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
-            if(result != None):
-                # print(result.order_by('name').values('name'))
-                BackboneResult = (list(result.order_by('name').values('id','name','alias','marker','ori','species')))
+            Ori_backbone_id_list = set()
+            Marker_backbone_id_list = set()
+            final_backbone_id_list = set()
+            if(ori != ""):
+                Ori_result = Backbone_Culture_Functions.objects.filter(function_content = ori, function_type="ori").values("backbone_id")
+                for each in Ori_result:
+                    Ori_backbone_id_list.add(each['backbone_id'])
+            if(marker != ""):
+                Marker_result = Backbone_Culture_Functions.objects.filter(function_content = marker, function_type="marker").values("backbone_id")
+                for each in Marker_result:
+                    Marker_backbone_id_list.add(each['backbone_id'])
+            if(ori != "" and marker != ""):
+                final_backbone_id_list = Ori_backbone_id_list & Marker_backbone_id_list
+            else:
+                final_backbone_id_list = Ori_backbone_id_list | Marker_backbone_id_list
+            # print(Ori_plasmid_id_list)
+            # print(Marker_plasmid_id_list)
+            # print(final_plasmid_id_list)
+            if(len(final_backbone_id_list) == 0):
+                # if(Name != "" and result != None):
+                #     result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                # if(result != None):
+                if(ori != "" or marker != ""):
+                    return JsonResponse(data = {'success':False, 'data': [],
+                                        'pagination':{
+                                            'current_page' : 0,
+                                            'total_pages' : 0,
+                                            'total_count' : 0,
+                                            'has_next' : 0,
+                                            'has_previous' : 0,
+                                            'page_size' : 0,
+                                            'offset' : 0
+                                            }
+                                        },status = 200, safe = False)
+                else:
+                    BackboneResult = []
+                    result = Backbonetable.objects
+                    if(Name != "" and result != None):
+                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                    if(len(result) != 0):
+                        temp_result = list(result.values('id','name','alias','marker','ori','species','tag'))
+                        for each in temp_result:
+                            info_list = getBackboneOriAndMarker(each['id'])
+                            each['ori'] = info_list[0]
+                            each['marker'] = info_list[1]
+                            each['scar'] = Backbonescartable.objects.filter(backboneid = each['id']).first().bbsi
+                            BackboneResult.append(each)
+                    # PlasmidResult = (list(result.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level')))
+            else:
+                BackboneResult = []
+                for each_id in final_backbone_id_list:
+                    result = Backbonetable.objects.filter(id = each_id)
+                    if(Name != "" and result != None):
+                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                    if(len(result) != 0):
+                        print(result)
+                        temp_result = (list(result.values('id','name','alias','marker','ori','species','tag')))[0]
+                        info_list = getBackboneOriAndMarker(temp_result['id'])
+                        temp_result['ori'] = info_list[0]
+                        temp_result['marker'] = info_list[1]
+                        temp_result['scar'] = Backbonescartable.objects.filter(backboneid = temp_result['id']).first().bbsi
+                        BackboneResult.append(temp_result)
         print(BackboneResult)
         if(len(BackboneResult) != 0):
             total_count = len(BackboneResult)
@@ -1429,9 +1663,13 @@ def SearchByBackboneName(request):
         if(Name == None or Name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Name can not be empty'})
-        BackboneList = Backbonetable.objects.filter(name=Name)
+        BackboneList = list(Backbonetable.objects.filter(name=Name).values())
         if(len(BackboneList) > 0):
-            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
+            for each_id in BackboneList:
+                info_list = getBackboneOriAndMarker(each_id['id'])
+                each_id['ori'] = info_list[0]
+                each_id['marker'] = info_list[1]
+            return JsonResponse(data=BackboneList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(BackboneList.values())})
         else:
             return JsonResponse(data="No such Name", status=404,safe=False)
@@ -1443,9 +1681,14 @@ def SearchByBackboneID(request):
         if(ID == None or ID == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
-        BackboneList = Backbonetable.objects.filter(id=ID)
+        BackboneList = list(Backbonetable.objects.filter(id=ID).values())
         if(len(BackboneList) > 0):
-            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
+            for each in BackboneList:
+                info_list = getBackboneOriAndMarker(each['id'])
+                each['ori'] = info_list[0]
+                each['marker'] = info_list[1]
+
+            return JsonResponse(data=BackboneList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -1457,9 +1700,13 @@ def  SearchByBackboneSeq(request):
         if(Seq == None or Seq == ""):
             return JsonResponse(data="Seq cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Sequence can not be empty'})
-        BackboneList = Backbonetable.objects.filter(sequence=Seq)
+        BackboneList = list(Backbonetable.objects.filter(sequence=Seq).values())
         if(len(BackboneList) > 0):
-            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
+            for each in BackboneList:
+                info_list = getBackboneOriAndMarker(each['id'])
+                each['ori'] = info_list[0]
+                each['marker'] = info_list[1]
+            return JsonResponse(data=BackboneList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(BackboneList.values())})
         else:
             return JsonResponse(data="No such backbone", status=404,safe=False)
@@ -1486,9 +1733,13 @@ def SearchByBackboneSpecies(request):
         if(Species == None or Species == ""):
             return JsonResponse(data="Species cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Species can not be empty'})
-        BackboneList = Backbonetable.objects.filter(species=Species)
+        BackboneList = list(Backbonetable.objects.filter(species=Species).values())
         if(len(BackboneList) > 0):
-            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
+            for each in BackboneList:
+                info_list = getBackboneOriAndMarker(each['id'])
+                each['ori'] = info_list[0]
+                each['marker'] = info_list[1]
+            return JsonResponse(data=BackboneList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(BackboneList.values())})
         else:
             return JsonResponse(data="No such Species", status=404,safe=False)
@@ -1500,9 +1751,16 @@ def SearchByBackboneMarker(request):
         if(Marker == None or Marker == ""):
             return JsonResponse(data="Marker cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Marker can not be empty'})
-        BackboneList = Backbonetable.objects.filter(marker=Marker)
-        if(len(BackboneList) > 0):
-            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
+        backbone_result = list(Backbone_Culture_Functions.objects.filter(function_content = Marker, function_type = "marker").values('backbone_id').distinct())
+        if(len(backbone_result) > 0):
+            BackboneList = []
+            for each in backbone_result:
+                backbone_each_result = list(Backbonetable.objects.filter(id = each['backbone_id']).values())[0]
+                info_list = getBackboneOriAndMarker(backbone_each_result['id'])
+                backbone_each_result['ori'] = info_list[0]
+                backbone_each_result['marker'] = info_list[1]
+                BackboneList.append(backbone_each_result)
+            return JsonResponse(data=BackboneList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(BackboneList.values())})
         else:
             return JsonResponse(data="No such Marker", status=404,safe=False)
@@ -1514,10 +1772,16 @@ def SearchByBackboneOri(request):
         if(Ori == None or Ori == ""):
             return JsonResponse(data="Ori cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Ori can not be empty'})
-        BackboneList = Backbonetable.objects.filter(ori=Ori)
-        if(len(BackboneList) > 0):
-            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
-            # return JsonResponse({'code':200,'status':'success','data':list(BackboneList.values())})
+        backbone_result = list(Backbone_Culture_Functions.objects.filter(function_content = Ori, function_type = "ori").values('backbone_id').distinct())
+        if(len(backbone_result) > 0):
+            BackboneList = []
+            for each in backbone_result:
+                backbone_each_result = list(Backbonetable.objects.filter(id = each['backbone_id']).values())[0]
+                info_list = getBackboneOriAndMarker(backbone_each_result['id'])
+                backbone_each_result['ori'] = info_list[0]
+                backbone_each_result['marker'] = info_list[1]
+                BackboneList.append(backbone_each_result)
+            return JsonResponse(data=BackboneList, status=200,safe=False)
         else:
             return JsonResponse(data="No such Ori", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
@@ -1528,9 +1792,13 @@ def SearchByCopyNumber(request):
         if(CopyNumber == None or CopyNumber == ""):
             return JsonResponse(data="CopyNumber cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'CopyNumber can not be empty'})
-        BackboneList = Backbonetable.objects.filter(copynumber = CopyNumber)
+        BackboneList = list(Backbonetable.objects.filter(copynumber = CopyNumber).values())
         if(len(BackboneList) > 0):
-            return JsonResponse(data=list(BackboneList.values()), status=200,safe=False)
+            for each in BackboneList:
+                info_list = getBackboneOriAndMarker(each['id'])
+                each['ori'] = info_list[0]
+                each['marker'] = info_list[1]
+            return JsonResponse(data=BackboneList, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(BackboneList.values())})
         else:
             return JsonResponse(data="No such CopyNumber", status=404,safe=False)
@@ -1562,8 +1830,10 @@ def AddBackboneData(request):
         name = data['name']
         length = len(data['sequence']) if data['sequence'] != "" else 0
         sequence = data['sequence']
+        #list
         ori = data['ori']
         marker = data['marker']
+        
         species = data['species']
         copynumber = data['copynumber'] if 'copynumber' in data else ""
         note = data['note'] if 'note' in data else ""
@@ -1573,12 +1843,20 @@ def AddBackboneData(request):
         if(name == None or name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
+        tag = "abnormal" if (len(ori) > 1 or len(marker) > 1) else "normal"
         if(Backbonetable.objects.filter(name = name).first() != None):
-            Backbonetable.objects.filter(name = name).update(name=name, length=length, sequence=sequence, ori=ori, marker=marker,
-                                     species = species,copynumber=copynumber, notes=note, alias=alias,user=username)
+            Backbonetable.objects.filter(name = name).update(name=name, length=length, sequence=sequence,
+                                    species = species,copynumber=copynumber, notes=note, alias=alias,user=username, tag=tag)
+            backbone_id = Backbonetable.objects.filter(name = name).first()
+            Backbone_Culture_Functions.objects.filter(backbone_id = backbone_id.id).delete()
         else:
             Backbonetable.objects.create(name=name, length=length, sequence=sequence, ori=ori, marker=marker,
-                                     species = species,copynumber=copynumber, notes=note, alias=alias,user=username)
+                                    species = species,copynumber=copynumber, notes=note, alias=alias,user=username, tag=tag)
+            backbone_id = Backbonetable.objects.filter(name = name).first()
+        for each in ori:
+            Backbone_Culture_Functions.objects.create(backbone_id = backbone_id, function_content = each, function_type = 'ori')
+        for each in marker:
+            Backbone_Culture_Functions.objects.create(backbone_id = backbone_id, function_content = each, function_type = "marker")
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Added'})
 
@@ -1613,20 +1891,28 @@ def UpdateBackboneData(request):
         newName = request.POST.get('newName')
         newLength = len(request.POST.get('sequence'))
         newSequence = request.POST.get('sequence')
+        #list
         newOri = request.POST.get('ori')
         newMarker = request.POST.get('marker')
+        
         newSpecies = request.POST.get('species')
         newCopynumber = request.POST.get('copynumber')
         newNote = request.POST.get('note')
         newScar = request.POST.get('scar')
         newAlias = request.POST.get('alias')
-        newUser = request.session.get('info')['uid']
+        newUser = request.session.get('info')['uname']
+        tag = "abnormal" if (len(newOri) >1 or len(newMarker) > 1) else "normal"
         if(newName == None or newName == "" or newSequence == None or newSequence == ""):
             return JsonResponse(data="Name and sequence cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, Sequence can not be empty'})
-        Backbonetable.objects.filter(id=BackboneID).update(name=newName, length=newLength, sequence=newSequence,ori=newOri, marker=newMarker,
+        Backbonetable.objects.filter(id=BackboneID).update(name=newName, length=newLength, sequence=newSequence,
                                                            species=newSpecies,copynumber=newCopynumber,notes=newNote,
                                                            scar=newScar,alias=newAlias,user=newUser)
+        Backbone_Culture_Functions.objects.filter(backbone_id = BackboneID).delete()
+        for each in newOri:
+            Backbone_Culture_Functions.objects.create(backbone_id = BackboneID, function_content = each, function_type = "ori")
+        for each in newMarker:
+            Backbone_Culture_Functions.objects.create(backbone_id = BackboneID, function_content = each, function_type = "marker")
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Updated'})
 
@@ -1659,6 +1945,9 @@ def DeleteBackboneData(request):
             return JsonResponse(data="No such BackboneID", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Backbone Not Found'})
         TbBackboneUserfileaddress.objects.filter(backboneid=BackboneID).delete()
+        Parentbackbonetable.objects.filter(parentbackboneid = BackboneID).delete()
+        Backbonescartable.objects.filter(backboneid = BackboneID).delete()
+        Backbone_Culture_Functions.objects.filter(backbone_id = BackboneID).delete()
         Backbonetable.objects.filter(id=BackboneID).delete()
         return JsonResponse(data="Deleted backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Deleted'})
@@ -1678,6 +1967,39 @@ def DeleteBackboneFileAddress(request):
         TbBackboneUserfileaddress.objects.filter(**FilterDict).delete()
         return JsonResponse(data="Deleted backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Address Deleted'})
+
+
+def setBackboneCulture(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        BackboneName = data["name"]
+        Ori_list = data["ori"]
+        Marker_list = data["marker"]
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    backboneid = Backbonetable.objects.filter(name=BackboneName).first()
+                    Backbone_culture_exist = Backbone_Culture_Functions.objects.filter(backbone_id = backboneid).values()
+                    if(len(Backbone_culture_exist) != 0):
+                        Backbone_Culture_Functions.objects.filter(backbone_id = backboneid).delete()
+                    for each_ori in Ori_list:
+                        Backbone_Culture_Functions.objects.create(backbone_id = backboneid,function_content = each_ori, function_type = "ori")
+                    for each_marker in Marker_list:
+                        Backbone_Culture_Functions.objects.create(backbone_id = backboneid,function_content = each_marker, function_type="marker")
+                    return JsonResponse(data = {"success":True,"data":"success upload"},status=200, safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        print("timeout")
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
+
 
 
 
@@ -2237,8 +2559,15 @@ def getPartValueList(request,column):
 def getBackboneValueList(request,column):
     if(request.method == 'GET'):
         if(column != None and column != ""):
-            categories = Backbonetable.objects.values_list(column,flat=True).distinct()
-            categories_list = list(categories)
+            if(column == "ori"):
+                categories = Backbone_Culture_Functions.objects.filter(function_type = "ori").values_list("function_content").distinct()
+                categories_list = list(categories)
+            elif(column == "marker"):
+                categories = Backbone_Culture_Functions.objects.filter(function_type = "marker").values_list("function_content").distinct()
+                categories_list = list(categories)
+            else:
+                categories = Backbonetable.objects.values_list(column,flat=True).distinct()
+                categories_list = list(categories)
             for each_cate in categories_list:
                 if(each_cate == "_" or each_cate == ""):
                     categories_list.remove(each_cate)
@@ -2249,12 +2578,20 @@ def getBackboneValueList(request,column):
 def getPlasmidValueList(request,column):
     if(request.method == 'GET'):
         if(column != None and column != ""):
-            categories = Plasmidneed.objects.values_list(column,flat=True).distinct()
-            categories_list = list(categories)
-            for each_cate in categories_list:
-                if(each_cate == "_" or each_cate == ""):
-                    categories_list.remove(each_cate)
-            return JsonResponse(data={'success':True,'data':categories_list}, status = 200, safe=False)
+            if(column == "ori" or column == "marker"):
+                categories = list(Plasmid_Culture_Functions.objects.filter(function_type = column).values("function_content").distinct())
+                categories_list = []
+                for each_cate in categories:
+                    categories_list.append(each_cate['function_content'])
+                print(categories_list)
+                return JsonResponse(data={'success':True,'data':categories_list}, status = 200, safe=False)
+            else:
+                categories = Plasmidneed.objects.values_list(column,flat=True).distinct()
+                categories_list = list(categories)
+                for each_cate in categories_list:
+                    if(each_cate == "_" or each_cate == ""):
+                        categories_list.remove(each_cate)
+                return JsonResponse(data={'success':True,'data':categories_list}, status = 200, safe=False)
         else:
             return JsonResponse(data="column cannot be empty",status=400, safe=False)
 
@@ -2315,22 +2652,23 @@ def setPartScar(request):
 #Backbone Scar Operation
 def getBackboneScar(request):
     if(request.method == 'GET'):
-        name = request.GET.get('name')
-        if(name != None and name != ""):
-            backbone_object = Backbonetable.objects.filter(name = name).first()
-            scar_info = Backbonescartable.objects.filter(id = backbone_object).first()
+        id = request.GET.get('id')
+        if(id != None and id != ""):
+            # backbone_object = Backbonetable.objects.filter(name = ).first()
+            scar_info = Backbonescartable.objects.filter(backboneid = id).values("bsmbi", "bsai", "bbsi", "aari", "sapi")
             if(scar_info != None):
-                return JsonResponse(data = {'success':True,'scar_info':scar_info},status = 200, safe = False)
+                return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
                 return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
         else:
-            return JsonResponse(data={'success':False, 'error':"Name cannot be empty"},status = 400,safe=False)
+            return JsonResponse(data={'success':False, 'error':"id cannot be empty"},status = 400,safe=False)
     else:
         return JsonResponse(data = {'success':False, 'error':'Just GET method'},status = 400, safe=False)
 
 def setBackboneScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
+        print(data)
         name = data['name']
         bsmbi = data['bsmbi']
         bsai = data['bsai']
@@ -2344,7 +2682,7 @@ def setBackboneScar(request):
                 try:
                     with transaction.atomic():
                         # backbone_obj = Backbonetable.objects.filter(name = name).first()
-                        backbone_obj = Backbonetable.objects.select_for_update().get(name = name)
+                        backbone_obj = Backbonetable.objects.get(name = name)
                         if(len(Backbonescartable.objects.filter(backboneid = backbone_obj)) != 0):
                             Backbonescartable.objects.filter(backboneid = backbone_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
                         else:
@@ -2371,12 +2709,12 @@ def setBackboneScar(request):
 #Plasmid Scar Operation
 def getPlasmidScar(request):
     if(request.method == 'GET'):
-        name = request.GET.get('name')
-        if(name != None and name != ""):
-            plasmid_obj = Plasmidneed.objects.filter(name = name).first()
-            scar_info = Plasmidscartable.objects.filter(plasmidid = plasmid_obj).first()
+        plasmidid = request.GET.get('plasmidid')
+        if(plasmidid != None and plasmidid != ""):
+            scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).values()
+            print(scar_info)
             if(scar_info != None):
-                return JsonResponse(data = {'success':True,'scar_info':scar_info},status = 200, safe = False)
+                return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
                 return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
         else:
@@ -2385,6 +2723,7 @@ def getPlasmidScar(request):
 def setPlasmidScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
+        print(data)
         name = data['name']
         bsmbi = data['bsmbi']
         bsai = data['bsai']
@@ -2398,7 +2737,7 @@ def setPlasmidScar(request):
                 try:
                     with transaction.atomic():
                         # plasmid_obj = Plasmidneed.objects.filter(name = name).first()
-                        plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
+                        plasmid_obj = Plasmidneed.objects.get(name = name)
                     if(len(Plasmidscartable.objects.filter(plasmidid = plasmid_obj)) != 0):
                         Plasmidscartable.objects.filter(plasmidid = plasmid_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
                     else:
@@ -2509,3 +2848,60 @@ def getPlasmidScarList(request):
             if(categories_list.__contains__(each_cate) == False and each_cate != '_' and each_cate != ""):
                 categories_list.append(each_cate)
         return JsonResponse(data = {'success':True,'data':categories_list}, status=200,safe=False)
+
+
+def UpdatePartSequence(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        name = data['name']
+        sequence = data['sequence']
+        # NewLength = len(request.POST.get('Level0Sequence'))
+        # NewLevel0Sequence = request.POST.get('Level0Sequence')
+        try:
+            part_obj = Parttable.objects.select_for_update().get(name = name)
+            # Parttable.objects.filter(name = part_obj.name).update(lengthinlevel0 = len(sequence), Level0Sequence = sequence)
+            part_obj.lengthinlevel0 = len(sequence)
+            part_obj.level0sequence = sequence
+            part_obj.save()
+            return JsonResponse(data = {'success': True}, status = 200, safe = False)
+        except Parttable.DoesNotExist:
+            return JsonResponse(data = {'success':False, 'message':"Part Does Not Exist"}, status = 404, safe = False)
+    else:
+        return JsonResponse(data = {'success':False, 'message' : "just POST method"}, status = 500, safe = False)
+
+def UpdateBackboneSequence(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        name = data['name']
+        sequence = data['sequence']
+        try:
+            backbone_obj = Backbonetable.objects.select_for_update().get(name = name)
+            # Backbonetable.objects.filter(id = backboneid).update(length = len(sequence), sequence = sequence)
+            # Backbonetable.objects.filter(name = backbone_obj.name).update(length = len(sequence), sequence = sequence)
+            backbone_obj.sequence = sequence
+            backbone_obj.length = len(sequence)
+            backbone_obj.save()
+            return JsonResponse(data = {'success': True}, status = 200, safe = False)
+        except Backbonetable.DoesNotExist:
+            return JsonResponse(data = {'success':False, 'message':"Backbone Does Not Exist"}, status = 404, safe = False)
+    else:
+        return JsonResponse(data = {'success':False, 'message' : "just POST method"}, status = 500, safe = False)
+    
+def UpdatePlasmidSequence(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        name = data['name']
+        sequence = data['sequence']
+        try:
+            with transaction.atomic():
+                # sonPlasmidObj = Plasmidneed.objects.select_for_update().get(name = sonPlasmidName)
+                plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
+                plasmid_obj.sequenceconfirm = sequence
+                plasmid_obj.length = len(sequence)
+                # Plasmidneed.objects.filter(name = plasmid_obj.name).update(length = len(sequence), sequenceconfirm = sequence)
+                plasmid_obj.save()
+                return JsonResponse(data = {'success': True}, status = 200, safe = False)
+        except Plasmidneed.DoesNotExist:
+            return JsonResponse(data = {'success':False, 'message':"Plasmid Does Not Exist"}, status = 404, safe = False)
+    else:
+        return JsonResponse(data = {'success':False, 'message' : "just POST method"}, status = 500, safe = False)

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>载体骨架信息 - 基因元件数据库</title>
     <style>
         * {
@@ -319,7 +320,9 @@
         <div class="content">
             <div class="info-section">
                 <h2><i>📋</i> 基本信息</h2>
-                <div class="backbone-name">{{backbone.name}}</div>
+                <h3><i class="fa-solid fa-user-secret"></i>  {{backbone.user}}</h3>
+                <div class="backbone-name">{{backbone.name}}({{backbone.alias}})</div>
+                
                 <!-- <p>pUC19是一种常用的克隆载体，大小为2686 bp，具有高拷贝数、多克隆位点和蓝白斑筛选等特性。</p> -->
                 
                 <div class="info-grid">
@@ -335,8 +338,12 @@
                         <h3>宿主</h3>
                         <p>{{backbone.species}}</p>
                     </div>
+                    <div class = "info-card">
+                        <h3>备注</h3>
+                        <p>{{backbone.notes}}</p>
+                    </div>
                 </div>
-            </div>
+            </i>
             
             <div class="info-section">
                 <h2><i>🧬</i> 载体特征</h2>
@@ -346,7 +353,7 @@
                         <div class="feature-details">
                             <div class="feature-detail-item">
                                 <div class="detail-label">类型:</div>
-                                <div class="detail-value">{{backbone.ori}}</div>
+                                <div class="detail-value" id = "ori_detail_content">{{backbone.ori}}</div>
                             </div>
                             <!-- <div class="feature-detail-item">
                                 <div class="detail-label">位置:</div>
@@ -365,7 +372,7 @@
                         <div class="feature-details">
                             <div class="feature-detail-item">
                                 <div class="detail-label">类型:</div>
-                                <div class="detail-value">{{backbone.marker}}</div>
+                                <div class="detail-value" id = "marker_detail_content" >{{backbone.marker}}</div>
                             </div>
                             <!-- <div class="feature-detail-item">
                                 <div class="detail-label">名称:</div>
@@ -382,28 +389,31 @@
                         </div>
                     </div>
                     
-                    <!-- <div class="feature-card">
-                        <h3><i>🧪</i> 报告基因</h3>
-                        <p>pUC19载体使用LacZα作为报告基因，支持蓝白斑筛选。</p>
+                    <div class="feature-card">
+                        <h3><i>🧪</i> scar</h3>
                         <div class="feature-details">
                             <div class="feature-detail-item">
-                                <div class="detail-label">类型:</div>
-                                <div class="detail-value">β-半乳糖苷酶α片段</div>
+                                <div class="detail-label">BsmBI:</div>
+                                <div class="detail-value">{{scar.bsmbi}}</div>
                             </div>
                             <div class="feature-detail-item">
-                                <div class="detail-label">名称:</div>
-                                <div class="detail-value">LacZα</div>
+                                <div class="detail-label">BsaI:</div>
+                                <div class="detail-value">{{scar.bsai}}</div>
                             </div>
                             <div class="feature-detail-item">
-                                <div class="detail-label">位置:</div>
-                                <div class="detail-value">397-504 bp</div>
+                                <div class="detail-label">BbsI:</div>
+                                <div class="detail-value">{{scar.bbsi}}</div>
                             </div>
                             <div class="feature-detail-item">
-                                <div class="detail-label">筛选底物:</div>
-                                <div class="detail-value">X-gal/IPTG</div>
+                                <div class="detail-label">AarI:</div>
+                                <div class="detail-value">{{scar.aari}}</div>
+                            </div>
+                            <div class="feature-detail-item">
+                                <div class="detail-label">SapI:</div>
+                                <div class="detail-value">{{scar.sapi}}</div>
                             </div>
                         </div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
             
@@ -411,9 +421,9 @@
                 <h2><i>🗺️</i> 载体图谱</h2>
                 <p>{{backbone.name}}载体图谱显示主要功能元件的位置和方向：</p>
                 <div class="map-container">
-                    <div class="plasmid-map">
-                        <div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{backbone.marker}}</div>
-                        <div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">{{backbone.ori}}</div>
+                    <div class="plasmid-map" id = "plasmid-map-div">
+                        <!-- <div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{backbone.marker}}</div>
+                        <div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">{{backbone.ori}}</div> -->
                         <!-- <div class="plasmid-label" style="transform: rotate(180deg) translate(220px) rotate(-180deg);">LacZα (397-504)</div>
                         <div class="plasmid-label" style="transform: rotate(270deg) translate(220px) rotate(-270deg);">MCS (396-454)</div> -->
                         <!-- <div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">AmpR (329-1276)</div>
@@ -455,13 +465,37 @@
     </div>
 
     <script>
-
-        document.getElementById('downPartMapButton').addEventListener('click',function(){
-            let pathname_list = window.location.pathname.split('/');
-            let backboneid = pathname_list[pathname_list.length -1];
-            window.location.href = `/LabDatabase/downloadBackboneMap/${backboneid}`;
-        })
-        // 简单的载体图谱交互效果
+        document.addEventListener('DOMContentLoaded', function(){
+            const plasmid_map_div = document.getElementById("plasmid-map-div");
+            // '<div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{backbone.marker}}</div>'
+            // '<div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">{{backbone.ori}}</div>'
+            ori_list = `{{backbone.ori}}`.split(", ")
+            marker_list = `{{backbone.marker}}`.split(", ")
+            ori_length = ori_list.length
+            marker_length = marker_list.length
+            total_num = ori_length + marker_length
+            each_deg = Math.floor(360 / total_num)
+            deg = 0
+            console.log(ori_list);
+            console.log(marker_list);
+            console.log(each_deg);
+            ori_list.forEach(item =>{
+                const tab = document.createElement("div");
+                tab.classList.add("plasmid-label");
+                tab.style.transform = `rotate(${deg}deg) translate(220px) rotate(-${deg}deg)`;
+                tab.innerText = item;
+                deg = deg + each_deg;
+                plasmid_map_div.appendChild(tab);
+            })
+            marker_list.forEach(item =>{
+                const tab = document.createElement("div");
+                tab.classList.add("plasmid-label");
+                tab.style.transform = `rotate(${deg}deg) translate(220px) rotate(-${deg}deg)`;
+                tab.innerText = item;
+                deg = deg + each_deg;
+                plasmid_map_div.appendChild(tab);
+            })
+            // 简单的载体图谱交互效果
         document.querySelectorAll('.plasmid-label').forEach(label => {
             label.addEventListener('mouseover', function() {
                 this.style.backgroundColor = 'rgba(255,255,255,0.7)';
@@ -477,6 +511,13 @@
                 this.style.zIndex = '1';
             });
         });
+        })
+        document.getElementById('downPartMapButton').addEventListener('click',function(){
+            let pathname_list = window.location.pathname.split('/');
+            let backboneid = pathname_list[pathname_list.length -1];
+            window.location.href = `/LabDatabase/downloadBackboneMap/${backboneid}`;
+        })
+        
         
         // 下载按钮交互
         document.querySelectorAll('.btn').forEach(button => {

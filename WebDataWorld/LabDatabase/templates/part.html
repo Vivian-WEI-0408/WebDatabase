@@ -2,7 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <title>基因元件信息</title>
     <style>
         * {
@@ -223,8 +225,8 @@
         <div class="content">
             <div class="info-section">
                 <h2><i>📋</i> 基本信息</h2>
-                <div class="gene-name">{{part.name}}</div>
-                <div class="gene-alias">{{part.alias}}</div>
+                <h3><i class="fa-solid fa-user-secret"></i>  {{part.user}}</h3>
+                <div class="gene-name">{{part.name}}({{part.alias}})</div>
                 
                 <div class="info-grid">
                     <div class="info-card">
@@ -238,6 +240,10 @@
                     <div class="info-card">
                         <h3>元件大小</h3>
                         <p>{{part.lengthinlevel0}} bp</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>备注</h3>
+                        <p>{{part.note}}</p>
                     </div>
                     <!-- <div class="info-card">
                         <h3>分子量</h3>
@@ -277,7 +283,7 @@
 
         
         <footer>
-            <p>基因元件数据库 &copy; 2023 | 最后更新: 2023年11月15日</p>
+            <p>基因元件数据库 &copy; 2025 | 最后更新: 2025年11月27日</p>
         </footer>
     </div>
 

@@ -41,6 +41,7 @@ urlpatterns = [
     path("deletePart",views.deletePartData,name="deletePart"),
     path("deletePartFile",views.deletePartFile,name="deletePartFile"),
     path("PartFilter",views.PartFilter,name="PartFilter"),
+    path("UpdatePartSequence",views.UpdatePartSequence,name="UpdatePartSequence"),
 
     path("Plasmid",views.PlasmidDataALL,name="Plasmid"),
     path("PlasmidName",views.SearchByPlasmidName,name="PlamsidName"),
@@ -49,10 +50,8 @@ urlpatterns = [
     path("PlasmidSeqByName",views.SearchPlasmidSequenceByName,name="PlasmidSeq"),
     path("PlasmidSeqByID",views.SearchPlasmidSequenceByID,name="PlasmidSeqByID"),
     path("PlasmidSeq",views.SearchByPlasmidSeq,name="PlasmidSeq"),
-    path("PlasmidOriClone",views.SearchByOriClone,name="PlasmidOriClone"),
-    path("PlasmidOriHost",views.SearchByOriHost,name="PlasmidOriHost"),
-    path("PlasmidMarkerClone",views.SearchByMarkerClone,name="PlasmidMarkerClone"),
-    path("PlasmidMarkerHost",views.SearchByMarkerHost,name="PlasmidMarkerHost"),
+    path("PlasmidOri",views.SearchByOri,name="PlasmidOri"),
+    path("PlasmidMarker",views.SearchByMarker,name="PlasmidMarker"),
     path("PlasmidLevel",views.SearchByLevel,name="PlasmidLevel"),
     path("PlasmidPlate",views.SearchByPlate,name="PlasmidPlate"),
     path("PlasmidParent",views.SearchPlasmidParent,name="PlasmidParent"),
@@ -69,6 +68,8 @@ urlpatterns = [
     path("deletePlasmidParent",views.DeleteParentPlasmid,name="deletePlasmidParent"),
     path("PlasmidFilter",views.PlasmidFilter,name="PlasmidFilter"),
     path("UpdateParentInfo",views.AddPlasmidParentInfo,name="UpdateParentInfo"),
+    path("setPlasmidCulture",views.setPlasmidCulture,name="setPlasmidCulture"),
+    path("UpdatePlasmidSequence",views.UpdatePlasmidSequence, name= "UpdatePlasmidSequence"),
 
     path("Backbone",views.BackboneDataALL,name="Backbone"),
     path("BackboneName",views.SearchByBackboneName,name="BackboneName"),
@@ -88,6 +89,8 @@ urlpatterns = [
     path("deleteBackbone",views.DeleteBackboneData,name="deleteBackbone"),
     path("deleteBackboneFile",views.DeleteBackboneFileAddress,name="deleteBackboneFile"),
     path("BackboneFilter",views.BackboneFilter,name="BackboneFilter"),
+    path("UpdateBackboneSequence",views.UpdateBackboneSequence,name="UpdateBackboneSequence"),
+    path("setBackboneCulture",views.setBackboneCulture,name="setBackboneCulture"),
 
     path("TestDataName",views.SearchByTestdataName,name="TestDataName"),
 

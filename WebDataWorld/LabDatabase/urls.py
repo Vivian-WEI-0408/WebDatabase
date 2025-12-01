@@ -14,9 +14,7 @@ urlpatterns = [
     
 
     #Upload Sequence Map
-    path("UploadPartMap",views.UploadPartMap,name="UploadPartMap"),
-    path("UploadBackboneMap",views.UploadBackboneMap,name="UploadBackboneMap"),
-    path("UploadPlasmidMap",views.UploadPlasmidMap,name="UploadPlasmidMap"),
+    path("UploadMap",views.UploadMap,name="UploadMap"),
 
 
 

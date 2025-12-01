@@ -8,6 +8,7 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
 from LabDatabase.excel_processor import ExcelProcessor
+from LabDatabase.map_processor import process_map_file
 import requests
 # from WebDatabase.models import UploadedFile
 import threading
@@ -23,13 +24,16 @@ import re
 # from .forms import FileUploadForm
 from .CaculateModule.FeatureIdentify import featureIdentify
 from .CaculateModule.FileGenerator import SequenceAnnotator
-from .CaculateModule.ScarIdentify import scarPosition
+from .CaculateModule.ScarIdentify import scarPosition,scarFunction
+from .CaculateModule.snapgene_reader import snapgene_to_dict
+from .ControllerModule import FittingLabels
+
 import uuid
 
-Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Base_URL = "http://10.30.76.2:8004/WebDatabase/"
 
 
-TASK_STATUS_PREFIX = 'excel_task_'
+TASK_STATUS_PREFIX = 'file_task_'
 # class User_auth(MiddlewareMixin):
 
 #     def process_request(self,request):
@@ -70,7 +74,7 @@ def getData(request):
                 # if(sessionid):
                 #     cookies[settings.SESSION_COOKIE_NAME] = sessionid
                 promoterResponse = requests.get(f'{Base_URL}Part?page={page}',cookies=request.COOKIES)
-                print(promoterResponse.url)
+                # print(promoterResponse.url)
                 if(promoterResponse.status_code == 200):
                     promoter = promoterResponse.json()
                     return JsonResponse(promoter,status=200,safe=False)
@@ -140,7 +144,7 @@ def DataFilter(request):
                 return JsonResponse(str(e),status = 400, safe=False)
         elif(type == "plasmid"):
             try:
-                request_body = {'oriClone':data.get('OriClone',""),'markerClone':data.get('MarkerClone',""),'oriHost':data.get('OriHost',""),'markerHost':data.get('MarkerHost',""),'Enzyme':data.get('Enzyme',""),'Scar':data.get('Scar',""),'name':data.get('name',""),'page':page,"page_size":10}
+                request_body = {'ori':data.get('Ori',""),'marker':data.get('Marker',""),'Enzyme':data.get('Enzyme',""),'Scar':data.get('Scar',""),'name':data.get('name',""),'page':page,"page_size":10}
                 plasmidResponse = session.post(f'{Base_URL}PlasmidFilter',json = request_body,cookies=request.COOKIES)
                 if(plasmidResponse.status_code == 200):
                     plasmid = plasmidResponse.json()
@@ -192,6 +196,46 @@ def download_template(request,type):
         raise Http404('模板文件不存在')
 
 
+"""
+file_name: [filename, file_type]
+"""
+def process_map_async(upload_map, file_name, upload_type, django_request, task_id, index, number_of_task):
+    try:
+        Sequence = ""
+        upload_map_temp = upload_map.read()
+        upload_map.seek(0)
+        upload_map_temp = upload_map_temp.decode("utf-8")
+        upload_map = io.StringIO(upload_map_temp)
+        result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
+        print(result)
+        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+        if(result):
+            
+            task_status_new = {
+                'status':'processing',
+                'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
+                'result':None,
+                'error':[]
+            }
+            # print(task_id)
+            # print(task_status)
+            cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
+        else:
+            task_status_new = {
+                'status':'processing',
+                'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
+                'result':None,
+            }
+            task_status['error'].append(f'{file_name} 上传失败')
+            # print(task_id)
+            # print(task_status)
+            cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
+    except Exception as e:
+        print(str(e))
+        
+                
+
+
 def process_excel_async(upload_record,django_request,task_id):
     Error_rows = []
     Empty_sequence_rows = []
@@ -200,7 +244,7 @@ def process_excel_async(upload_record,django_request,task_id):
             'status':'processing',
             'progress':10,
             'result':None,
-            'error':None
+            'error':[]
         }
         cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
         file_content = upload_record.read()
@@ -261,7 +305,6 @@ def UploadFile(request):
             'error':None,
         }
         cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
-
         thread = threading.Thread(
             target = process_excel_async,
             args= (file,request,task_id)
@@ -285,34 +328,64 @@ def UploadFile(request):
     
 def task_status(request, task_id):
     task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+    print(task_status)
     if(not task_status):
         return JsonResponse({'error':"任务不存在或已过期"},status=404)
+    if(task_status['progress'] == 100):
+        task_status['status'] = 'completed'
     response_data = {
         'task_id':task_id,
         'status':task_status['status'],
         'progress':task_status['progress'],
     }
     if task_status['status'] == 'completed':
-        response_data.update(task_status['result'])
+        if(task_status['result'] != None):
+            response_data.update(task_status['result'])
+        if(task_status['error'] != None):
+            response_data['error'] = task_status['error']
     elif task_status['status'] == 'failed':
         response_data['error'] = task_status['error']
     return JsonResponse(response_data)
 
-# def UploadPartFile(request):
-#     if request.method == 'POST' and request.FILES:
-#         file = request.FILES.get('file')
-#         title = request.POST.get('title', file.name)
-#         username = request.session['info']['uname']
-#         print(file)
-#         thread = threading.Thread(
-#             target = process_excel_async,
-#             args= (file,username)
-#         )
-#         thread.daemon = True
-#         thread.start()
-#         return JsonResponse({'success':True})
-#     else:
-#         return JsonResponse({'success':False,'message':'Upload record is empty'})
+
+@csrf_exempt
+def UploadMap(request):
+    if request.method == 'POST' and request.FILES.getlist('files'):
+        files = request.FILES.getlist('files')
+        task_status = {
+            'status':'processing',
+            'progress':0,
+            'result':None,
+            'error':None,
+        }
+        task_id = str(uuid.uuid4())
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
+        # upload_map,file_name,upload_type,django_request, task_id
+        
+        # title = request.POST.get('title', file.name)
+        pattern = r'^([^\_|.]+)'
+        number_of_task = len(files)
+        index = 0
+        for each in files:
+            suffix = each.name.split('.')[1]
+            each_name = []
+            match = re.match(pattern, each.name)
+            each_name.append(match.group(1).strip())
+            each_name.append(suffix)
+            # print(title)
+            type = request.POST.get('type')
+            # print(file)
+            # upload_map, file_name, upload_type, django_request, task_id, index, number_of_task
+            thread = threading.Thread(
+                target = process_map_async,
+                args= (each,each_name,type,request,task_id,index,number_of_task)
+            )
+            thread.daemon = True
+            thread.start()
+            index+=1
+        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件上传成功，正在处理中..."},status = 200, safe = False)
+    else:
+        return JsonResponse({'success':False,'message':'Upload record is empty'})
 
 def UploadBackboneFile(request):
     pass
@@ -351,9 +424,14 @@ def backbone_detail_show(request,backboneid):
             'Content-Type':'application/json',
         })
         backboneResponse = session.get(f'{Base_URL}BackboneByID?ID={backboneid}',cookies=request.COOKIES)
-        if(backboneResponse.status_code == 200):
+        backbonescar = session.get(f"{Base_URL}getBackboneScar?id={backboneid}",cookies=request.COOKIES)
+        if(backboneResponse.status_code == 200 and backbonescar.status_code == 200):
             backbone = backboneResponse.json()[0]
-            return render(request,'backbone.html',{'backbone':backbone})
+            backbone['ori'] = ", ".join(backbone['ori'])
+            backbone['marker'] = ", ".join(backbone['marker'])
+            print(backbone)
+            print(backbonescar.json())
+            return render(request,'backbone.html',{'backbone':backbone, "scar":backbonescar.json()['scar_info'][0]})
         else:
             return render(request,'error.html',{'error':backboneResponse.text})
 
@@ -365,6 +443,9 @@ def plasmid_detail_show(request,plasmidid):
             'Content-Type':'application/json',
         })
         plasmidResponse = session.get(f'{Base_URL}PlasmidByID?ID={plasmidid}',cookies=request.COOKIES)
+        plasmidScar = session.get(f'{Base_URL}getPlasmidScar?plasmidid={plasmidid}',cookies = request.COOKIES)
+        # print(plasmidScar)
+        # print(plasmidScar.json()["scar_info"][0])
         plasmidParentPart = session.get(f'{Base_URL}GetPartParent?plasmidid={plasmidid}',cookies=request.COOKIES)
         
         plasmidParentBackbone = session.get(f'{Base_URL}GetBackboneParent?plasmidid={plasmidid}',cookies=request.COOKIES)
@@ -372,9 +453,12 @@ def plasmid_detail_show(request,plasmidid):
         plasmidParentPlasmid = session.get(f'{Base_URL}GetPlasmidParent?plasmidid={plasmidid}',cookies=request.COOKIES)
         
         plasmidSonPlasmid = session.get(f'{Base_URL}GetPlasmidSon?plasmidid={plasmidid}',cookies = request.COOKIES)
+
         if(plasmidResponse.status_code == 200 and plasmidParentPart.status_code == 200 and plasmidParentBackbone.status_code == 200 and
-            plasmidParentPlasmid.status_code == 200 and plasmidSonPlasmid.status_code == 200):
+            plasmidParentPlasmid.status_code == 200 and plasmidSonPlasmid.status_code == 200 and plasmidScar.status_code == 200):
             plasmid = plasmidResponse.json()[0]
+            plasmid["ori_info"] = ", ".join(plasmid["ori_info"])
+            plasmid["marker_info"] = ", ".join(plasmid["marker_info"])
             result = {
                     'Part':[],
                     "Backbone":[],
@@ -394,7 +478,7 @@ def plasmid_detail_show(request,plasmidid):
                         result['Plasmid'].append(letter)
             return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'] if len(plasmidParentBackbone.json()['data']) > 0 else [],
                                     'plasmidparent':plasmidParentPlasmid.json()['data'] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'] if len(plasmidSonPlasmid.json()['data']) > 0 else [], 'ParentPartInfo':result["Part"],
-                                    'ParentBackboneInfo':result['Backbone'],'ParentPlasmidInfo':result['Plasmid']})
+                                    'ParentBackboneInfo':result['Backbone'],'ParentPlasmidInfo':result['Plasmid'],"scar":plasmidScar.json()["scar_info"][0]})
         else:
             return render(request,'error.html',{'error':plasmidResponse.text})
 
