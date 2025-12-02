@@ -19,7 +19,7 @@ class featureIdentify:
         self.miscFeatureKmer = KmerIndex.KmerIndex()
         self.primerBindKmer = KmerIndex.KmerIndex()
         type = ""
-        with open(r'C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase\CaculateModule\BasicFeature.txt','r') as file:
+        with open(r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\CaculateModule\BasicFeature.txt','r') as file:
             lines = file.readlines()
             for line in lines:
                 line = line.strip('\n')
