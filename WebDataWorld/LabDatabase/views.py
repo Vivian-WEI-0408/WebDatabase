@@ -204,13 +204,16 @@ def process_map_async(upload_map, file_name, upload_type, django_request, task_i
         Sequence = ""
         upload_map_temp = upload_map.read()
         upload_map.seek(0)
-        upload_map_temp = upload_map_temp.decode("utf-8")
-        upload_map = io.StringIO(upload_map_temp)
-        result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
+        if(file_name[1] == "dna"):
+            print("file_name_dna")
+            result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
+        else:
+            upload_map_temp = upload_map_temp.decode("utf-8")
+            upload_map = io.StringIO(upload_map_temp)
+            result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
         print(result)
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         if(result):
-            
             task_status_new = {
                 'status':'processing',
                 'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
@@ -226,10 +229,11 @@ def process_map_async(upload_map, file_name, upload_type, django_request, task_i
                 'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
                 'result':None,
             }
-            task_status['error'].append(f'{file_name} 上传失败')
+            task_status_new['error'].append(f'{file_name} 上传失败')
             # print(task_id)
             # print(task_status)
             cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
+            print(task_status_new)
     except Exception as e:
         print(str(e))
         
@@ -356,7 +360,7 @@ def UploadMap(request):
             'status':'processing',
             'progress':0,
             'result':None,
-            'error':None,
+            'error':[],
         }
         task_id = str(uuid.uuid4())
         cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
@@ -431,7 +435,11 @@ def backbone_detail_show(request,backboneid):
             backbone['marker'] = ", ".join(backbone['marker'])
             print(backbone)
             print(backbonescar.json())
-            return render(request,'backbone.html',{'backbone':backbone, "scar":backbonescar.json()['scar_info'][0]})
+            if(backbonescar.json()['success']):
+                scar_info = backbonescar.json()['scar_info']
+            else:
+                scar_info = backbonescar.json()['error']
+            return render(request,'backbone.html',{'backbone':backbone, "scar":scar_info})
         else:
             return render(request,'error.html',{'error':backboneResponse.text})
 
@@ -464,8 +472,12 @@ def plasmid_detail_show(request,plasmidid):
                     "Backbone":[],
                     "Plasmid":[],
                 }
-            if(plasmid['CustomParentInfo'] != "" and plasmid['CustomParentInfo']!= None and plasmid['CustomParentInfo'] != 'None' and plasmid['CustomParentInfo'] != 'NULL'):
-                plasmidParentInfo = plasmid['CustomParentInfo']
+            if(plasmidScar.json()['success']):
+                scar_info = plasmidScar.json()['scar_info']
+            else:
+                scar_info = plasmidScar.json()['error']
+            if(plasmid['customparentinformation'] != "" and plasmid['customparentinformation']!= None and plasmid['customparentinformation'] != 'None' and plasmid['customparentinformation'] != 'NULL'):
+                plasmidParentInfo = plasmid['customparentinformation']
                 pattern = r'(\w+)\(([ a-zA-z0-9]+)\)'
                 matches = re.findall(pattern, plasmidParentInfo)
                 print(result)
@@ -478,7 +490,7 @@ def plasmid_detail_show(request,plasmidid):
                         result['Plasmid'].append(letter)
             return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'] if len(plasmidParentBackbone.json()['data']) > 0 else [],
                                     'plasmidparent':plasmidParentPlasmid.json()['data'] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'] if len(plasmidSonPlasmid.json()['data']) > 0 else [], 'ParentPartInfo':result["Part"],
-                                    'ParentBackboneInfo':result['Backbone'],'ParentPlasmidInfo':result['Plasmid'],"scar":plasmidScar.json()["scar_info"][0]})
+                                    'ParentBackboneInfo':result['Backbone'],'ParentPlasmidInfo':result['Plasmid'],"scar":scar_info})
         else:
             return render(request,'error.html',{'error':plasmidResponse.text})
 

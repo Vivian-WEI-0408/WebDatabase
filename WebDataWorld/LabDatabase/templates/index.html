@@ -650,6 +650,8 @@
                 var file_input = document.getElementById('batchFileInput');
                 var file = file_input.files;
                 batchUploadFile(file);
+                const batchUploadModal = bootstrap.Modal.getInstance(document.getElementById('batchUploadModal'));
+                batchUploadModal.hide();
             });
 
             async function UploadFile(files, type){
@@ -690,8 +692,9 @@
                     alert('请选择文件');
                     return;
                 }
+                console.log(file);
                 const fd = new FormData();
-                fd.append('file',file);
+                fd.append('file',file[0]);
 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 const response = await fetch("/LabDatabase/UploadFile",{
@@ -703,8 +706,6 @@
                 });
                 var file_input = document.getElementById('batchFileInput');
                 file_input.innerText = '';
-                const batchUploadModal = bootstrap.Modal.getInstance(document.getElementById('batchUploadModal'));
-                batchUploadModal.hide();
                 const result = await response.json()
                 if(result.task_id){
                     alert(result.message);

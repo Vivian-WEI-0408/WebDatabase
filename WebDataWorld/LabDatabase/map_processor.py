@@ -16,6 +16,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             print(Sequence)
             break
     elif(file_name[1] == "dna"):
+        print("process_map_file")
         record = snapgene_to_dict(upload_map)
         Sequence = record['seq']
     if(Sequence != ""):
