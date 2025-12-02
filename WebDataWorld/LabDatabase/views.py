@@ -30,7 +30,7 @@ from .ControllerModule import FittingLabels
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
 
 
 TASK_STATUS_PREFIX = 'file_task_'
@@ -292,6 +292,7 @@ def process_excel_async(upload_record,django_request,task_id):
     # ExcelProcessor.process_excel_file(upload_record)
 @csrf_exempt
 def UploadFile(request):
+    print(request.FILES)
     if(request.method == 'POST' and request.FILES):
         file = request.FILES.get('file')
         title = request.POST.get('title', file.name)
@@ -348,7 +349,7 @@ def task_status(request, task_id):
     return JsonResponse(response_data)
 
 
-@csrf_exempt
+# @csrf_exempt
 def UploadMap(request):
     if request.method == 'POST' and request.FILES.getlist('files'):
         files = request.FILES.getlist('files')

@@ -1186,13 +1186,14 @@ def AddPlasmidData(request):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
-            Plasmidneed.objects.create(name=name, oricloning=oriclone, orihost=orihost, markercloning=markerclone,
-                                   markerhost=markerhost, level = level, length = length, sequenceconfirm=sequence,
+            Plasmidneed.objects.create(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo)
         else:
             Plasmidneed.objects.filter(name=name).update(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,CustomParentInfo = ParentInfo,user=username, tag = tag)
-            plasmidid = Plasmidneed.objects.filter(name = name).first()
+            plasmidid = Plasmidneed.objects.filter(name = name).first().plasmidid
+            Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmidid).delete()
+        plasmidid = Plasmidneed.objects.filter(name = name).first()
         for each in ori:
             Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidid, function_content = each, function_type = "ori")
         for each in marker:

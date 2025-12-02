@@ -576,7 +576,7 @@
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="batchFileInput" class="form-label">选择文件</label>
-                            <input class="form-control" type="file" id="batchFileInput">
+                            <input class="form-control" type="file" id="batchFileInput" accept=".xlsx">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">模板下载</label>
@@ -648,6 +648,8 @@
             
             document.getElementById('batchUploadBtn').addEventListener('click', function() {
                 var file_input = document.getElementById('batchFileInput');
+                console.log(file_input);
+                console.log(file_input.files);
                 var file = file_input.files;
                 batchUploadFile(file);
             });
@@ -691,7 +693,7 @@
                     return;
                 }
                 const fd = new FormData();
-                fd.append('file',file);
+                fd.append('file',file[0]);
 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 const response = await fetch("/LabDatabase/UploadFile",{
