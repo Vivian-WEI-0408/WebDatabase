@@ -2749,7 +2749,7 @@ def getBackboneScar(request):
         if(id != None and id != ""):
             # backbone_object = Backbonetable.objects.filter(name = ).first()
             scar_info = Backbonescartable.objects.filter(backboneid = id).values("bsmbi", "bsai", "bbsi", "aari", "sapi")
-            if(scar_info != None):
+            if(len(scar_info) != 0):
                 return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
                 return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 200, safe = False)
@@ -2815,7 +2815,7 @@ def getPlasmidScar(request):
         if(plasmidid != None and plasmidid != ""):
             scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).values()
             print(scar_info)
-            if(scar_info != None):
+            if(len(scar_info) != 0):
                 return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
                 return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 200, safe = False)

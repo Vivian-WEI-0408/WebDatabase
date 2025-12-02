@@ -30,7 +30,7 @@ from .ControllerModule import FittingLabels
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
 
 
 TASK_STATUS_PREFIX = 'file_task_'
