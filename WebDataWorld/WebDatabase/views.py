@@ -1897,20 +1897,21 @@ def AddBackboneData(request):
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
         # tag = "abnormal" if (len(ori) > 1 or len(marker) > 1) else "normal"
         if(Backbonetable.objects.filter(name = name).first() != None):
-            backbone_obj = Backbonetable.objects.select_for_update().get(name = name)
-            backbone_obj.name = name
-            backbone_obj.length = length
-            backbone_obj.sequence = sequence
-            backbone_obj.species = species
-            backbone_obj.copynumber = copynumber
-            backbone_obj.notes = note
-            backbone_obj.alias = alias
-            backbone_obj.user = username
-            backbone_obj.tag = tag
-            backbone_obj.updatedate = timezone.now()
-            backbone_obj.save()
-            backbone_id = Backbonetable.objects.filter(name = name).first()
-            Backbone_Culture_Functions.objects.filter(backbone_id = backbone_id.id).delete()
+            with transaction.atomic():
+                backbone_obj = Backbonetable.objects.select_for_update().get(name = name)
+                backbone_obj.name = name
+                backbone_obj.length = length
+                backbone_obj.sequence = sequence
+                backbone_obj.species = species
+                backbone_obj.copynumber = copynumber
+                backbone_obj.notes = note
+                backbone_obj.alias = alias
+                backbone_obj.user = username
+                backbone_obj.tag = tag
+                backbone_obj.updatedate = timezone.now()
+                backbone_obj.save()
+                backbone_id = Backbonetable.objects.filter(name = name).first()
+                Backbone_Culture_Functions.objects.filter(backbone_id = backbone_id.id).delete()
         else:
             uploadDate = timezone.now()
             updateDate = timezone.now()

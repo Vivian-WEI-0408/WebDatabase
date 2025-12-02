@@ -30,7 +30,7 @@ from .ControllerModule import FittingLabels
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Base_URL = "http://10.30.76.2:8004/WebDatabase/"
 
 
 TASK_STATUS_PREFIX = 'file_task_'
@@ -437,7 +437,7 @@ def backbone_detail_show(request,backboneid):
             print(backbone)
             print(backbonescar.json())
             if(backbonescar.json()['success']):
-                scar_info = backbonescar.json()['scar_info']
+                scar_info = backbonescar.json()['scar_info'][0]
             else:
                 scar_info = backbonescar.json()['error']
             return render(request,'backbone.html',{'backbone':backbone, "scar":scar_info})
@@ -474,7 +474,7 @@ def plasmid_detail_show(request,plasmidid):
                     "Plasmid":[],
                 }
             if(plasmidScar.json()['success']):
-                scar_info = plasmidScar.json()['scar_info']
+                scar_info = plasmidScar.json()['scar_info'][0]
             else:
                 scar_info = plasmidScar.json()['error']
             if(plasmid['customparentinformation'] != "" and plasmid['customparentinformation']!= None and plasmid['customparentinformation'] != 'None' and plasmid['customparentinformation'] != 'NULL'):
