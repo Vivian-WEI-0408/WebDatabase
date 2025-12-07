@@ -1,34 +1,30 @@
-from Bio.Seq import Seq
-import re
+# from Bio.Seq import Seq
+# import re
 import pymysql
 import sys
-sys.path.append(r'C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase')
-from ControllerModule import FittingLabels
+# sys.path.append(r'C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase')
+# from ControllerModule import FittingLabels
 
 conn = pymysql.connect(user="root",password="04080117",host="localhost",database="labdnadata")
 cur = conn.cursor()
 
 sql = "begin;"
-sql = "select plasmidid from plasmidneed;"
+sql = "select backboneid, count(backboneid) as count from backbonescartable group by backboneid having count(backboneid) > 1;"
 cur.execute(sql)
 result = cur.fetchall()
 for each in result:
-    sql2 = f"select function_content from plasmid_culture_functions where plasmid_id = {each[0]} and function_type = 'ori';"
+    sql2 = f"select backbonescarid from backbonescartable where backboneid = {each[0]};"
     cur.execute(sql2)
     result2 = cur.fetchall()
+    print(result2)
+    print(len(result2))
     if(len(result2) > 1):
-        sql3 = f"update plasmidneed set tag = 'abnormal' where plasmidid = {each[0]};"
-        cur.execute(sql3)
-    else:
-        sql4 = f"select function_content from plasmid_culture_functions where plasmid_id = {each[0]} and function_type = 'marker';"
-        cur.execute(sql4)
-        result4 = cur.fetchall()
-        if(len(result4) > 1):
-            sql5 = f"update plasmidneed set tag = 'abnormal' where plasmidid = {each[0]};"
-            cur.execute(sql5)
-        else:
-            sql5 = f"update plasmidneed set tag = 'normal' where plasmidid = {each[0]};"
-            cur.execute(sql5)
+        for i in range(1,len(result2)):
+            sql3 = f"delete from backbonescartable where backbonescarid = {result2[i][0]};"
+            print(sql3)
+            cur.execute(sql3)
+            
+            
 #     sql2 = f"update parttable set tag = 'normal' where partid = {each[0]};"
 #     cur.execute(sql2)
 # sql = "begin;"

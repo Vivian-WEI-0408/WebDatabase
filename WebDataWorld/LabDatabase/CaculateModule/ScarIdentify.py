@@ -20,6 +20,7 @@ CACC   J
 TGTC   K
 CGCT   L
 CCGT   M
+TTTT   T
 '''
 
 type2s_enzymes = ["BsmBI","BsaI","BbsI","AarI","SapI"]
@@ -91,6 +92,8 @@ def scarName(seq):
         scar_str += "L"
     elif(seq.upper() == "CCGT"):
         scar_str += "M"
+    elif(seq.upper() == "TTTT"):
+        scar_str += "T"
     else:
         scar_str = "undefine"
     return scar_str
@@ -131,6 +134,8 @@ def scarFunction(seq):
                 scar_str += "L"
             elif(NoSite['Scar']["start"].upper() == "CCGT"):
                 scar_str += "M"
+            elif(NoSite['Scar']["start"].upper() == "TTTT"):
+                scar_str += "T"
             if(NoSite["Scar"]["end"].upper() == "CTGA"):
                 scar_str += "F"
             elif(NoSite["Scar"]["end"].upper() == "TACG"):
@@ -165,6 +170,8 @@ def scarFunction(seq):
                 scar_str += "L"
             elif(NoSite['Scar']["end"].upper() == "CCGT"):
                 scar_str += "M"
+            elif(NoSite['Scar']['end'].upper() == "TTTT"):
+                scar_str += "T"
         if(scar_str == ""):
             scar_list.append("Enzyme Not Available")
         else:

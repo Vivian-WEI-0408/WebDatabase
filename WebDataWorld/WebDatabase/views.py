@@ -851,8 +851,11 @@ def PlasmidFilter(request):
                                 each['ori_info'] = info_list[0]
                                 each['marker_info'] = info_list[1]
                                 print(info_list)
-                                plasmid_scar_obj = Plasmidscartable.objects.get(plasmidid = each['plasmidid'])
-                                each['scar'] = plasmid_scar_obj.bbsi
+                                plasmid_scar_obj = Plasmidscartable.objects.filter(plasmidid = each['plasmidid']).first()
+                                if(plasmid_scar_obj != None):
+                                    each['scar'] = plasmid_scar_obj.bbsi
+                                else:
+                                    each['scar'] = "No Sequence"
                             except Plasmidscartable.DoesNotExist:
                                 each['scar'] = "No Sequence"
                             except Plasmid_Culture_Functions.DoesNotExist:
@@ -871,7 +874,11 @@ def PlasmidFilter(request):
                         info_list = getOriAndMarker(temp_result['plasmidid'])
                         temp_result['ori_info'] = info_list[0]
                         temp_result['marker_info'] = info_list[1]
-                        temp_result['scar'] = Plasmidscartable.objects.filter(plasmidid = temp_result['plasmidid']).first().bbsi
+                        plasmid_scar_obj = Plasmidscartable.objects.filter(plasmidid = temp_result['plasmidid']).first()
+                        if(plasmid_scar_obj != None):
+                            temp_result['scar'] = plasmid_scar_obj.bbsi
+                        else:
+                            temp_result['scar'] = "No Sequence"
                         PlasmidResult.append(temp_result)
         # print(PlasmidResult)
         if(len(PlasmidResult) != 0):
@@ -1513,7 +1520,7 @@ def BackboneDataALL(request):
             offset = (page -1)*page_size
             total_count = Backbonetable.objects.count()
             total_pages = (total_count + page_size -1) // page_size
-            query_set = Backbonetable.objects.order_by('name').values('id','name','alias','marker','ori','species','tag')[offset:offset+page_size]
+            query_set = Backbonetable.objects.order_by('name').values('id','name','alias','species','tag')[offset:offset+page_size]
             # query_set = Backbonetable.objects.only('id','name','marker','ori','species').all().order_by('name')[offset:offset+page_size]
             query_set = list(query_set)
             for each in query_set:
@@ -1645,7 +1652,11 @@ def BackboneFilter(request):
                                 info_list = getBackboneOriAndMarker(each['id'])
                                 each['ori'] = info_list[0]
                                 each['marker'] = info_list[1]
-                                each['scar'] = Backbonescartable.objects.get(backboneid = each['id']).bbsi
+                                backbone_scar_obj = Backbonescartable.objects.filter(backboneid = each['id']).first()
+                                if(backbone_scar_obj != None):
+                                    each['scar'] = backbone_scar_obj.bbsi
+                                else:
+                                    each['scar'] = "No sequence"
                             except Backbonescartable.DoesNotExist:
                                 each['scar'] = "No sequence"
                             BackboneResult.append(each)
@@ -1662,7 +1673,11 @@ def BackboneFilter(request):
                         info_list = getBackboneOriAndMarker(temp_result['id'])
                         temp_result['ori'] = info_list[0]
                         temp_result['marker'] = info_list[1]
-                        temp_result['scar'] = Backbonescartable.objects.filter(backboneid = temp_result['id']).first().bbsi
+                        backbone_scar_obj = Backbonescartable.objects.filter(backboneid = each['id']).first()
+                        if(backbone_scar_obj != None):
+                            temp_result['scar'] = backbone_scar_obj.bbsi
+                        else:
+                            temp_result['scar'] = "No sequence"
                         BackboneResult.append(temp_result)
         print(BackboneResult)
         if(len(BackboneResult) != 0):
@@ -2761,7 +2776,7 @@ def getBackboneScar(request):
         if(id != None and id != ""):
             # backbone_object = Backbonetable.objects.filter(name = ).first()
             scar_info = Backbonescartable.objects.filter(backboneid = id).values("bsmbi", "bsai", "bbsi", "aari", "sapi")
-            if(scar_info != None):
+            if(len(scar_info) != 0):
                 return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
                 return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 200, safe = False)
@@ -2827,7 +2842,7 @@ def getPlasmidScar(request):
         if(plasmidid != None and plasmidid != ""):
             scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).values()
             print(scar_info)
-            if(scar_info != None):
+            if(len(scar_info) != 0):
                 return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
                 return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 200, safe = False)
