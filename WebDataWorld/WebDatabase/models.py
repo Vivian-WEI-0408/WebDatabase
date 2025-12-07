@@ -107,8 +107,8 @@ class Backbonetable(models.Model):
     name = models.CharField(db_column='Name', max_length=20)  # Field name made lowercase.
     length = models.IntegerField(db_column='Length', blank=True, null=True)  # Field name made lowercase.
     sequence = models.TextField(db_column='Sequence')  # Field name made lowercase.
-    ori = models.CharField(db_column='Ori', max_length=20)  # Field name made lowercase.
-    marker = models.CharField(db_column='Marker', max_length=20)  # Field name made lowercase.
+    # ori = models.CharField(db_column='Ori', max_length=20)  # Field name made lowercase.
+    # marker = models.CharField(db_column='Marker', max_length=20)  # Field name made lowercase.
     species = models.CharField(db_column='Species', max_length=50, blank=True, null=True)  # Field name made lowercase.
     copynumber = models.CharField(db_column='CopyNumber', max_length=20, blank=True, null=True)  # Field name made lowercase.
     notes = models.TextField(db_column='Notes', blank=True, null=True)  # Field name made lowercase.
@@ -412,10 +412,10 @@ class Plasmid_Culture_Functions(models.Model):
 class Plasmidneed(models.Model):
     plasmidid = models.AutoField(db_column='PlasmidID', primary_key=True)  # Field name made lowercase.
     name = models.CharField(db_column='Name', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    oricloning = models.CharField(db_column='OriCloning', max_length=20)  # Field name made lowercase.
-    orihost = models.CharField(db_column='OriHost', max_length=20)  # Field name made lowercase.
-    markercloning = models.CharField(db_column='MarkerCloning', max_length=20)  # Field name made lowercase.
-    markerhost = models.CharField(db_column='MarkerHost', max_length=20)  # Field name made lowercase.
+    # oricloning = models.CharField(db_column='OriCloning', max_length=20)  # Field name made lowercase.
+    # orihost = models.CharField(db_column='OriHost', max_length=20)  # Field name made lowercase.
+    # markercloning = models.CharField(db_column='MarkerCloning', max_length=20)  # Field name made lowercase.
+    # markerhost = models.CharField(db_column='MarkerHost', max_length=20)  # Field name made lowercase.
     level = models.CharField(db_column='Level', max_length=10)  # Field name made lowercase.
     length = models.IntegerField(db_column='Length')  # Field name made lowercase.
     sequenceconfirm = models.TextField(db_column='SequenceConfirm')  # Field name made lowercase.
