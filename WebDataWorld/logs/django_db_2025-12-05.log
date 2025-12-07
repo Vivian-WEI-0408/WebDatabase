@@ -1,0 +1,220 @@
+DEBUG 2025-12-05 17:53:43,020 utils 7844 7540 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 17:53:43,020 utils 7844 7540 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 17:53:43,022 utils 7844 7540 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-05 17:53:43,033 utils 7844 7540 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-05 17:59:39,871 utils 7844 21884 (0.016) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 17:59:39,872 utils 7844 21884 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 17:59:39,873 utils 7844 21884 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 09:59:39.864560' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 09:59:39.864560', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 17:59:43,903 utils 7844 21884 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 17:59:43,903 utils 7844 21884 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 09:59:43.901633' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 09:59:43.901633', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 17:59:44,031 utils 7844 21884 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 17:59:44,032 utils 7844 21884 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 09:59:44.030799' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 09:59:44.030799', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:00:47,565 utils 6028 10992 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:00:47,565 utils 6028 10992 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:00:47,566 utils 6028 10992 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:00:47,569 utils 6028 10992 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-05 18:00:52,460 utils 6028 10452 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:00:52,461 utils 6028 10452 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:00:52,461 utils 6028 10452 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:00:52.458344' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:00:52.458344', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:00:52,529 utils 6028 10452 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:00:52,529 utils 6028 10452 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:00:52.527345' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:00:52.527345', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:30,606 utils 19032 23668 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:30,606 utils 19032 23668 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:30,607 utils 19032 23668 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:30,610 utils 19032 23668 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,585 utils 19032 10268 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,585 utils 19032 10268 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,586 utils 19032 10268 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.583178' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.583178', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,702 utils 19032 10268 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,703 utils 19032 10268 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.698276' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.698276', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,703 utils 19032 24364 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,705 utils 19032 24364 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,705 utils 19032 22732 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,705 utils 19032 24364 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.699276' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.699276', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,706 utils 19032 22732 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,707 utils 19032 1124 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,708 utils 19032 22732 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.701276' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.701276', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,708 utils 19032 20324 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,709 utils 19032 1124 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,709 utils 19032 20324 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,710 utils 19032 1124 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.704277' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.704277', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,710 utils 19032 2836 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,710 utils 19032 20324 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.702277' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.702277', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,714 utils 19032 2836 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,715 utils 19032 2836 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.706275' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.706275', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,716 utils 19032 1124 (0.016) SELECT DISTINCT `backbone_culture_functions`.`function_content` AS `function_content` FROM `backbone_culture_functions` WHERE `backbone_culture_functions`.`function_type` = 'ori'; args=('ori',); alias=default
+DEBUG 2025-12-05 18:02:32,718 utils 19032 2836 (0.000) SELECT DISTINCT `backbonescartable`.`BsmBI` AS `bsmbi` FROM `backbonescartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,721 utils 19032 2836 (0.000) SELECT DISTINCT `backbonescartable`.`BsaI` AS `bsai` FROM `backbonescartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,722 utils 19032 2836 (0.000) SELECT DISTINCT `backbonescartable`.`BbsI` AS `bbsi` FROM `backbonescartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,722 utils 19032 1124 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,723 utils 19032 2836 (0.000) SELECT DISTINCT `backbonescartable`.`AarI` AS `aari` FROM `backbonescartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,723 utils 19032 1124 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.719276' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.719276', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,723 utils 19032 2836 (0.000) SELECT DISTINCT `backbonescartable`.`SapI` AS `sapi` FROM `backbonescartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,725 utils 19032 20324 (0.000) SELECT DISTINCT `partscartable`.`BsmBI` AS `bsmbi` FROM `partscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,728 utils 19032 2836 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,729 utils 19032 2836 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.727279' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.727279', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,729 utils 19032 20324 (0.000) SELECT DISTINCT `partscartable`.`BsaI` AS `bsai` FROM `partscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,732 utils 19032 2836 (0.000) SELECT DISTINCT `backbone_culture_functions`.`function_content` AS `function_content` FROM `backbone_culture_functions` WHERE `backbone_culture_functions`.`function_type` = 'marker'; args=('marker',); alias=default
+DEBUG 2025-12-05 18:02:32,734 utils 19032 20324 (0.015) SELECT DISTINCT `partscartable`.`BbsI` AS `bbsi` FROM `partscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,735 utils 19032 1124 (0.015) SELECT DISTINCT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE `plasmid_culture_functions`.`function_type` = 'marker'; args=('marker',); alias=default
+DEBUG 2025-12-05 18:02:32,735 utils 19032 2836 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,736 utils 19032 2836 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.733275' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.733275', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,739 utils 19032 20324 (0.000) SELECT DISTINCT `partscartable`.`AarI` AS `aari` FROM `partscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,741 utils 19032 2836 (0.000) SELECT DISTINCT `plasmidscartable`.`BsmBI` AS `bsmbi` FROM `plasmidscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,743 utils 19032 20324 (0.000) SELECT DISTINCT `partscartable`.`SapI` AS `sapi` FROM `partscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,745 utils 19032 2836 (0.000) SELECT DISTINCT `plasmidscartable`.`BsaI` AS `bsai` FROM `plasmidscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,747 utils 19032 18100 (0.016) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,747 utils 19032 18100 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,748 utils 19032 1124 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,748 utils 19032 2836 (0.016) SELECT DISTINCT `plasmidscartable`.`BbsI` AS `bbsi` FROM `plasmidscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,749 utils 19032 18100 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.742276' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.742276', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,749 utils 19032 1124 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.744275' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.744275', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,750 utils 19032 23484 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,750 utils 19032 23484 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,751 utils 19032 24564 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,752 utils 19032 23484 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.746281' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.746281', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,752 utils 19032 2836 (0.000) SELECT DISTINCT `plasmidscartable`.`AarI` AS `aari` FROM `plasmidscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,752 utils 19032 24564 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,753 utils 19032 24564 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.748275' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.748275', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,756 utils 19032 18100 (0.000) SELECT COUNT(*) AS `__count` FROM `backbonetable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,758 utils 19032 20324 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-05 18:02:32,758 utils 19032 2836 (0.000) SELECT DISTINCT `plasmidscartable`.`SapI` AS `sapi` FROM `plasmidscartable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,758 utils 19032 23484 (0.000) SELECT COUNT(*) AS `__count` FROM `plasmidneed`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,758 utils 19032 18100 (0.000) None; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,759 utils 19032 20324 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-05 10:02:32.754276' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-05 10:02:32.754276', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-05 18:02:32,761 utils 19032 1124 (0.000) SELECT DISTINCT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE `plasmid_culture_functions`.`function_type` = 'ori'; args=('ori',); alias=default
+DEBUG 2025-12-05 18:02:32,768 utils 19032 24564 (0.015) SELECT COUNT(*) AS `__count` FROM `parttable`; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,777 utils 19032 24564 (0.000) SELECT `parttable`.`PartID` AS `partid`, `parttable`.`Name` AS `name`, `parttable`.`Alias` AS `alias`, `parttable`.`Type` AS `type`, `parttable`.`SourceOrganism` AS `sourceorganism`, `parttable`.`Reference` AS `reference`, `parttable`.`tag` AS `tag` FROM `parttable` ORDER BY 2 ASC; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,783 utils 19032 23484 (0.031) SELECT `plasmidneed`.`PlasmidID` AS `plasmidid`, `plasmidneed`.`Name` AS `name`, `plasmidneed`.`Alias` AS `alias`, `plasmidneed`.`Level` AS `level`, `plasmidneed`.`tag` AS `tag` FROM `plasmidneed` ORDER BY 2 ASC; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,791 utils 19032 23484 (0.000) SELECT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE (`plasmid_culture_functions`.`function_type` = 'ori' AND `plasmid_culture_functions`.`plasmid_id` = 2793); args=('ori', 2793); alias=default
+DEBUG 2025-12-05 18:02:32,793 utils 19032 23484 (0.016) SELECT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE (`plasmid_culture_functions`.`function_type` = 'marker' AND `plasmid_culture_functions`.`plasmid_id` = 2793); args=('marker', 2793); alias=default
+DEBUG 2025-12-05 18:02:32,794 utils 19032 23484 (0.000) SELECT `plasmidscartable`.`PlasmidScarID`, `plasmidscartable`.`PlasmidID`, `plasmidscartable`.`BsmBI`, `plasmidscartable`.`BsaI`, `plasmidscartable`.`BbsI`, `plasmidscartable`.`AarI`, `plasmidscartable`.`SapI` FROM `plasmidscartable` WHERE `plasmidscartable`.`PlasmidID` = 2793 ORDER BY `plasmidscartable`.`PlasmidScarID` ASC LIMIT 1; args=(2793,); alias=default
+DEBUG 2025-12-05 18:02:32,796 utils 19032 23484 (0.000) SELECT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE (`plasmid_culture_functions`.`function_type` = 'ori' AND `plasmid_culture_functions`.`plasmid_id` = 213); args=('ori', 213); alias=default
+DEBUG 2025-12-05 18:02:32,797 utils 19032 23484 (0.000) SELECT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE (`plasmid_culture_functions`.`function_type` = 'marker' AND `plasmid_culture_functions`.`plasmid_id` = 213); args=('marker', 213); alias=default
+DEBUG 2025-12-05 18:02:32,798 utils 19032 23484 (0.000) SELECT `plasmidscartable`.`PlasmidScarID`, `plasmidscartable`.`PlasmidID`, `plasmidscartable`.`BsmBI`, `plasmidscartable`.`BsaI`, `plasmidscartable`.`BbsI`, `plasmidscartable`.`AarI`, `plasmidscartable`.`SapI` FROM `plasmidscartable` WHERE `plasmidscartable`.`PlasmidID` = 213 ORDER BY `plasmidscartable`.`PlasmidScarID` ASC LIMIT 1; args=(213,); alias=default
+DEBUG 2025-12-05 18:02:32,800 utils 19032 23484 (0.000) SELECT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE (`plasmid_culture_functions`.`function_type` = 'ori' AND `plasmid_culture_functions`.`plasmid_id` = 6619); args=('ori', 6619); alias=default
+DEBUG 2025-12-05 18:02:32,800 utils 19032 23484 (0.000) SELECT `plasmid_culture_functions`.`function_content` AS `function_content` FROM `plasmid_culture_functions` WHERE (`plasmid_culture_functions`.`function_type` = 'marker' AND `plasmid_culture_functions`.`plasmid_id` = 6619); args=('marker', 6619); alias=default
+DEBUG 2025-12-05 18:02:32,801 utils 19032 23484 (0.000) SELECT `plasmidscartable`.`PlasmidScarID`, `plasmidscartable`.`PlasmidID`, `plasmidscartable`.`BsmBI`, `plasmidscartable`.`BsaI`, `plasmidscartable`.`BbsI`, `plasmidscartable`.`AarI`, `plasmidscartable`.`SapI` FROM `plasmidscartable` WHERE `plasmidscartable`.`PlasmidID` = 6619 ORDER BY `plasmidscartable`.`PlasmidScarID` ASC LIMIT 1; args=(6619,); alias=default
+DEBUG 2025-12-05 18:02:32,839 utils 19032 18100 (0.000) None; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,840 utils 19032 18100 (0.000) None; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,840 utils 19032 18100 (0.000) None; args=(); alias=default
+DEBUG 2025-12-05 18:02:32,841 utils 19032 18100 (0.000) None; args=(); alias=default

@@ -17,6 +17,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -32,15 +33,14 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'rest_framework',
-    'WebDatabase.apps.WebdatabaseConfig',
-    'LabDatabase.apps.LabdatabaseConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'WebDatabase',
+    'LabDatabase',
 ]
 
 MIDDLEWARE = [
@@ -108,6 +108,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'WebDatabase.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+AUTH_USER_MODEL = 'WebDatabase.CustomUser'
+
+LOGIN_URL = '/LabDatabase/login/'
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -151,3 +161,289 @@ FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 ]
 
+#LOG FILE
+# 创建日志目录
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+
+# 按日期生成日志文件名
+from datetime import datetime
+TODAY = datetime.now().strftime('%Y-%m-%d')
+LOG_FILE_INFO = os.path.join(LOG_DIR, f'django_info_{TODAY}.log')
+LOG_FILE_ERROR = os.path.join(LOG_DIR, f'django_error_{TODAY}.log')
+LOG_FILE_DB = os.path.join(LOG_DIR, f'django_db_{TODAY}.log')
+LOG_FILE_REQUEST = os.path.join(LOG_DIR, f'django_request_{TODAY}.log')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    
+    # 日志格式器
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'standard': {
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
+        }
+    },
+    
+    # 过滤器
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    
+    # 处理器
+    'handlers': {
+        # 控制台输出
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        
+        # 通用日志文件
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_FILE_INFO,
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 10,
+            'formatter': 'standard',
+            'encoding': 'utf-8',
+        },
+        
+        # 错误日志文件
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_FILE_ERROR,
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 20,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        
+        # 数据库日志
+        'file_db': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': LOG_FILE_DB,
+            'when': 'midnight',  # 每天午夜轮转
+            'interval': 1,
+            'backupCount': 30,  # 保留30天
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        
+        # 邮件通知（生产环境）
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        }
+    },
+    
+    # 日志记录器
+    'loggers': {
+        # Django 默认日志
+        'django': {
+            'handlers': ['console', 'file_info', 'file_error'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        
+        # 数据库查询日志
+        'django.db.backends': {
+            'handlers': ['file_db'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        
+        # 请求处理日志
+        'django.request': {
+            'handlers': ['file_error', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        
+        # 安全日志
+        'django.security': {
+            'handlers': ['file_error'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        
+        # 自定义应用日志
+        'WebDatabase': {
+            'handlers': ['console', 'file_info', 'file_error'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        
+        # 第三方库日志
+        'requests': {
+            'handlers': ['file_info'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
+
+class LogConfig:
+    """日志配置基类"""
+    
+    @staticmethod
+    def get_logging_config(env, log_dir):
+        config = {
+            'version': 1,
+            'disable_existing_loggers': False,
+            'formatters': {
+                'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'standard': {
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
+        }
+            },  # 同上
+            'handlers': {
+                'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        
+        # 通用日志文件
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_FILE_INFO,
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 10,
+            'formatter': 'standard',
+            'encoding': 'utf-8',
+        },
+        
+        # 错误日志文件
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_FILE_ERROR,
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 20,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        
+        # 数据库日志
+        'file_db': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': LOG_FILE_DB,
+            'when': 'midnight',  # 每天午夜轮转
+            'interval': 1,
+            'backupCount': 30,  # 保留30天
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        
+        # 邮件通知（生产环境）
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        }
+        },    # 同上
+            'loggers': {
+                # Django 默认日志
+        'django': {
+            'handlers': ['console', 'file_info', 'file_error'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        
+        # 数据库查询日志
+        'django.db.backends': {
+            'handlers': ['file_db'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        
+        # 请求处理日志
+        'django.request': {
+            'handlers': ['file_error', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        
+        # 安全日志
+        'django.security': {
+            'handlers': ['file_error'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        
+        # 自定义应用日志
+        'WebDatabase': {
+            'handlers': ['console', 'file_info', 'file_error'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        
+        
+        # 第三方库日志
+        'requests': {
+            'handlers': ['file_info'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        },     # 同上
+        }
+        
+        if env == 'production':
+            config['loggers']['django']['handlers'] = ['file_info', 'file_error', 'mail_admins']
+            config['loggers']['django']['level'] = 'WARNING'
+            
+        elif env == 'development':
+            config['handlers']['console']['level'] = 'DEBUG'
+            config['loggers']['django']['level'] = 'DEBUG'
+            
+        return config
+
+
+LOGGING_development = LogConfig.get_logging_config('development', LOG_DIR)
+
+
+LOGGING_production = LogConfig.get_logging_config('production', LOG_DIR)

@@ -1,0 +1,235 @@
+ERROR 2025-12-05 17:59:39,908 log 7844 21884 Internal Server Error: /LabDatabase/index
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 39, in process_request
+    request_logger.info(
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DjangoLogger' object has no attribute 'info'
+ERROR 2025-12-05 17:59:39,910 basehttp 7844 21884 "GET /LabDatabase/index HTTP/1.1" 500 72956
+ERROR 2025-12-05 17:59:43,914 log 7844 21884 Internal Server Error: /LabDatabase/index
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 39, in process_request
+    request_logger.info(
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DjangoLogger' object has no attribute 'info'
+ERROR 2025-12-05 17:59:43,915 basehttp 7844 21884 "GET /LabDatabase/index HTTP/1.1" 500 72812
+ERROR 2025-12-05 17:59:44,042 log 7844 21884 Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 39, in process_request
+    request_logger.info(
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DjangoLogger' object has no attribute 'info'
+ERROR 2025-12-05 17:59:44,043 basehttp 7844 21884 "GET /favicon.ico HTTP/1.1" 500 72600
+ERROR 2025-12-05 18:00:52,474 log 6028 10452 Internal Server Error: /LabDatabase/index
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 39, in process_request
+    request_logger.request_log(
+TypeError: DjangoLogger.request_log() got an unexpected keyword argument 'extra'
+ERROR 2025-12-05 18:00:52,476 basehttp 6028 10452 "GET /LabDatabase/index HTTP/1.1" 500 72952
+ERROR 2025-12-05 18:00:52,539 log 6028 10452 Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 39, in process_request
+    request_logger.request_log(
+TypeError: DjangoLogger.request_log() got an unexpected keyword argument 'extra'
+ERROR 2025-12-05 18:00:52,540 basehttp 6028 10452 "GET /favicon.ico HTTP/1.1" 500 72605
+ERROR 2025-12-05 18:02:32,821 log 19032 23484 Internal Server Error: /WebDatabase/Plasmid
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 735, in PlasmidDataALL
+    each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 703, in getdefaultplasmidscar
+    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'bbsi'
+ERROR 2025-12-05 18:02:32,824 basehttp 19032 23484 "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82179
+ERROR 2025-12-05 18:02:32,858 log 19032 18100 Internal Server Error: /WebDatabase/Backbone
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 1518, in BackboneDataALL
+    query_set = list(query_set)
+                ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 216, in __iter__
+    for row in compiler.results_iter(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1572, in results_iter
+    results = self.execute_sql(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+ERROR 2025-12-05 18:02:32,862 basehttp 19032 18100 "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167188
+ERROR 2025-12-06 16:29:02,824 log 19032 27124 Internal Server Error: /WebDatabase/Plasmid
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 735, in PlasmidDataALL
+    each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 703, in getdefaultplasmidscar
+    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'bbsi'
+ERROR 2025-12-06 16:29:02,826 basehttp 19032 27124 "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82179
+ERROR 2025-12-06 16:29:03,049 log 19032 24888 Internal Server Error: /WebDatabase/Backbone
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 1518, in BackboneDataALL
+    query_set = list(query_set)
+                ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 216, in __iter__
+    for row in compiler.results_iter(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1572, in results_iter
+    results = self.execute_sql(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+ERROR 2025-12-06 16:29:03,051 basehttp 19032 24888 "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167188

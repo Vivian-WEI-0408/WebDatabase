@@ -124,6 +124,7 @@ class ExcelProcessor:
     @classmethod
     def process_excel_file(cls,django_request,upload_record, type, BASE_URL):
         """处理 Excel 文件"""
+        logger.info('处理上传文件请求：%s',django_request.path)
         try:
             # 读取 Excel 文件
             df = upload_record

@@ -21,7 +21,7 @@ from Bio.SeqIO import parse,write
 # from UI.ProgressBar import ProgressBar
 # from UI.PlasmidInputDialogShow import PlasmidInputDialogShow
 # from UI.SeqFileInputDialog import SeqFileInputDialog
-from snapgene_reader import snapgene_file_to_seqrecord
+# from snapgene_reader import snapgene_file_to_seqrecord
 # from UI.FormularFormShow import FormularFormShow
 # from UI.ExperienceDataImpotDialog import ExperienceDataImportDialog
 # from UI.ImportSeqFileChoiceShow import ImportSeqFileChoiceShow

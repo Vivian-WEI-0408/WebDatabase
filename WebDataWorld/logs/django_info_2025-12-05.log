@@ -1,0 +1,40 @@
+2025-12-05 17:53:40 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2025-12-05 17:59:39 [ERROR] django.server: "GET /LabDatabase/index HTTP/1.1" 500 72956
+2025-12-05 17:59:43 [ERROR] django.server: "GET /LabDatabase/index HTTP/1.1" 500 72812
+2025-12-05 17:59:44 [ERROR] django.server: "GET /favicon.ico HTTP/1.1" 500 72600
+2025-12-05 18:00:45 [INFO] django.utils.autoreload: C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py changed, reloading.
+2025-12-05 18:00:46 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2025-12-05 18:00:52 [ERROR] django.server: "GET /LabDatabase/index HTTP/1.1" 500 72952
+2025-12-05 18:00:52 [ERROR] django.server: "GET /favicon.ico HTTP/1.1" 500 72605
+2025-12-05 18:02:28 [INFO] django.utils.autoreload: C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py changed, reloading.
+2025-12-05 18:02:29 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2025-12-05 18:02:32 [INFO] django.server: "GET /LabDatabase/index HTTP/1.1" 200 83790
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/getBackboneValueList/ori HTTP/1.1" 200 143
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/getBackboneScarList HTTP/1.1" 200 255
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/getBackboneValueList/marker HTTP/1.1" 200 227
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/getPlasmidValueList/marker HTTP/1.1" 200 265
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/getPartScarList HTTP/1.1" 200 172
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/getPlasmidScarList HTTP/1.1" 200 287
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/getPlasmidValueList/ori HTTP/1.1" 200 142
+2025-12-05 18:02:32 [INFO] django.server: "GET /WebDatabase/Part?page=1 HTTP/1.1" 200 1413
+2025-12-05 18:02:32 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2694
+2025-12-05 18:02:32 [INFO] django.server: "GET /LabDatabase/getdata?type=part&page=1 HTTP/1.1" 200 1413
+2025-12-05 18:02:32 [ERROR] django.server: "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82179
+2025-12-05 18:02:32 [WARNING] django.server: "GET /LabDatabase/getdata?type=plasmid&page=1 HTTP/1.1" 400 2
+2025-12-05 18:02:32 [ERROR] django.server: "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167188
+2025-12-05 18:02:32 [WARNING] django.server: "GET /LabDatabase/getdata?type=backbone&page=1 HTTP/1.1" 400 2
+2025-12-06 16:29:01 [INFO] django.server: "GET /LabDatabase/index HTTP/1.1" 200 83790
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/getBackboneValueList/ori HTTP/1.1" 200 143
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/getBackboneValueList/marker HTTP/1.1" 200 227
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/Part?page=1 HTTP/1.1" 200 1413
+2025-12-06 16:29:02 [INFO] django.server: "GET /LabDatabase/getdata?type=part&page=1 HTTP/1.1" 200 1413
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/getPlasmidValueList/ori HTTP/1.1" 200 142
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/getPartScarList HTTP/1.1" 200 172
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/getPlasmidValueList/marker HTTP/1.1" 200 265
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/getBackboneScarList HTTP/1.1" 200 255
+2025-12-06 16:29:02 [INFO] django.server: "GET /WebDatabase/getPlasmidScarList HTTP/1.1" 200 287
+2025-12-06 16:29:02 [ERROR] django.server: "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82179
+2025-12-06 16:29:02 [WARNING] django.server: "GET /LabDatabase/getdata?type=plasmid&page=1 HTTP/1.1" 400 2
+2025-12-06 16:29:03 [ERROR] django.server: "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167188
+2025-12-06 16:29:03 [WARNING] django.server: "GET /LabDatabase/getdata?type=backbone&page=1 HTTP/1.1" 400 2
+2025-12-06 16:29:35 [INFO] django.utils.autoreload: C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDataWorld\settings.py changed, reloading.

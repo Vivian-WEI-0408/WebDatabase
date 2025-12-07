@@ -1,0 +1,566 @@
+ERROR 2025-12-06 16:30:12,232 log 28156 27344 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 189, in register
+    form.clean()
+  File "E:\Anaconda\Lib\site-packages\django\forms\forms.py", line 375, in clean
+    return self.cleaned_data
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRegisterForm' object has no attribute 'cleaned_data'
+ERROR 2025-12-06 16:30:12,234 basehttp 28156 27344 "POST /WebDatabase/register HTTP/1.1" 500 79117
+ERROR 2025-12-06 16:45:39,456 log 2452 24376 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 188, in register
+    form.clean_data()
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 66, in clean_data
+    cleaned_data = super().clean()
+                   ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\forms\forms.py", line 375, in clean
+    return self.cleaned_data
+           ^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRegisterForm' object has no attribute 'cleaned_data'
+ERROR 2025-12-06 16:45:39,457 basehttp 2452 24376 "POST /WebDatabase/register HTTP/1.1" 500 83203
+ERROR 2025-12-06 16:51:29,536 log 9456 18296 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 188, in register
+    form.clean_data()
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 66, in clean_data
+    cleaned_data = super().clean()
+                   ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\forms\forms.py", line 375, in clean
+    print(self.cleaned_data)
+          ^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRegisterForm' object has no attribute 'cleaned_data'
+ERROR 2025-12-06 16:51:29,538 basehttp 9456 18296 "POST /WebDatabase/register HTTP/1.1" 500 83213
+ERROR 2025-12-06 16:52:02,190 log 21272 23556 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 188, in register
+    form.clean_data()
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 66, in clean_data
+    cleaned_data = super().clean()
+                   ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\forms\forms.py", line 376, in clean
+    print(self.cleaned_data)
+          ^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRegisterForm' object has no attribute 'cleaned_data'
+ERROR 2025-12-06 16:52:02,192 basehttp 21272 23556 "POST /WebDatabase/register HTTP/1.1" 500 83236
+ERROR 2025-12-06 16:59:11,025 log 27336 23488 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 188, in register
+    form.clean_data()
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 67, in clean_data
+    username = self.cleaned_data.get('uname')
+               ^^^^^^^^^^^^^^^^^
+AttributeError: 'UserRegisterForm' object has no attribute 'cleaned_data'
+ERROR 2025-12-06 16:59:11,027 basehttp 27336 23488 "POST /WebDatabase/register HTTP/1.1" 500 79247
+ERROR 2025-12-06 17:00:29,573 log 14244 5492 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 188, in register
+    form.clean_data()
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 70, in clean_data
+    password1 = self.cleaned_data('password1')
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'dict' object is not callable
+ERROR 2025-12-06 17:00:29,575 basehttp 14244 5492 "POST /WebDatabase/register HTTP/1.1" 500 79331
+ERROR 2025-12-06 17:01:50,039 log 25068 23148 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 190, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 77, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+ERROR 2025-12-06 17:01:50,040 basehttp 25068 23148 "POST /WebDatabase/register HTTP/1.1" 500 79285
+ERROR 2025-12-06 17:07:08,564 log 26628 9108 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 190, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 77, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+ERROR 2025-12-06 17:07:08,566 basehttp 26628 9108 "POST /WebDatabase/register HTTP/1.1" 500 79285
+ERROR 2025-12-06 17:07:20,810 log 25208 27336 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 191, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 78, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+ERROR 2025-12-06 17:07:20,812 basehttp 25208 27336 "POST /WebDatabase/register HTTP/1.1" 500 79225
+ERROR 2025-12-06 17:12:37,302 log 19024 27700 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 191, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 78, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserManager.create_user() missing 1 required positional argument: 'username'
+ERROR 2025-12-06 17:12:37,304 basehttp 19024 27700 "POST /WebDatabase/register HTTP/1.1" 500 79225
+ERROR 2025-12-06 17:21:45,177 log 26268 18112 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.DataError: (1406, "Data too long for column 'password' at row 1")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 191, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 78, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 565, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.DataError: (1406, "Data too long for column 'password' at row 1")
+ERROR 2025-12-06 17:21:45,183 basehttp 26268 18112 "POST /WebDatabase/register HTTP/1.1" 500 203686
+ERROR 2025-12-06 17:24:31,358 log 19224 23916 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 194, in register
+    login(request, user)
+TypeError: login() takes 1 positional argument but 2 were given
+ERROR 2025-12-06 17:24:31,360 basehttp 19224 23916 "POST /WebDatabase/register HTTP/1.1" 500 75551
+ERROR 2025-12-06 17:25:14,280 log 17104 25736 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 191, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 78, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 561, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:25:14,283 basehttp 17104 25736 "POST /WebDatabase/register HTTP/1.1" 500 83646
+ERROR 2025-12-06 17:26:12,023 log 25276 24240 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 191, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 78, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:26:12,025 basehttp 25276 24240 "POST /WebDatabase/register HTTP/1.1" 500 83637
+ERROR 2025-12-06 17:27:28,188 log 22824 28360 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 192, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 78, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:27:28,191 basehttp 22824 28360 "POST /WebDatabase/register HTTP/1.1" 500 83651
+ERROR 2025-12-06 17:27:55,187 log 2988 9256 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 193, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 79, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:27:55,189 basehttp 2988 9256 "POST /WebDatabase/register HTTP/1.1" 500 83651
+ERROR 2025-12-06 17:28:29,751 log 27484 6076 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 193, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 79, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:28:29,753 basehttp 27484 6076 "POST /WebDatabase/register HTTP/1.1" 500 83651
+ERROR 2025-12-06 17:29:47,123 log 24804 9112 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 194, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 80, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:29:47,125 basehttp 24804 9112 "POST /WebDatabase/register HTTP/1.1" 500 83619
+ERROR 2025-12-06 17:31:28,321 log 24172 20632 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 193, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 79, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:31:28,323 basehttp 24172 20632 "POST /WebDatabase/register HTTP/1.1" 500 83651
+ERROR 2025-12-06 17:32:03,489 log 8116 11252 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 194, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 80, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:32:03,491 basehttp 8116 11252 "POST /WebDatabase/register HTTP/1.1" 500 83651
+ERROR 2025-12-06 17:39:27,659 log 14112 28464 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 195, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 81, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:39:27,661 basehttp 14112 28464 "POST /WebDatabase/register HTTP/1.1" 500 83645
+ERROR 2025-12-06 17:41:34,907 log 28624 23264 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 195, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 81, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:41:34,909 basehttp 28624 23264 "POST /WebDatabase/register HTTP/1.1" 500 83745
+ERROR 2025-12-06 17:43:38,404 log 4576 27944 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 196, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 83, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:43:38,406 basehttp 4576 27944 "POST /WebDatabase/register HTTP/1.1" 500 83697
+ERROR 2025-12-06 17:45:06,326 log 2080 27476 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 197, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 83, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:45:06,328 basehttp 2080 27476 "POST /WebDatabase/register HTTP/1.1" 500 83698
+ERROR 2025-12-06 17:45:48,082 log 26088 4540 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 197, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 83, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 564, in create_user
+    raise ValueError(_('用户名和邮箱必须提供'))
+ValueError: 用户名和邮箱必须提供
+ERROR 2025-12-06 17:45:48,084 basehttp 26088 4540 "POST /WebDatabase/register HTTP/1.1" 500 83711
+ERROR 2025-12-06 17:48:46,980 log 26744 20584 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 200, in register
+    login(request)
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 179, in login
+    cleaned_data = form.clean()
+                   ^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 121, in clean
+    cleaned_data = super().clean()
+                   ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\views\decorators\debug.py", line 75, in sensitive_variables_wrapper
+    return func(*func_args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\forms.py", line 362, in clean
+    username = self.cleaned_data.get("username")
+               ^^^^^^^^^^^^^^^^^
+AttributeError: 'CustomLoginForm' object has no attribute 'cleaned_data'
+ERROR 2025-12-06 17:48:46,982 basehttp 26744 20584 "POST /WebDatabase/register HTTP/1.1" 500 92170
+ERROR 2025-12-06 17:51:41,065 log 13824 8380 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 176, in login
+    return render(request, 'Login.html', {'form': form})
+                                                  ^^^^
+UnboundLocalError: cannot access local variable 'form' where it is not associated with a value
+ERROR 2025-12-06 17:51:41,069 basehttp 13824 8380 "GET /WebDatabase/login HTTP/1.1" 500 73993
+ERROR 2025-12-06 17:52:36,957 log 25004 28120 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 204, in _get_response
+    self.check_response(response, callback)
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 332, in check_response
+    raise ValueError(
+ValueError: The view WebDatabase.account.login didn't return an HttpResponse object. It returned None instead.
+ERROR 2025-12-06 17:52:36,958 basehttp 25004 28120 "GET /WebDatabase/login HTTP/1.1" 500 74685
+ERROR 2025-12-06 18:22:30,875 log 24996 26028 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 190, in login
+    return render(request, 'Login.html', {'form': form})
+                                                  ^^^^
+UnboundLocalError: cannot access local variable 'form' where it is not associated with a value
+ERROR 2025-12-06 18:22:30,876 basehttp 24996 26028 "GET /WebDatabase/login HTTP/1.1" 500 74232
+ERROR 2025-12-07 19:40:52,629 log 2584 14792 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 185, in login
+    print(form.is_bound())
+          ^^^^^^^^^^^^^^^
+TypeError: 'bool' object is not callable
+ERROR 2025-12-07 19:40:52,632 basehttp 2584 14792 "POST /WebDatabase/login HTTP/1.1" 500 75101

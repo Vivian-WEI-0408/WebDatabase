@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.shortcuts import render,redirect
 # Register your models here.
 def login(request):
+    print("redirect")
     return redirect("/WebDatabase/login")
 
 def logout(request):

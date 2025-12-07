@@ -1,0 +1,1167 @@
+ERROR 2025-12-07 20:54:05,558 log 31712 13960 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 186, in login
+    print(form.errors)
+          ^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\forms\forms.py", line 201, in errors
+    self.full_clean()
+  File "E:\Anaconda\Lib\site-packages\django\forms\forms.py", line 338, in full_clean
+    self._clean_form()
+  File "E:\Anaconda\Lib\site-packages\django\forms\forms.py", line 354, in _clean_form
+    cleaned_data = self.clean()
+                   ^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 125, in clean
+    self.cleaned_data = super().clean()
+                        ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\views\decorators\debug.py", line 75, in sensitive_variables_wrapper
+    return func(*func_args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\forms.py", line 371, in clean
+    raise self.get_invalid_login_error()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\forms.py", line 399, in get_invalid_login_error
+    self.error_messages["invalid_login"],
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'invalid_login'
+ERROR 2025-12-07 20:54:05,561 basehttp 31712 13960 "POST /WebDatabase/login HTTP/1.1" 500 112740
+ERROR 2025-12-07 21:12:05,096 log 5492 29280 Internal Server Error: /WebDatabase/Plasmid
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 735, in PlasmidDataALL
+    each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 703, in getdefaultplasmidscar
+    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'bbsi'
+ERROR 2025-12-07 21:12:05,100 basehttp 5492 29280 "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82179
+ERROR 2025-12-07 21:12:05,198 log 5492 4584 Internal Server Error: /WebDatabase/Backbone
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 1518, in BackboneDataALL
+    query_set = list(query_set)
+                ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 216, in __iter__
+    for row in compiler.results_iter(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1572, in results_iter
+    results = self.execute_sql(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+ERROR 2025-12-07 21:12:05,201 basehttp 5492 4584 "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167188
+ERROR 2025-12-07 21:51:38,353 log 22656 27176 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 222, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 84, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 568, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+ERROR 2025-12-07 21:51:38,359 basehttp 22656 27176 "POST /WebDatabase/register HTTP/1.1" 500 203890
+ERROR 2025-12-07 21:54:43,690 log 20236 30292 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 224, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 85, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserManager.create_user() missing 1 required positional argument: 'uname'
+ERROR 2025-12-07 21:54:43,692 basehttp 20236 30292 "POST /WebDatabase/register HTTP/1.1" 500 79472
+ERROR 2025-12-07 21:54:56,378 log 31616 18700 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 224, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 85, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 568, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+ERROR 2025-12-07 21:54:56,385 basehttp 31616 18700 "POST /WebDatabase/register HTTP/1.1" 500 203933
+ERROR 2025-12-07 21:55:14,590 log 31616 18700 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 224, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 85, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 568, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+ERROR 2025-12-07 21:55:14,592 basehttp 31616 18700 "POST /WebDatabase/register HTTP/1.1" 500 203933
+ERROR 2025-12-07 21:55:36,752 log 31616 18700 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 224, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 85, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 568, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+ERROR 2025-12-07 21:55:36,754 basehttp 31616 18700 "POST /WebDatabase/register HTTP/1.1" 500 203933
+ERROR 2025-12-07 22:02:51,019 log 15392 21296 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 224, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 85, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 569, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+ERROR 2025-12-07 22:02:51,024 basehttp 15392 21296 "POST /WebDatabase/register HTTP/1.1" 500 203932
+ERROR 2025-12-07 22:03:12,952 log 15392 21296 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 224, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 85, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 569, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+ERROR 2025-12-07 22:03:12,954 basehttp 15392 21296 "POST /WebDatabase/register HTTP/1.1" 500 203932
+ERROR 2025-12-07 22:07:01,476 log 29896 25416 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 229, in register
+    user = form.save()
+           ^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 90, in save
+    user = CustomUser.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\models.py", line 569, in create_user
+    user.save(using = self._db)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1868, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry '' for key 'customuser.username'")
+ERROR 2025-12-07 22:07:01,481 basehttp 29896 25416 "POST /WebDatabase/register HTTP/1.1" 500 204027
+ERROR 2025-12-07 22:13:16,595 log 28820 26768 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 231, in register
+    login(request)
+TypeError: login() missing 1 required positional argument: 'user'
+ERROR 2025-12-07 22:13:16,598 basehttp 28820 26768 "POST /WebDatabase/register HTTP/1.1" 500 75833
+ERROR 2025-12-07 22:14:12,971 log 28820 26768 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 231, in register
+    login(request)
+TypeError: login() missing 1 required positional argument: 'user'
+ERROR 2025-12-07 22:14:12,972 basehttp 28820 26768 "POST /WebDatabase/register HTTP/1.1" 500 75833
+ERROR 2025-12-07 22:14:55,412 log 25416 22568 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 57, in _get_backend_from_user
+    backend = backend or user.backend
+                         ^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'backend'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 231, in register
+    login(request,user)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 189, in login
+    backend = _get_backend_from_user(user=user, backend=backend)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 63, in _get_backend_from_user
+    raise ValueError(
+ValueError: You have multiple authentication backends configured and therefore must provide the `backend` argument or set the `backend` attribute on the user.
+ERROR 2025-12-07 22:14:55,415 basehttp 25416 22568 "POST /WebDatabase/register HTTP/1.1" 500 89349
+ERROR 2025-12-07 22:35:42,127 log 6244 31592 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 57, in _get_backend_from_user
+    backend = backend or user.backend
+                         ^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'backend'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 238, in register
+    login(request,user)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 189, in login
+    backend = _get_backend_from_user(user=user, backend=backend)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 63, in _get_backend_from_user
+    raise ValueError(
+ValueError: You have multiple authentication backends configured and therefore must provide the `backend` argument or set the `backend` attribute on the user.
+ERROR 2025-12-07 22:35:42,129 basehttp 6244 31592 "POST /WebDatabase/register HTTP/1.1" 500 89369
+ERROR 2025-12-07 22:40:20,366 log 11564 23988 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 208, in login_view
+    request.session['info'] = {'uid':form.cleaned_data.user.uid,'uname':form.cleaned_data['uname']}
+                                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'user'
+ERROR 2025-12-07 22:40:20,368 basehttp 11564 23988 "POST /WebDatabase/login HTTP/1.1" 500 86430
+ERROR 2025-12-07 22:41:29,075 log 18592 29108 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 208, in login_view
+    request.session['info'] = {'uid':form.cleaned_data['user'].uid,'uname':form.cleaned_data['uname']}
+                                                                           ~~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'uname'
+ERROR 2025-12-07 22:41:29,077 basehttp 18592 29108 "POST /WebDatabase/login HTTP/1.1" 500 86332
+ERROR 2025-12-07 22:43:58,963 log 5948 27500 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 208, in login_view
+    request.session['info'] = {'uid':form.cleaned_data['user'].uid,'uname':form.cleaned_data['uname']}
+                                                                           ~~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'uname'
+ERROR 2025-12-07 22:43:58,965 basehttp 5948 27500 "POST /WebDatabase/login HTTP/1.1" 500 86332
+ERROR 2025-12-07 22:44:55,247 log 27884 10424 Internal Server Error: /WebDatabase/login
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 192, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\utils\decorators.py", line 190, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 208, in login_view
+    request.session['info'] = {'uid':form.cleaned_data['user'].uid,'uname':form.cleaned_data['uname']}
+                                                                           ~~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'uname'
+ERROR 2025-12-07 22:44:55,248 basehttp 27884 10424 "POST /WebDatabase/login HTTP/1.1" 500 86332
+ERROR 2025-12-07 22:46:52,207 log 15560 31060 Internal Server Error: /WebDatabase/Backbone
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 1518, in BackboneDataALL
+    query_set = list(query_set)
+                ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 216, in __iter__
+    for row in compiler.results_iter(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1572, in results_iter
+    results = self.execute_sql(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+ERROR 2025-12-07 22:46:52,251 log 15560 27544 Internal Server Error: /WebDatabase/Plasmid
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 735, in PlasmidDataALL
+    each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 703, in getdefaultplasmidscar
+    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'bbsi'
+ERROR 2025-12-07 22:46:52,255 basehttp 15560 31060 "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167198
+ERROR 2025-12-07 22:46:52,256 basehttp 15560 27544 "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82189
+ERROR 2025-12-07 22:47:59,017 log 15560 23556 Internal Server Error: /WebDatabase/Backbone
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 1518, in BackboneDataALL
+    query_set = list(query_set)
+                ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 216, in __iter__
+    for row in compiler.results_iter(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1572, in results_iter
+    results = self.execute_sql(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+ERROR 2025-12-07 22:47:59,028 basehttp 15560 23556 "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167198
+ERROR 2025-12-07 22:47:59,057 log 15560 12280 Internal Server Error: /WebDatabase/Plasmid
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 735, in PlasmidDataALL
+    each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 703, in getdefaultplasmidscar
+    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'bbsi'
+ERROR 2025-12-07 22:47:59,059 basehttp 15560 12280 "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82189
+ERROR 2025-12-07 22:48:50,075 log 15560 24932 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 57, in _get_backend_from_user
+    backend = backend or user.backend
+                         ^^^^^^^^^^^^
+AttributeError: 'CustomUser' object has no attribute 'backend'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 239, in register
+    login(request,user)
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 189, in login
+    backend = _get_backend_from_user(user=user, backend=backend)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\contrib\auth\__init__.py", line 63, in _get_backend_from_user
+    raise ValueError(
+ValueError: You have multiple authentication backends configured and therefore must provide the `backend` argument or set the `backend` attribute on the user.
+ERROR 2025-12-07 22:48:50,077 basehttp 15560 24932 "POST /WebDatabase/register HTTP/1.1" 500 89431
+ERROR 2025-12-07 22:54:59,752 log 26380 29748 Internal Server Error: /WebDatabase/register
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\account.py", line 269, in register
+    request.session['info'] = {'uid':form.cleaned_data['uid'],'uname':form.cleaned_data['username']}
+                                                                      ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'username'
+ERROR 2025-12-07 22:54:59,754 basehttp 26380 29748 "POST /WebDatabase/register HTTP/1.1" 500 76024
+ERROR 2025-12-07 22:56:20,484 log 15796 16076 Internal Server Error: /WebDatabase/Plasmid
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 735, in PlasmidDataALL
+    each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 703, in getdefaultplasmidscar
+    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'bbsi'
+ERROR 2025-12-07 22:56:20,505 log 15796 24668 Internal Server Error: /WebDatabase/Backbone
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\WebDatabase\views.py", line 1518, in BackboneDataALL
+    query_set = list(query_set)
+                ^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\query.py", line 216, in __iter__
+    for row in compiler.results_iter(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1572, in results_iter
+    results = self.execute_sql(
+              ^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "E:\Anaconda\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "E:\Anaconda\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'backbonetable.Marker' in 'field list'")
+ERROR 2025-12-07 22:56:20,509 basehttp 15796 16076 "GET /WebDatabase/Plasmid?page=1 HTTP/1.1" 500 82474
+ERROR 2025-12-07 22:56:20,515 basehttp 15796 24668 "GET /WebDatabase/Backbone?page=1 HTTP/1.1" 500 167483

@@ -6,7 +6,9 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
@@ -552,7 +554,32 @@ class Testdatatable(models.Model):
         managed = False
         db_table = 'testdatatable'
 
-
+class UserManager(BaseUserManager):
+    def create_user(self,uname, email, password, **extra_fields):
+        """创建普通用户"""
+        print(uname)
+        print(email)
+        print(password)
+        if not email or not uname:
+            raise ValueError(_('用户名和邮箱必须提供'))
+        email = self.normalize_email(email)
+        user = self.model(email = email, uname = uname,username = uname, **extra_fields)
+        user.set_password(password)
+        print(user)
+        user.save(using = self._db)
+        return user
+    def create_superuser(self, uname, email, password = None, **extra_fields):
+        """创建超级用户"""
+        extra_fields.setdefault('is_staff',True)
+        extra_fields.setdefault('is_superuser',True)
+        extra_fields.setdefault('is_active',True)
+        
+        if(extra_fields.get('is_staff') is not True):
+            raise ValueError(_('超级用户必须有 is_staff=True'))
+        if(extra_fields.get('is_superuser') is not True):
+            raise ValueError(_('超级用户必须有 is_superuser=True'))
+        return self.create_user(uname, email,password,**extra_fields)
+    
 class User(models.Model):
     uid = models.AutoField(primary_key=True)
     uname = models.CharField(max_length=50)
@@ -564,6 +591,96 @@ class User(models.Model):
         managed = True
         db_table = 'user'
 
+class CustomUser(AbstractUser):
+    
+    class UserRole(models.TextChoices):
+        USER = 'user',_("普通用户")
+        EDITOR = 'editor',_('编辑者')
+        MANAGER = 'manager',_('管理员')
+        ADMIN = 'admin',_('超级管理员')
+    
+    uid = models.AutoField(primary_key=True)
+    uname = models.CharField(max_length=50)
+    
+    role = models.CharField(
+        max_length=20,
+        choices = UserRole.choices,
+        default = UserRole.USER
+    )
+    
+    email = models.CharField(max_length=50, blank=True, null=True)
+    is_email_verified = models.BooleanField(default=False)
+    objects = UserManager()
+    last_activate = models.DateTimeField(auto_now=True)
+    create_time = models.DateField(blank=True, null=True)
+    
+    password = models.CharField(max_length=500,null=False,default="f06a53bb5da60c512506097e48203d4c")
+
+    class Meta:
+        managed = True
+        db_table = "CustomUser"
+        verbose_name = _('用户')
+        verbose_name_plural = _('用户')
+
+    
+    def __str__(self):
+        return f"{self.uname} ({self.get_role_display()})"
+    
+    @property
+    def is_editor(self):
+        """是否是编辑"""
+        return self.role in [self.UserRole.EDITOR, self.UserRole.MANAGER, self.UserRole.ADMIN]
+    
+    @property
+    def is_manager(self):
+        """是否是管理员"""
+        return self.role in [self.UserRole.MANAGER, self.UserRole.ADMIN]
+    
+    @property
+    def is_admin(self):
+        """是否是超级管理员"""
+        return self.role == self.UserRole.ADMIN
+
+        
+# class CustomUser(AbstractUser):
+#     uid = models.AutoField(primary_key=True)
+#     uname = models.CharField(max_length=50)
+    
+#     email = models.CharField(max_length=50, blank=True, null=True)
+#     avatar = models.ImageField(_("头像"),upload_to='avatars/',blank=True, null=True)
+    
+#     create_time = models.DateField(blank=True, null=True)
+#     password = models.CharField(max_length=50)
+    
+#     class Meta:
+#         verbose_name = _('用户')
+#         verbose_name_plural = _('用户')
+#     def __str__(self):
+#         return self.username
+    
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete = models.CASCADE,
+        related_name='profile',
+        verbose_name=_('用户')
+    )
+    
+    show_email = models.BooleanField(_('公开邮箱'),default = False)
+    show_phone = models.BooleanField(_('公开手机号'),default = False)
+    
+    create_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('用户资料')
+        verbose_name_plural = _('用户资料')
+    def __str__(self):
+        return f"{self.user.uname} 的资料"
+    
+    @classmethod
+    def get_or_create_profile(cls, user):
+        profile, created = cls.objects.get_or_create(user = user)
+        return profile
 
 class Yeastmodels(models.Model):
     collection = models.CharField(max_length=100, blank=True, null=True)

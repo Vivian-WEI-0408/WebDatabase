@@ -117,7 +117,7 @@ urlpatterns = [
     path("AddLbdnr",views.AddLbdnr,name="AddLbdnr"),
     path("UpdateLBDnr",views.UpdateLBDnr,name="UpdateLBDnr"),
     
-    path("login",account.login,name="login"),
+    path("login",account.login_view,name="login"),
     path("logout",account.logout,name="logout"),
     path("register",account.register,name="register"),
 

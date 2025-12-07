@@ -130,19 +130,23 @@
             <div id="login-form">
                 <h2>用户登录</h2>
                 <div id="login-message" class="message"></div>
-                <form id="loginForm" method="POST">
+                <form id="loginForm" method="POST" action = "/WebDatabase/login">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="login-username">用户名</label>
-                        {{form.uname}}
-                        <span>{{form.uname.errors.0}}</span>
-                        {#<input type="text" id="login-username" name="username" placeholder="用户名" required> #}
+                        <label for="{{form.username.id_for_label}}">{{form.username.label}}</label>
+                        {{form.username}}
+                        {% if form.errors%}
+                            <span>{{ form.username.errors }}</span>
+                        {% endif%}
+                        <!-- {#<input type="text" id="login-username" name="username" placeholder="用户名" required> #} -->
                     </div>
                     <div class="form-group">
-                        <label for="login-password">密码</label>
+                        <label for="{{form.password.id_for_label}}">{{form.password.label}}</label>
                         {{form.password}}
-                        <span>{{ form.password.errors.0 }}</span>
-                        {#<input type="password" id="login-password" name="password" placeholder = "密码" required> #}
+                        {% if form.errors%}
+                            <span>{{ form.password.errors}}</span>
+                        {% endif %}
+                        <!-- {#<input type="password" id="login-password" name="password" placeholder = "密码" required> #} -->
                     </div>
                     <button type="submit">登录</button>
                 </form>

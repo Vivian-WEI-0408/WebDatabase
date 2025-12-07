@@ -1,0 +1,10 @@
+DEBUG 2025-12-07 19:40:52,092 utils 2584 14792 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-07 19:40:52,115 utils 2584 14792 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-07 19:40:52,116 utils 2584 14792 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-07 11:40:52.088150' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-07 11:40:52.088150', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default

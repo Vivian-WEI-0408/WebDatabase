@@ -15,13 +15,16 @@ from .models import (Backbonetable,Parentplasmidtable,
                     Partrputable,Parttable,Plasmidneed,
                     Straintable,TbBackboneUserfileaddress,
                     TbPartUserfileaddress,TbPlasmidUserfileaddress,
-                    Testdatatable,User,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
+                    Testdatatable,CustomUser,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
                     Parentparttable, Partscartable, Backbonescartable, Plasmidscartable, \
                     Plasmid_Culture_Functions,Backbone_Culture_Functions)
 from django.views.decorators.csrf import csrf_exempt
 # from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
 #     PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
 #     TbPartUserfileaddressSerializer,TbPlasmidUserfileaddressSerializer,TestdatatableSerializer
+import logging
+from .logger import request_logger
+
 
 #----------------------------------------------------------
 #用户登录验证(中间件)
@@ -31,18 +34,27 @@ from django.views.decorators.csrf import csrf_exempt
 class User_auth(MiddlewareMixin):
 
     def process_request(self,request):
+        request.start_time = time.time()
+        
+        
         #排除不需要登录就能访问的页面
         if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register":
             return
         info = request.session.get('info')
-        print(f'User_auth{info}')
-        # print(info)
+        # print(f'User_auth{info}')
+        # print(request.user)
+        print(info)
         if not info:
             return redirect('/WebDatabase/login')
         else:
             return
 
     def process_response(self,request,response):
+        final_time = time.time()
+        duration_time = time.time() - request.start_time
+        request_logger.request_log(
+            request, response, duration_time
+        )
         return response
     # if not info:
     #     return JsonResponse({'status': 'Not logged in'})

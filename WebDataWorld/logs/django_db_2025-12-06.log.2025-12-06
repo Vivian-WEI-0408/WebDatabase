@@ -1,0 +1,1921 @@
+DEBUG 2025-12-06 16:29:50,195 utils 28156 6084 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:29:50,195 utils 28156 6084 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:29:50,196 utils 28156 6084 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:29:50,207 utils 28156 6084 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:29:56,257 utils 28156 27344 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:29:56,258 utils 28156 27344 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:29:56,258 utils 28156 27344 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:29:56.255003' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:29:56.255003', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 16:29:56,860 utils 28156 27344 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:29:56,860 utils 28156 27344 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:29:56.858528' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:29:56.858528', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 16:30:11,923 utils 28156 27344 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:30:11,923 utils 28156 27344 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:30:11.920550' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:30:11.920550', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 16:44:34,510 utils 20004 23772 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:44:34,510 utils 20004 23772 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:44:34,512 utils 20004 23772 (0.015) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:44:34,515 utils 20004 23772 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:45:17,118 utils 2452 26340 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:45:17,118 utils 2452 26340 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:45:17,119 utils 2452 26340 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:45:17,122 utils 2452 26340 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:45:19,990 utils 2452 24376 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:45:19,990 utils 2452 24376 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:45:19,990 utils 2452 24376 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:45:19.987648' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:45:19.987648', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 16:45:39,441 utils 2452 24376 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:45:39,442 utils 2452 24376 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:45:39.439620' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:45:39.439620', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 16:50:20,692 utils 16088 23932 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:50:20,692 utils 16088 23932 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:50:20,694 utils 16088 23932 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:50:20,696 utils 16088 23932 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:51:25,866 utils 9456 24044 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:51:25,866 utils 9456 24044 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:51:25,868 utils 9456 24044 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:51:25,872 utils 9456 24044 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:51:29,521 utils 9456 18296 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:51:29,521 utils 9456 18296 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:51:29,522 utils 9456 18296 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:51:29.518456' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:51:29.518456', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 16:52:01,264 utils 21272 26728 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:52:01,265 utils 21272 26728 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:52:01,267 utils 21272 26728 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:52:01,271 utils 21272 26728 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:52:02,174 utils 21272 23556 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:52:02,174 utils 21272 23556 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:52:02,175 utils 21272 23556 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:52:02.171542' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:52:02.171542', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 16:52:31,907 utils 24656 23976 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:52:31,908 utils 24656 23976 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:52:31,909 utils 24656 23976 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:52:31,912 utils 24656 23976 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:58:55,559 utils 27492 20000 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:58:55,560 utils 27492 20000 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:58:55,561 utils 27492 20000 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:58:55,565 utils 27492 20000 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:59:10,090 utils 27336 24216 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:59:10,090 utils 27336 24216 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:59:10,094 utils 27336 24216 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:59:10,097 utils 27336 24216 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 16:59:11,010 utils 27336 23488 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 16:59:11,011 utils 27336 23488 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 16:59:11,012 utils 27336 23488 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 08:59:11.008695' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 08:59:11.008695', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:00:19,595 utils 14244 17828 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:00:19,596 utils 14244 17828 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:00:19,597 utils 14244 17828 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:00:19,600 utils 14244 17828 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:00:29,510 utils 14244 5492 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:00:29,511 utils 14244 5492 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:00:29,550 utils 14244 5492 (0.047) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:00:29,559 utils 14244 5492 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:00:29.558860' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:00:29.558860', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:01:06,795 utils 26876 24200 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:01:06,795 utils 26876 24200 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:01:06,797 utils 26876 24200 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:01:06,800 utils 26876 24200 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:01:47,326 utils 25068 13804 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:01:47,327 utils 25068 13804 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:01:47,329 utils 25068 13804 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:01:47,332 utils 25068 13804 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:01:49,969 utils 25068 23148 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:01:49,969 utils 25068 23148 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:01:49,970 utils 25068 23148 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:01:50,020 utils 25068 23148 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:01:50.019161' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:01:50.019161', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:06:29,189 utils 20288 25524 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:06:29,190 utils 20288 25524 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:06:29,191 utils 20288 25524 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:06:29,194 utils 20288 25524 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:06:39,292 utils 27396 25856 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:06:39,293 utils 27396 25856 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:06:39,294 utils 27396 25856 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:06:39,297 utils 27396 25856 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:07:03,484 utils 26628 25396 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:07:03,485 utils 26628 25396 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:07:03,487 utils 26628 25396 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:07:03,490 utils 26628 25396 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:07:08,539 utils 26628 9108 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:07:08,539 utils 26628 9108 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:07:08,540 utils 26628 9108 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:07:08,550 utils 26628 9108 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:07:08.549310' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:07:08.549310', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:07:18,355 utils 25208 7192 (0.015) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:07:18,355 utils 25208 7192 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:07:18,356 utils 25208 7192 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:07:18,359 utils 25208 7192 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:07:20,785 utils 25208 27336 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:07:20,786 utils 25208 27336 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:07:20,787 utils 25208 27336 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:07:20,796 utils 25208 27336 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:07:20.796701' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:07:20.796701', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:12:04,461 utils 26600 26448 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:12:04,462 utils 26600 26448 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:12:04,463 utils 26600 26448 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:12:04,466 utils 26600 26448 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:12:35,162 utils 19024 13404 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:12:35,163 utils 19024 13404 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:12:35,164 utils 19024 13404 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:12:35,167 utils 19024 13404 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:12:37,278 utils 19024 27700 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:12:37,278 utils 19024 27700 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:12:37,279 utils 19024 27700 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:12:37,289 utils 19024 27700 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:12:37.288462' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:12:37.288462', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:13:49,115 utils 28636 15480 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:13:49,115 utils 28636 15480 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:13:49,116 utils 28636 15480 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:13:49,119 utils 28636 15480 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:21:29,003 utils 27344 14180 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:21:29,004 utils 27344 14180 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:21:29,005 utils 27344 14180 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:21:29,009 utils 27344 14180 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:21:33,802 utils 26268 26024 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:21:33,802 utils 26268 26024 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:21:33,803 utils 26268 26024 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:21:33,806 utils 26268 26024 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:21:43,870 utils 26268 18112 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:21:43,870 utils 26268 18112 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:21:43,871 utils 26268 18112 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:21:45,069 utils 26268 18112 (0.000) None; args=[None, False, '', '', '', False, True, '2025-12-06 09:21:43.871582', 'wby_test', CustomUser.UserRole.USER, '619009418@qq.com', False, '2025-12-06 09:21:45.068329', None, 'pbkdf2_sha256$1000000$n9ORwWDGFp2ECd7UbfrvsY$a6KGNJ8G3iaatlz0UILJCn1YfSeQ1nZEDqbBJW6Cx8k=']; alias=default
+DEBUG 2025-12-06 17:21:45,152 utils 26268 18112 (0.000) SELECT `CustomUser`.`last_login`, `CustomUser`.`is_superuser`, `CustomUser`.`username`, `CustomUser`.`first_name`, `CustomUser`.`last_name`, `CustomUser`.`is_staff`, `CustomUser`.`is_active`, `CustomUser`.`date_joined`, `CustomUser`.`uid`, `CustomUser`.`uname`, `CustomUser`.`role`, `CustomUser`.`email`, `CustomUser`.`is_email_verified`, `CustomUser`.`last_activate`, `CustomUser`.`create_time`, `CustomUser`.`password` FROM `CustomUser` LIMIT 21; args=(); alias=default
+DEBUG 2025-12-06 17:21:45,154 utils 26268 18112 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:21:45.153291' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:21:45.153291', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:22:15,097 utils 28668 24168 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:22:15,097 utils 28668 24168 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:22:15,098 utils 28668 24168 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:22:15,101 utils 28668 24168 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:22:25,305 utils 19224 26304 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:22:25,305 utils 19224 26304 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:22:25,306 utils 19224 26304 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:22:25,309 utils 19224 26304 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:24:30,648 utils 19224 23916 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:24:30,648 utils 19224 23916 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:24:30,648 utils 19224 23916 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:24:31,309 utils 19224 23916 (0.015) INSERT INTO `CustomUser` (`last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `is_staff`, `is_active`, `date_joined`, `uname`, `role`, `email`, `is_email_verified`, `last_activate`, `create_time`, `password`) VALUES (NULL, 0, '', '', '', 0, 1, '2025-12-06 09:24:30.649846', 'wby_test', 'user', '619009418@qq.com', 0, '2025-12-06 09:24:31.306901', NULL, 'pbkdf2_sha256$1000000$A9vIGiOa1K4GcsTBbgMti5$odhzDFdIrycfJsVaUYlkR0iv4kqGseP8fxEkJH1Zgrg='); args=[None, False, '', '', '', False, True, '2025-12-06 09:24:30.649846', 'wby_test', CustomUser.UserRole.USER, '619009418@qq.com', False, '2025-12-06 09:24:31.306901', None, 'pbkdf2_sha256$1000000$A9vIGiOa1K4GcsTBbgMti5$odhzDFdIrycfJsVaUYlkR0iv4kqGseP8fxEkJH1Zgrg=']; alias=default
+DEBUG 2025-12-06 17:24:31,345 utils 19224 23916 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:24:31.344926' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:24:31.344926', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:25:12,536 utils 17104 12496 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:25:12,537 utils 17104 12496 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:25:12,538 utils 17104 12496 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:25:12,540 utils 17104 12496 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:25:14,255 utils 17104 25736 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:25:14,255 utils 17104 25736 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:25:14,255 utils 17104 25736 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:25:14,264 utils 17104 25736 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:25:14.263818' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:25:14.263818', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:26:00,902 utils 25276 26400 (0.016) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:26:00,903 utils 25276 26400 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:26:00,904 utils 25276 26400 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:26:00,908 utils 25276 26400 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:26:11,997 utils 25276 24240 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:26:11,997 utils 25276 24240 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:26:11,998 utils 25276 24240 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:26:12,009 utils 25276 24240 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:26:12.008063' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:26:12.008063', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:26:56,719 utils 20380 24616 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:26:56,720 utils 20380 24616 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:26:56,721 utils 20380 24616 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:26:56,723 utils 20380 24616 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:27:26,252 utils 22824 27024 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:27:26,253 utils 22824 27024 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:27:26,254 utils 22824 27024 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:27:26,257 utils 22824 27024 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:27:28,161 utils 22824 28360 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:27:28,162 utils 22824 28360 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:27:28,162 utils 22824 28360 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:27:28,173 utils 22824 28360 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:27:28.172827' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:27:28.172827', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:27:53,000 utils 2988 22716 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:27:53,001 utils 2988 22716 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:27:53,002 utils 2988 22716 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:27:53,005 utils 2988 22716 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:27:55,161 utils 2988 9256 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:27:55,161 utils 2988 9256 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:27:55,162 utils 2988 9256 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:27:55,172 utils 2988 9256 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:27:55.171029' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:27:55.171029', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:28:28,513 utils 27484 28400 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:28:28,513 utils 27484 28400 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:28:28,514 utils 27484 28400 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:28:28,517 utils 27484 28400 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:28:29,727 utils 27484 6076 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:28:29,728 utils 27484 6076 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:28:29,728 utils 27484 6076 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:28:29,737 utils 27484 6076 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:28:29.736976' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:28:29.736976', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:29:42,326 utils 24804 24640 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:29:42,327 utils 24804 24640 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:29:42,327 utils 24804 24640 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:29:42,330 utils 24804 24640 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:29:47,097 utils 24804 9112 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:29:47,097 utils 24804 9112 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:29:47,098 utils 24804 9112 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:29:47,108 utils 24804 9112 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:29:47.107375' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:29:47.107375', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:31:20,182 utils 24172 26092 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:31:20,183 utils 24172 26092 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:31:20,184 utils 24172 26092 (0.015) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:31:20,186 utils 24172 26092 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:31:28,294 utils 24172 20632 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:31:28,294 utils 24172 20632 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:31:28,295 utils 24172 20632 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:31:28,306 utils 24172 20632 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:31:28.305739' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:31:28.305739', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:32:02,073 utils 8116 3860 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:32:02,073 utils 8116 3860 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:32:02,075 utils 8116 3860 (0.016) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:32:02,078 utils 8116 3860 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:32:03,464 utils 8116 11252 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:32:03,464 utils 8116 11252 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:32:03,465 utils 8116 11252 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:32:03,474 utils 8116 11252 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:32:03.473096' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:32:03.473096', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:39:26,945 utils 14112 28260 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:39:26,945 utils 14112 28260 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:39:26,946 utils 14112 28260 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:39:26,949 utils 14112 28260 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:39:27,577 utils 14112 28464 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:39:27,578 utils 14112 28464 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:39:27,578 utils 14112 28464 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:39:27,643 utils 14112 28464 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:39:27.642559' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:39:27.642559', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:40:49,214 utils 28540 4044 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:40:49,214 utils 28540 4044 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:40:49,215 utils 28540 4044 (0.016) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:40:49,218 utils 28540 4044 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:41:31,819 utils 28624 20416 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:41:31,820 utils 28624 20416 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:41:31,820 utils 28624 20416 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:41:31,824 utils 28624 20416 (0.016) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:41:34,881 utils 28624 23264 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:41:34,881 utils 28624 23264 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:41:34,882 utils 28624 23264 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:41:34,893 utils 28624 23264 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:41:34.892447' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:41:34.892447', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:43:31,216 utils 4576 24956 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:43:31,216 utils 4576 24956 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:43:31,218 utils 4576 24956 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:43:31,221 utils 4576 24956 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:43:38,378 utils 4576 27944 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:43:38,378 utils 4576 27944 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:43:38,379 utils 4576 27944 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:43:38,389 utils 4576 27944 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:43:38.388114' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:43:38.388114', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:45:03,576 utils 2080 22868 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:45:03,576 utils 2080 22868 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:45:03,577 utils 2080 22868 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:45:03,580 utils 2080 22868 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:45:06,248 utils 2080 27476 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:45:06,249 utils 2080 27476 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:45:06,249 utils 2080 27476 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:45:06,312 utils 2080 27476 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:45:06.311679' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:45:06.311679', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:45:37,871 utils 26088 3476 (0.016) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:45:37,871 utils 26088 3476 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:45:37,873 utils 26088 3476 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:45:37,875 utils 26088 3476 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:45:48,056 utils 26088 4540 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:45:48,056 utils 26088 4540 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:45:48,057 utils 26088 4540 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:45:48,067 utils 26088 4540 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:45:48.066691' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:45:48.066691', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:47:44,682 utils 26744 23416 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:47:44,682 utils 26744 23416 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:47:44,683 utils 26744 23416 (0.015) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:47:44,686 utils 26744 23416 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:47:45,331 utils 26744 20584 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:47:45,332 utils 26744 20584 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:47:45,332 utils 26744 20584 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:47:45,413 utils 26744 20584 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:47:45.412154' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:47:45.412154', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:48:46,238 utils 26744 20584 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:48:46,238 utils 26744 20584 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:48:46,912 utils 26744 20584 (0.016) INSERT INTO `CustomUser` (`last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `is_staff`, `is_active`, `date_joined`, `uname`, `role`, `email`, `is_email_verified`, `last_activate`, `create_time`, `password`) VALUES (NULL, 0, '', '', '', 0, 1, '2025-12-06 09:48:46.239716', 'wby_test', 'user', '619009418@qq.com', 0, '2025-12-06 09:48:46.900255', NULL, 'pbkdf2_sha256$1000000$iPOEG5yYStsLg1IS5w2D3o$0Rp5gMNKn+q/3eAFgbpvzeZ7Sk0YISUNiHpl2GVFLQQ='); args=[None, False, '', '', '', False, True, '2025-12-06 09:48:46.239716', 'wby_test', CustomUser.UserRole.USER, '619009418@qq.com', False, '2025-12-06 09:48:46.900255', None, 'pbkdf2_sha256$1000000$iPOEG5yYStsLg1IS5w2D3o$0Rp5gMNKn+q/3eAFgbpvzeZ7Sk0YISUNiHpl2GVFLQQ=']; alias=default
+DEBUG 2025-12-06 17:48:46,929 utils 26744 20584 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:48:46.928379' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:48:46.928379', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:50:22,848 utils 27236 8908 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:50:22,848 utils 27236 8908 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:50:22,849 utils 27236 8908 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:50:22,852 utils 27236 8908 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:51:30,179 utils 13824 14284 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:51:30,179 utils 13824 14284 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:51:30,181 utils 13824 14284 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:51:30,183 utils 13824 14284 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:51:32,890 utils 13824 8380 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:51:32,890 utils 13824 8380 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:51:32,891 utils 13824 8380 (0.000) SELECT 1 AS `a` FROM `CustomUser` WHERE `CustomUser`.`uname` = 'wby_test' LIMIT 1; args=(1, 'wby_test'); alias=default
+DEBUG 2025-12-06 17:51:32,899 utils 13824 8380 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:51:32.898342' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:51:32.898342', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:51:41,044 utils 13824 8380 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:51:41,045 utils 13824 8380 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:51:41.042721' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:51:41.042721', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 17:52:23,074 utils 27956 21052 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:52:23,074 utils 27956 21052 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:52:23,075 utils 27956 21052 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:52:23,078 utils 27956 21052 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:52:36,435 utils 25004 6668 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:52:36,436 utils 25004 6668 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:52:36,436 utils 25004 6668 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:52:36,439 utils 25004 6668 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 17:52:36,942 utils 25004 28120 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 17:52:36,942 utils 25004 28120 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 17:52:36,943 utils 25004 28120 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 09:52:36.939657' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 09:52:36.939657', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:22:21,516 utils 24996 15504 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:22:21,516 utils 24996 15504 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:22:21,517 utils 24996 15504 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:22:21,521 utils 24996 15504 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:22:30,697 utils 24996 26028 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:22:30,698 utils 24996 26028 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:22:30,698 utils 24996 26028 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:22:30.695377' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:22:30.695377', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:23:40,125 utils 26852 1672 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:23:40,126 utils 26852 1672 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:23:40,127 utils 26852 1672 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:23:40,129 utils 26852 1672 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:23:46,372 utils 27964 18400 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:23:46,372 utils 27964 18400 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:23:46,374 utils 27964 18400 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:23:46,376 utils 27964 18400 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:23:47,406 utils 27964 1784 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:23:47,407 utils 27964 1784 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:23:47,407 utils 27964 1784 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:23:47.403652' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:23:47.403652', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:24:16,726 utils 24168 23556 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:24:16,726 utils 24168 23556 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:24:16,728 utils 24168 23556 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:24:16,731 utils 24168 23556 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:24:42,130 utils 24748 26764 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:24:42,131 utils 24748 26764 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:24:42,132 utils 24748 26764 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:24:42,135 utils 24748 26764 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:25:11,781 utils 25264 23836 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:25:11,781 utils 25264 23836 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:25:11,782 utils 25264 23836 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:25:11,785 utils 25264 23836 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:25:13,234 utils 25264 8516 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:25:13,234 utils 25264 8516 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:25:13,234 utils 25264 8516 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:25:13.231668' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:25:13.231668', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:25:19,162 utils 25264 8516 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:25:19,162 utils 25264 8516 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:25:19.160780' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:25:19.160780', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:25:33,712 utils 25264 8516 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:25:33,715 utils 25264 8516 (0.016) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:25:33.710855' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:25:33.710855', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:26:03,911 utils 25264 8516 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:26:03,912 utils 25264 8516 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:26:03.909411' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:26:03.909411', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:26:40,216 utils 13944 10928 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:26:40,216 utils 13944 10928 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:26:40,218 utils 13944 10928 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:26:40,221 utils 13944 10928 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:26:41,611 utils 13944 12664 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:26:41,611 utils 13944 12664 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:26:41,612 utils 13944 12664 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:26:41.609973' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:26:41.609973', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:26:51,078 utils 13944 12664 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:26:51,078 utils 13944 12664 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:26:51.076050' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:26:51.076050', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:27:14,418 utils 11596 15896 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:27:14,419 utils 11596 15896 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:27:14,421 utils 11596 15896 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:27:14,423 utils 11596 15896 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:27:29,270 utils 11596 19788 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:27:29,271 utils 11596 19788 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:27:29,271 utils 11596 19788 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:27:29.268740' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:27:29.268740', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:27:48,958 utils 24080 24928 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:27:48,958 utils 24080 24928 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:27:48,959 utils 24080 24928 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:27:48,964 utils 24080 24928 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:27:55,788 utils 24080 26600 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:27:55,788 utils 24080 26600 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:27:55,789 utils 24080 26600 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:27:55.785969' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:27:55.785969', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:28:17,038 utils 18904 17344 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:28:17,039 utils 18904 17344 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:28:17,040 utils 18904 17344 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:28:17,043 utils 18904 17344 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:28:24,551 utils 18904 28156 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:28:24,552 utils 18904 28156 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:28:24,552 utils 18904 28156 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:28:24.548973' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:28:24.548973', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:28:52,587 utils 23716 22568 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:28:52,587 utils 23716 22568 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:28:52,588 utils 23716 22568 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:28:52,591 utils 23716 22568 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:28:58,385 utils 23716 12664 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:28:58,386 utils 23716 12664 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:28:58,386 utils 23716 12664 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:28:58.383011' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:28:58.383011', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:29:39,747 utils 24108 27096 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:29:39,748 utils 24108 27096 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:29:39,749 utils 24108 27096 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:29:39,752 utils 24108 27096 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:29:47,685 utils 24108 25824 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:29:47,685 utils 24108 25824 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:29:47,686 utils 24108 25824 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:29:47.682446' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:29:47.682446', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:30:35,733 utils 20392 17880 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:30:35,733 utils 20392 17880 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:30:35,734 utils 20392 17880 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:30:35,737 utils 20392 17880 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:30:42,101 utils 20392 21068 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:30:42,101 utils 20392 21068 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:30:42,101 utils 20392 21068 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:30:42.098126' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:30:42.098126', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:30:57,266 utils 18060 22860 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:30:57,266 utils 18060 22860 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:30:57,268 utils 18060 22860 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:30:57,271 utils 18060 22860 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:32:01,364 utils 19996 24108 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:32:01,365 utils 19996 24108 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:32:01,366 utils 19996 24108 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:32:01,368 utils 19996 24108 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:32:50,560 utils 25756 27344 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:32:50,561 utils 25756 27344 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:32:50,562 utils 25756 27344 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:32:50,566 utils 25756 27344 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:32:58,382 utils 25756 26900 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:32:58,382 utils 25756 26900 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:32:58,383 utils 25756 26900 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:32:58.379538' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:32:58.379538', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:33:49,874 utils 11560 27332 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:33:49,875 utils 11560 27332 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:33:49,876 utils 11560 27332 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:33:49,879 utils 11560 27332 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:33:55,232 utils 11560 26852 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:33:55,232 utils 11560 26852 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:33:55,232 utils 11560 26852 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:33:55.228090' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:33:55.228090', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:34:05,457 utils 26832 12600 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:05,457 utils 26832 12600 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:34:05,458 utils 26832 12600 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:05,461 utils 26832 12600 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:34:10,515 utils 26832 27896 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:10,516 utils 26832 27896 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:34:10,516 utils 26832 27896 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:34:10.513252' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:34:10.513252', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:34:18,472 utils 23564 26684 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:18,473 utils 23564 26684 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:34:18,474 utils 23564 26684 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:18,476 utils 23564 26684 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:34:30,849 utils 23564 28080 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:30,849 utils 23564 28080 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:34:30,849 utils 23564 28080 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:34:30.847220' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:34:30.847220', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:34:36,895 utils 10656 24364 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:36,896 utils 10656 24364 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:34:36,897 utils 10656 24364 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:34:36,900 utils 10656 24364 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:36:21,852 utils 27872 26968 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:36:21,852 utils 27872 26968 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:36:21,853 utils 27872 26968 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:36:21,856 utils 27872 26968 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:36:25,626 utils 16256 28228 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:36:25,627 utils 16256 28228 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:36:25,628 utils 16256 28228 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:36:25,631 utils 16256 28228 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:36:31,279 utils 16256 12704 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:36:31,279 utils 16256 12704 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:36:31,279 utils 16256 12704 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:36:31.275295' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:36:31.275295', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:36:57,866 utils 28512 11260 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:36:57,866 utils 28512 11260 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:36:57,867 utils 28512 11260 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:36:57,870 utils 28512 11260 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:37:02,878 utils 24264 5492 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:37:02,878 utils 24264 5492 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:37:02,879 utils 24264 5492 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:37:02,882 utils 24264 5492 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:38:14,499 utils 19976 26156 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:38:14,500 utils 19976 26156 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:38:14,501 utils 19976 26156 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:38:14,504 utils 19976 26156 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:38:25,344 utils 19976 24872 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:38:25,344 utils 19976 24872 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:38:25,344 utils 19976 24872 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:38:25.340338' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:38:25.340338', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:41:00,061 utils 24748 22944 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:41:00,061 utils 24748 22944 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:41:00,062 utils 24748 22944 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:41:00,065 utils 24748 22944 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:41:17,757 utils 24748 2528 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:41:17,758 utils 24748 2528 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:41:17,758 utils 24748 2528 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:41:17.755522' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:41:17.755522', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:42:05,621 utils 26652 24520 (0.016) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:42:05,621 utils 26652 24520 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:42:05,623 utils 26652 24520 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:42:05,626 utils 26652 24520 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:42:57,000 utils 18264 26028 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:42:57,001 utils 18264 26028 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:42:57,002 utils 18264 26028 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:42:57,005 utils 18264 26028 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:43:04,504 utils 18264 25192 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:04,504 utils 18264 25192 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:43:04,505 utils 18264 25192 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:43:04.501876' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:43:04.501876', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:43:27,351 utils 15896 25728 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:27,352 utils 15896 25728 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:43:27,353 utils 15896 25728 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:27,356 utils 15896 25728 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:43:31,374 utils 19460 28516 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:31,375 utils 19460 28516 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:43:31,376 utils 19460 28516 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:31,379 utils 19460 28516 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:43:37,071 utils 19460 25260 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:37,072 utils 19460 25260 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:43:37,072 utils 19460 25260 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:43:37.069527' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:43:37.069527', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:43:59,381 utils 10264 15036 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:59,381 utils 10264 15036 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:43:59,383 utils 10264 15036 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:43:59,386 utils 10264 15036 (0.015) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:52:54,696 utils 10264 28396 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:52:54,696 utils 10264 28396 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:52:54,697 utils 10264 28396 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:52:54.693839' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:52:54.693839', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:53:22,022 utils 27512 24256 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:53:22,023 utils 27512 24256 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:53:22,024 utils 27512 24256 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:53:22,027 utils 27512 24256 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:53:45,944 utils 19268 24892 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:53:45,944 utils 19268 24892 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:53:45,945 utils 19268 24892 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:53:45,948 utils 19268 24892 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
+DEBUG 2025-12-06 18:53:53,805 utils 19268 3888 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:53:53,805 utils 19268 3888 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:53:53,805 utils 19268 3888 (0.000) SELECT `django_session`.`session_key`, `django_session`.`session_data`, `django_session`.`expire_date` FROM `django_session` WHERE (`django_session`.`expire_date` > '2025-12-06 10:53:53.802399' AND `django_session`.`session_key` = 'bac1lmxpkrgtuq5bydromadehyjekkrf') LIMIT 21; args=('2025-12-06 10:53:53.802399', 'bac1lmxpkrgtuq5bydromadehyjekkrf'); alias=default
+DEBUG 2025-12-06 18:55:20,525 utils 2584 13508 (0.000) 
+                SELECT VERSION(),
+                       @@sql_mode,
+                       @@default_storage_engine,
+                       @@sql_auto_is_null,
+                       @@lower_case_table_names,
+                       CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:55:20,526 utils 2584 13508 (0.000) SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; args=None; alias=default
+DEBUG 2025-12-06 18:55:20,527 utils 2584 13508 (0.000) 
+            SELECT
+                table_name,
+                table_type,
+                table_comment
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ; args=None; alias=default
+DEBUG 2025-12-06 18:55:20,530 utils 2584 13508 (0.000) SELECT `django_migrations`.`id`, `django_migrations`.`app`, `django_migrations`.`name`, `django_migrations`.`applied` FROM `django_migrations`; args=(); alias=default
