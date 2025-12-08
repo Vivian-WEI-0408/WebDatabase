@@ -276,10 +276,19 @@
                 <div>
                     <h1>🧬 生物元件管理系统</h1>
                     <p>管理 Part、Backbone 和 Plasmid 数据</p>
+                    
                 </div>
                 <div>
+                    {% if user.is_authenticated %}
+                        <h3>你好，{{user.username}}</h3>
+                    {% endif %}
                     {% if user.is_superuser %}
                         <button id = "admin_index" class="badge bg-light text-dark"><span class="badge bg-light text-dark">管理</span></button>
+                     {% endif %}
+                     {% if user.is_authenticated %}
+                         <button id = "logout" class="badge bg-light text-dark" onclick="window.location.href = '/WebDatabase/logout'"><span class="badge bg-light text-dark">退出登录</span></button>
+                     {% else %}
+                          <button id = "login" class="badge bg-light text-dark" onclick="window.location.href = '/WebDatabase/login'"><span class="badge bg-light text-dark">登录</span></button>
                      {% endif %}
                     <span class="badge bg-light text-dark">v2.1.0</span>
                 </div>
