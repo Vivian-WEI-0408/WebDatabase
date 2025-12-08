@@ -11,6 +11,8 @@ urlpatterns = [
     path("login",admin.login,name="login"),
     path("logout",admin.logout,name="logout"),
     path("register",admin.register,name="register"),
+    path("AdminRegister",admin.register_admin, name = "AdminRegister"),
+
     
 
     #Upload Sequence Map
@@ -27,9 +29,9 @@ urlpatterns = [
     path("plasmid/<int:plasmidid>",views.plasmid_detail_show,name="plasmid_detail"),
 
     #delete
-    path("deletepart/<int:partid>",views.delete_part,name="delete_part"),
-    path("deletebackbone/<int:backboneid>",views.delete_backbone,name="delete_backbone"),
-    path("deleteplasmid/<int:plasmidid>",views.delete_plasmid,name="delete_plasmid"),
+    path("deletepart",views.delete_part,name="delete_part"),
+    path("deletebackbone",views.delete_backbone,name="delete_backbone"),
+    path("deleteplasmid",views.delete_plasmid,name="delete_plasmid"),
 
     #Modify
     path("modifypart/<int:partid>",views.modify_part,name="modify_part"),

@@ -2675,6 +2675,7 @@ def ImportDataset():
     
 def FittingLabels(sequence):
     sequence = sequence.upper()
+    # print(sequence)
     MarkerLabel = []
     OriginLabel = []
     MarkerResult = MarkerKmer.query(sequence)

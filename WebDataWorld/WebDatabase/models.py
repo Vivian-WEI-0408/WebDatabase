@@ -560,6 +560,8 @@ class UserManager(BaseUserManager):
         print(uname)
         print(email)
         print(password)
+        extra_fields.setdefault('is_staff',True)
+        extra_fields.setdefault('is_activate',True)
         if not email or not uname:
             raise ValueError(_('用户名和邮箱必须提供'))
         email = self.normalize_email(email)
@@ -575,10 +577,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_active',True)
         
         if(extra_fields.get('is_staff') is not True):
-            raise ValueError(_('超级用户必须有 is_staff=True'))
+            raise ValueError(_('用户必须有 is_staff=True'))
         if(extra_fields.get('is_superuser') is not True):
             raise ValueError(_('超级用户必须有 is_superuser=True'))
         return self.create_user(uname, email,password,**extra_fields)
+    
+        
     
 class User(models.Model):
     uid = models.AutoField(primary_key=True)

@@ -120,6 +120,7 @@ urlpatterns = [
     path("login",account.login_view,name="login"),
     path("logout",account.logout,name="logout"),
     path("register",account.register,name="register"),
+    path("AdminRegister",account.admin_register, name = "AdminRegister"),
 
     path("PartNameFilter",views.SearchByPartNameFilter,name="PartNameFilter"),
     path("BackboneNameFilter",views.SearchByBackboneNameFilter,name="BackboneNameFilter"),

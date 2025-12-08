@@ -10,3 +10,6 @@ def logout(request):
 
 def register(request):
     return redirect("/WebDatabase/register")
+
+def register_admin(request):
+    return redirect("/WebDatabase/AdminRegister")

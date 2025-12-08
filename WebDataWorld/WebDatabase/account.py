@@ -95,6 +95,16 @@ class UserRegisterForm(forms.Form):
         print(user)
         return user
     
+    def save_superuser(self):
+        print(self.cleaned_data)
+        user = CustomUser.objects.create_superuser(
+            uname = self.cleaned_data.get('uname'),
+            email = self.cleaned_data.get('email'),
+            password=md5(self.cleaned_data.get('password1'))
+        )
+        print(user)
+        return user
+    
     
     def authenticate_user(self, username, email, password):
         """认证用户（支持邮箱或用户名登录）"""
@@ -202,8 +212,8 @@ class CustomLoginForm(AuthenticationForm):
         print(username)
         print(password)
         user = authenticate(username=username, password=md5(password))
-        self.cleaned_data['uid'] = user.uid
         if user != None:
+            self.cleaned_data['uid'] = user.uid
             return user
         # 如果失败，尝试用邮箱认证
         if user is None and '@' in username:
@@ -244,6 +254,7 @@ def login_view(request):
     else:
         form = CustomLoginForm(request=request)
         return render(request, 'Login.html', {"form":form})
+    
 
         
     
@@ -286,6 +297,37 @@ def logout(request):
     if request.user.is_authenticated:
         logout(request)
     return redirect("/LabDatabase/login")
+
+
+
+def admin_register(request):
+    """用户注册视图"""
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            form.clean_data()
+            if("uname" in form.cleaned_data and "email" in form.cleaned_data and "password1" in form.cleaned_data and "password2" in form.cleaned_data):
+                
+                # 创建用户
+                user = form.save_superuser()
+                # 自动登录
+                # username, email, password
+                user = form.authenticate_user(form.cleaned_data['uname'], form.cleaned_data['email'], form.cleaned_data['password1'])
+                login(request, user)
+                request.session['info'] = {'uid':form.cleaned_data['uid'],'uname':form.cleaned_data['uname']}
+
+                # 发送欢迎邮件（可选）
+                # send_welcome_email(user)
+                messages.success(request, f'欢迎 {user.username}！注册成功！')
+                # 重定向到首页
+                return redirect('/LabDatabase/index')
+            else:
+                return render (request, 'Register_admin.html',{"form":form})
+        else:
+            print("form is invalid")
+        
+    form = UserRegisterForm()
+    return render(request, 'Register_admin.html', {'form': form})
 # class LoginModelForm(forms.ModelForm):
 #     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请输入密码','minlength':6,"maxlength":100,'required':True}))
 #     class Meta:

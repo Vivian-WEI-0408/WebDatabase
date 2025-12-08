@@ -643,22 +643,22 @@ def UpdatePartFileAddress(request):
 #Delete
 def deletePartData(request):
     if(request.method == "GET"):
-        name = request.GET.get('name')
-        if(name == None or name == ""):
-            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
-        PartID = Parttable.objects.get(name=name).id
+        # name = request.GET.get('name')
+        # if(name == None or name == ""):
+        #     return JsonResponse(data={"success":False, "messsage":"Name cannot be empty"}, status=400,safe=False)
+        #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
+        PartID = request.GET.get("partid")
         username = request.session['info']['uname']
-        partuploaduser = Parttable.objects.get(name = name).user
+        partuploaduser = Parttable.objects.get(partid = PartID).user
         if(partuploaduser == "" or partuploaduser == None or username != partuploaduser):
-            return JsonResponse(data = "当前用户没有删除权限，请联系上传用户进行删除",status = 400, safe=False)
+            return JsonResponse(data = {"success":False, "message" : "当前用户没有删除权限，请联系上传用户进行删除"},status = 400, safe=False)
         if(PartID == None):
-            return JsonResponse(data="No such part", status=404,safe=False)
+            return JsonResponse(data={"success":False, "message":"No such part"}, status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Part Not Found'})
         TbPartUserfileaddress.objects.filter(partid=PartID).delete()
         Partrputable.objects.filter(partid=PartID).delete()
-        Parttable.objects.filter(name=name).delete()
-        return JsonResponse(data="Deleted part", status=200)
+        Parttable.objects.filter(partid = PartID).delete()
+        return JsonResponse(data={"success":True}, status=200)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data deleted'})
 
 
@@ -700,8 +700,11 @@ def getOriAndMarker(plasmid_id):
     return [ori_list, marker_list]
 
 def getdefaultplasmidscar(plasmidid):
-    scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).first().bbsi
-    return scar_info
+    plasmid_obj = Plasmidscartable.objects.filter(plasmidid = plasmidid).first()
+    if plasmid_obj != None:
+        return plasmid_obj.bbsi
+    else:
+        return "No Sequence"
 
 def PlasmidDataALL(request):
     if(request.method == "GET"):
@@ -1213,6 +1216,7 @@ def AddPlasmidFileAddress(request):
 def AddPlasmidData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
+        print(data)
         name = data['name']
         # oriclone = data['oriclone']
         # orihost = data['orihost']
@@ -1224,34 +1228,45 @@ def AddPlasmidData(request):
         plate = data['plate'] if 'plate' in data else ""
         state = data['state'] if 'state' in data else 0
         note = data['note'] if 'note' in data else ""
-        alias = data['alias'] 
+        alias = data['alias']
         username = request.session['info']['uname']
         ParentInfo = data['ParentInfo'] if 'ParentInfo' in data else ""
-        username = request.session.get('info')['uname']
+        # username = request.session.get('info')['uname']
         tag = data['tag'] if "tag" in data else "normal"
-        if(name == None or name == "" or level == None or level == "" or alias == ""):
+        if(name == None or name == "" or level == None or level == ""):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
-            Plasmidneed.objects.create(name=name, level = level, length = length, sequenceconfirm=sequence,
+            print("Plasmidneed.objects.filter(name = name).first()")
+            try:
+                Plasmidneed.objects.create(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,customparentinformation = ParentInfo,
-                                   uploaddate = timezone.now(), updatedate = timezone.now())
+                                   uploaddate = timezone.now(), updatedate = timezone.now(), user = username)
+                return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
+            except Exception as e:
+                return JsonResponse(data="fail upload",status = 400, safe=False)
         else:
-            plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
-            plasmid_obj.name = name
-            plasmid_obj.level = level
-            plasmid_obj.length = length
-            plasmid_obj.sequenceconfirm = sequence
-            plasmid_obj.plate = plate
-            plasmid_obj.state = state
-            plasmid_obj.note = note
-            plasmid_obj.alias = alias
-            plasmid_obj.customparentinformation = ParentInfo
-            plasmid_obj.user = username
-            plasmid_obj.tag = tag
-            plasmid_obj.updatedate = timezone.now()
-            plasmid_obj.save()
-        return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
+            print("Update")
+            try:
+                with transaction.atomic():
+                    plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
+                    plasmid_obj.name = name
+                    plasmid_obj.level = level
+                    plasmid_obj.length = length
+                    plasmid_obj.sequenceconfirm = sequence
+                    plasmid_obj.plate = plate
+                    plasmid_obj.state = state
+                    plasmid_obj.note = note
+                    plasmid_obj.alias = alias
+                    plasmid_obj.customparentinformation = ParentInfo
+                    plasmid_obj.user = username
+                    plasmid_obj.tag = tag
+                    plasmid_obj.updatedate = timezone.now()
+                    plasmid_obj.save()
+                return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
+            except Exception as e:
+                print(e.args)
+                return JsonResponse(data = str(e), status = 400, safe = False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Added'})
 
 def AddParentPlasmid(request):
@@ -1394,23 +1409,35 @@ def UpdatePlasmidFileAddress(request):
 #delete
 def deletePlasmidData(request):
     if(request.method == "GET"):
-        name = request.GET.get('name')
-        if(name == None or name == ""):
-            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
-            # return JsonResponse({'code':204,'status':'failed', 'data': 'Plasmid Name can not be empty'})
-        PlasmidID = Plasmidneed.objects.filter(name=name).first().plasmidid
+        # name = request.GET.get('name')
+        # if(name == None or name == ""):
+        #     return JsonResponse(data={"success":False, "message":"Name cannot be empty"}, status=400,safe=False)
+        #     # return JsonResponse({'code':204,'status':'failed', 'data': 'Plasmid Name can not be empty'})
+        PlasmidID = request.GET.get("plasmidid")
+        # print("balabala")
+        # print(PlasmidID)
         if(PlasmidID == None):
-            return JsonResponse(data="No such Plasmid", status=404,safe=False)
+            return JsonResponse(data={"success":False, "message":"No such Plasmid"}, status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
-        Parentplasmidtable.objects.filter(sonplasmidid=PlasmidID).delete()
-        Parentplasmidtable.objects.filter(parenplasmidid=PlasmidID).delete()
-        Parentparttable.objects.filter(sonplasmidid = PlasmidID).delete()
-        Parentbackbonetable.objects.filter(sonplasmidid = PlasmidID).delete()
-        Plasmidscartable.objects.filter(plasmidid = PlasmidID).delete()
-        Plasmid_Culture_Functions.objects.filter(plasmid_id = PlasmidID).delete()
-        TbPlasmidUserfileaddress.objects.filter(plasmidid=PlasmidID).delete()
-        Plasmidneed.objects.filter(plasmidid = PlasmidID).delete()
-        return JsonResponse(data="Plasmid Data Deleted", status=200)
+        plasmid_user = Plasmidneed.objects.get(plasmidid = PlasmidID).user
+        # print("balabala")
+        print(plasmid_user)
+        
+        if(plasmid_user != request.session['info']['uname']):
+            print("no user")
+            return JsonResponse(data = {"success":False, "message":"当前用户没有删除权限，请联系上传用户进行删除"}, status = 400, safe=False)
+        try:
+            Parentplasmidtable.objects.filter(sonplasmidid=PlasmidID).delete()
+            Parentplasmidtable.objects.filter(parentplasmidid=PlasmidID).delete()
+            Parentparttable.objects.filter(sonplasmidid = PlasmidID).delete()
+            Parentbackbonetable.objects.filter(sonplasmidid = PlasmidID).delete()
+            Plasmidscartable.objects.filter(plasmidid = PlasmidID).delete()
+            Plasmid_Culture_Functions.objects.filter(plasmid_id = PlasmidID).delete()
+            TbPlasmidUserfileaddress.objects.filter(plasmidid=PlasmidID).delete()
+            Plasmidneed.objects.filter(plasmidid = PlasmidID).delete()
+            return JsonResponse(data={"success":True}, status=200, safe=False)
+        except Exception as e:
+            return JsonResponse(data = {"success":False,"message":str(e)},status = 400, safe= False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Deleted'})
 
 def deletePlasmidFileAddress(request):
@@ -1495,8 +1522,11 @@ def setPlasmidCulture(request):
 #----------------------------------------------------------
 #Backbone table
 def getdefaultbackbonescar(backboneid):
-    scar_info = Backbonescartable.objects.filter(backboneid = backboneid).first().bbsi
-    return scar_info
+    backbone_obj = Backbonescartable.objects.filter(backboneid = backboneid).first()
+    if backbone_obj != None:
+        return backbone_obj.bbsi
+    else:
+        return "No Sequence"
 #Search
 def BackboneDataALL(request):
     if(request.method == "GET"):
@@ -2033,26 +2063,26 @@ def UpdateBackboneFileAddress(request):
 #Delete
 def DeleteBackboneData(request):
     if(request.method == "GET"):
-        Name = request.GET.get('name')
-        if(Name == None or Name == ""):
-            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
-            # return JsonResponse({'code':204,'status':'failed','data':'name can not be empty'})
+        # Name = request.GET.get('name')
+        # if(Name == None or Name == ""):
+        #     return JsonResponse(data={"success":False, "message":"Name cannot be empty"}, status=400,safe=False)
+        #     # return JsonResponse({'code':204,'status':'failed','data':'name can not be empty'})
         username = request.session.get('info')['uname']
-        BackboneID = Backbonetable.objects.filter(name = Name).first()
+        BackboneID = request.GET.get('backboneid')
         if(BackboneID.user == "" or BackboneID.user == None or BackboneID.user != username):
-            return JsonResponse(data = "当前用户没有删除权限，请联系上传用户进行删除", status = 400, safe = False)
-        if(BackboneID.id == None):
-            return JsonResponse(data="No such BackboneID", status=404,safe=False)
+            return JsonResponse(data ={"success" : False, "message":"当前用户没有删除权限，请联系上传用户进行删除"} , status = 400, safe = False)
+        if(BackboneID == None):
+            return JsonResponse(data={"success":False, "message":"No such BackboneID"}, status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Backbone Not Found'})
         try:
-            TbBackboneUserfileaddress.objects.filter(backboneid=BackboneID.id).delete()
-            Parentbackbonetable.objects.filter(parentbackboneid = BackboneID.id).delete()
-            Backbonescartable.objects.filter(backboneid = BackboneID.id).delete()
-            Backbone_Culture_Functions.objects.filter(backbone_id = BackboneID.id).delete()
-            Backbonetable.objects.filter(id=BackboneID.id).delete()
-            return JsonResponse(data="Deleted backbone data", status=200,safe=False)
+            TbBackboneUserfileaddress.objects.filter(backboneid=BackboneID).delete()
+            Parentbackbonetable.objects.filter(parentbackboneid = BackboneID).delete()
+            Backbonescartable.objects.filter(backboneid = BackboneID).delete()
+            Backbone_Culture_Functions.objects.filter(backbone_id = BackboneID).delete()
+            Backbonetable.objects.filter(id=BackboneID).delete()
+            return JsonResponse(data={"success": True}, status=200,safe=False)
         except Exception as e:
-            return JsonResponse(data = str(e), status = 400, safe = False)
+            return JsonResponse(data = {"success" : False, "message": str(e)}, status = 400, safe = False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Deleted'})
 
 def DeleteBackboneFileAddress(request):

@@ -30,7 +30,7 @@ from .ControllerModule import FittingLabels
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Base_URL = "http://10.30.76.2:8004/WebDatabase/"
 
 
 TASK_STATUS_PREFIX = 'file_task_'
@@ -54,7 +54,7 @@ TASK_STATUS_PREFIX = 'file_task_'
 
 def index(request):
     if(request.method == "GET"):
-        return render(request,'index.html')
+        return render(request,'index.html',{"user":request.user})
 
 def getData(request):
     # print(request.session['info']['uname'])
@@ -262,6 +262,7 @@ def process_excel_async(upload_record,django_request,task_id):
             type = "plasmid"
         print(type)
         result = ExcelProcessor.process_excel_file(django_request,excel_data,type,Base_URL)
+        print(result)
         task_status['progress'] = 100
         task_status['status'] = 'completed'
         Error_rows = result['error_row']
@@ -289,7 +290,7 @@ def process_excel_async(upload_record,django_request,task_id):
             'status':'failed',
             'progress':100,
             'result':None,
-            'error':str(e),
+            'error':str(e.args),
         }
         cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
 
@@ -336,7 +337,7 @@ def task_status(request, task_id):
     print(task_status)
     if(not task_status):
         return JsonResponse({'error':"任务不存在或已过期"},status=404)
-    if(task_status['progress'] == 100):
+    if(task_status['progress'] == 100 and task_status['status'] != "failed"):
         task_status['status'] = 'completed'
     response_data = {
         'task_id':task_id,
@@ -583,15 +584,60 @@ def downloadPlasmidMap(request,plasmidid):
         else:
             return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
 
-
-def delete_part(request,partid):
+def adminPage(request):
     pass
 
-def delete_backbone(request,backboneid):
-    pass
+def delete_part(request):
+    if(request.method == "POST"):
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent':'Django-App/1.0',
+            'Content-Type':'application/json',
+        })
+        partid = json.loads(request.body)["partid"]
+        delete_part_response = session.get(f"{Base_URL}deletePart?partid={partid}", cookies = request.COOKIES)
+        if(delete_part_response.status_code != 200):
+            return JsonResponse(data = {"success":False, "message":delete_part_response.json()["message"]},status = 400, safe = False)
+        else:
+            return JsonResponse(data={"success":True},status = 200, safe=False)
+    else:
+        return JsonResponse(data = {"success":False, "message":"Just GET Method"}, status = 404, safe = False)
 
-def delete_plasmid(request,plasmidid):
-    pass
+def delete_backbone(request):
+    if(request.method == "POST"):
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent':'Django-App/1.0',
+            'Content-Type':'application/json',
+        })
+        backboneid = json.loads(request.body)["backboneid"]
+        delete_backbone_response = session.get(f"{Base_URL}deleteBackbone?backboneid={backboneid}", cookies = request.COOKIES)
+        if(delete_backbone_response.status_code != 200):
+            return JsonResponse(data = {"success":False, "message":delete_backbone_response.json()["message"]},status = 400, safe = False)
+        else:
+            return JsonResponse(data={"success":True},status = 200, safe=False)
+    else:
+        return JsonResponse(data = {"success":False, "message":"Just GET Method"}, status = 404, safe = False)
+
+
+def delete_plasmid(request):
+    if(request.method == "POST"):
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent':'Django-App/1.0',
+            'Content-Type':'application/json',
+        })
+        plasmidid = json.loads(request.body)["Plasmidid"]
+        # print(plasmidid)
+        delete_plasmid_response = session.get(f"{Base_URL}deletePlasmid?plasmidid={plasmidid}", cookies=request.COOKIES)
+        print(delete_plasmid_response.json())
+        if(delete_plasmid_response.status_code != 200):
+            return JsonResponse(data = {"success":False, "message":delete_plasmid_response.json()["message"]},status = 400, safe = False)
+        else:
+            return JsonResponse(data={"success":True},status = 200, safe=False)
+    else:
+        return JsonResponse(data = {"success":False, "message":"Just GET Method"}, status = 404, safe = False)
+
 
 def modify_part(request,partid):
     pass

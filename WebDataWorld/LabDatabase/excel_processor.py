@@ -237,6 +237,7 @@ class ExcelProcessor:
                         data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'level':row['Level'],'sequence':row['Sequence'],'note':row['Note'],'ParentInfo':row['ParentSourceNote']}
                         print(data_body)
                         response = session.post(f'{BASE_URL}AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
+                        print(response.json())
                         if(response.status_code != 200):
                             error_rows.append(f'第{index}行，{row["PlasmidName"]} 添加数据失败\n')
                             continue
@@ -256,7 +257,7 @@ class ExcelProcessor:
                                 Ori_list.append(each_ori['Name'])
                             for each_marker in OriAndMarkerLabel['Marker']:
                                 Marker_list.append(each_marker['Name'])
-                            
+                            print(OriAndMarkerLabel)
                             plasmid_culture_body = {"name":row['PlasmidName'], "ori":Ori_list,"marker":Marker_list}
                             plasmid_culture_response = session.post(f"{BASE_URL}setPlasmidCulture",json = plasmid_culture_body, cookies=django_request.COOKIES)
                             if(plasmid_culture_response.status_code != 200):
@@ -268,7 +269,7 @@ class ExcelProcessor:
                                 error_rows.append(f'第{index}行，{row["PlasmidName"]}scar添加失败\n')
                         else:
                             empty_seq_rows.append(f'第{index}行，{row["PlasmidName"]} 序列为空，请后续补充序列信息\n')
-
+                        print(empty_seq_rows)
                         ParentPart = row['ParentPart']
                         ParentBackbone = row['ParentBackbone']
                         ParentPlasmid = row['ParentPlasmid']
@@ -310,13 +311,18 @@ class ExcelProcessor:
                                         continue
                                         # return {'success':False,'error':'Plasmid upload success, Parent plasmid upload fail'}
                         request_body = {"PlasmidName":row["PlasmidName"],"PlasmidParentInfo":ParentPlasmidExtraNote}
+                        print(request_body)
                         session.post(f'{BASE_URL}UpdateParentInfo',json=request_body,cookies=django_request.COOKIES)
             print(error_rows)
             print(empty_seq_rows)
             return {'success':True,'error_row':error_rows,'empty_Seq_rows':empty_seq_rows}
         except Exception as e:
-            logger.error(f"处理 Excel 文件失败: {str(e)}")
+            logger.error(f"处理Excel文件失败: {str(e.args[0])}")
+            print(error_rows)
+            print(empty_seq_rows)
             return {
                 'success': False,
-                'error': str(e)
+                'error': str(e.args),
+                'error_row':error_rows,
+                'empty_Seq_rows':empty_seq_rows
             }

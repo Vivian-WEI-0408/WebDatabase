@@ -278,6 +278,9 @@
                     <p>管理 Part、Backbone 和 Plasmid 数据</p>
                 </div>
                 <div>
+                    {% if user.is_superuser %}
+                        <button id = "admin_index" class="badge bg-light text-dark"><span class="badge bg-light text-dark">管理</span></button>
+                     {% endif %}
                     <span class="badge bg-light text-dark">v2.1.0</span>
                 </div>
             </div>
@@ -843,6 +846,10 @@
 
         });
 
+        document.getElementById("admin_index").addEventListener('click', function(){
+            window.location.href = "/LabDatabase/adminPage";
+        })
+
         //Part Search
         // function PartSearch(){
         //     let Type = document.getElementById('PartTypeSelect').innerText;
@@ -903,6 +910,7 @@
                                 else if(item.type === 4){
                                     PartType = "RBS";
                                 }
+                                row.setAttribute("id", `part_row_${item.partid}`)
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
@@ -913,7 +921,7 @@
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/part/${item.partid}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
-                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick = "PartDelete(${item.partid})">删除</button>
                                     </td>
                                 `;
                                 tableBody.appendChild(row);
@@ -978,7 +986,7 @@
                         totalPages = data.pagination.total_pages;
                         currentPage = data.pagination.current_page;
                         offset = data.pagination.offset;
-
+                        
                         tableBody.innerHTML = '';
                         if (totalItems === 0) {
                             tableBody.innerHTML = `
@@ -994,6 +1002,7 @@
                         } else {
                             result.forEach(item => {
                                 const row = document.createElement('tr');
+                                row.setAttribute("id", `backbone_row_${item.id}`)
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
@@ -1005,7 +1014,7 @@
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/backbone/${item.id}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
-                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="DeleteBackbone(${item.id})">删除</button>
                                     </td>
                                 `;
                                 tableBody.appendChild(row);
@@ -1085,6 +1094,7 @@
                         } else {
                             result.forEach(item => {
                                 const row = document.createElement('tr');
+                                row.setAttribute("id", `plasmid_row_${item.plasmidid}`)
                                 var ori_list = item.ori_info;
                                 var marker_list = item.marker_info;
                                 console.log(ori_list);
@@ -1100,7 +1110,7 @@
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
-                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick = "PlasmidDelete(${item.plasmidid})">删除</button>
                                     </td>
                                 `;
                                 tableBody.appendChild(row);
@@ -1199,6 +1209,7 @@
                             // 填充表格数据
                                 result.forEach(item => {
                                     const row = document.createElement('tr');
+                                    row.setAttribute("id", `part_row_${item.partid}`)
                                     let PartType = "";
                                     if(item.type === 1){
                                         PartType = "promoter";
@@ -1222,7 +1233,7 @@
                                         <td class="action-cell">
                                             <button class="btn btn-sm btn-outline-primary"  onclick="window.location.href='/LabDatabase/part/${item.partid}'">查看</button>
                                             <button class="btn btn-sm btn-outline-secondary">编辑</button>
-                                            <button class="btn btn-sm btn-outline-danger">删除</button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick = "DeletePart(${item.partid})">删除</button>
                                         </td>
                                         `;
                                     tableBody.appendChild(row);
@@ -1342,6 +1353,7 @@
                         } else {
                             result.forEach(item => {
                                 const row = document.createElement('tr');
+                                row.setAttribute("id", `backbone_row_${item.id}`)
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
@@ -1353,7 +1365,7 @@
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/backbone/${item.id}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
-                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick = "DeleteBackbone(${item.id})">删除</button>
                                     </td>
                                 `;
                                 tableBody.appendChild(row);
@@ -1472,6 +1484,7 @@
                         } else {
                             result.forEach(item => {
                                 const row = document.createElement('tr');
+                                row.setAttribute("id", `plasmid_row_${item.plasmidid}`)
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
@@ -1483,7 +1496,7 @@
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
                                         <button class="btn btn-sm btn-outline-secondary">编辑</button>
-                                        <button class="btn btn-sm btn-outline-danger">删除</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick = "DeletePlasmid(${item.plasmidid})">删除</button>
                                     </td>
                                 `;
                                 tableBody.appendChild(row);
@@ -1653,6 +1666,100 @@
                     });
                 }
             });
+        }
+
+        function DeletePart(partid){
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            var confirmDelete = confirm("确定要删除吗？");
+            if( !confirmDelete){
+                event.preventDefault();
+            }
+            else{
+                let request_body = {"partid":partid}
+
+                fetch(`/LabDatabase/deletepart`,{
+                    method:'POST',
+                    body:JSON.stringify(request_body),
+                    headers:{
+                        'X-CSRFToken':csrfToken,
+                        'Content-Type':"application/json",
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        alert("删除成功");
+                        document.getElementById(`part_row_${partid}`).remove();
+
+                    }
+                    else{
+                        alert(data.message);
+                    }
+                });
+            }
+            
+        }
+
+        function DeleteBackbone(Backboneid){
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            var confirmDelete = confirm("确定要删除吗？");
+            if( !confirmDelete){
+                event.preventDefault();
+            }
+            else{
+                let request_body = {"backboneid":Backboneid}
+                fetch(`/LabDatabase/deletebackbone`,{
+                    method:'POST',
+                    body:JSON.stringify(request_body),
+                    headers:{
+                        'X-CSRFToken':csrfToken,
+                        'Content-Type':"application/json",
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        alert("删除成功");
+                        document.getElementById(`backbone_row_${Backboneid}`).remove();
+
+                    }
+                    else{
+                        alert(data.message);
+                    }
+                });
+            }
+        }
+        
+        function DeletePlasmid(Plasmidid){
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            var confirmDelete = confirm("确定要删除吗？");
+            if( !confirmDelete){
+                event.preventDefault();
+            }
+            else{
+                let request_body = {"Plasmidid":Plasmidid, "CurrentPath":window.location.href}
+                fetch(`/LabDatabase/deleteplasmid`,{
+                    method:'POST',
+                    body:JSON.stringify(request_body),
+                    headers:{
+                        'X-CSRFToken':csrfToken,
+                        'Content-Type':"application/json",
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        alert("删除成功");
+                        document.getElementById(`plasmid_row_${Plasmidid}`).remove();
+                    }
+                    else{
+                        alert(data.message);
+                    }
+                });
+            }
         }
     </script>
 </body>
