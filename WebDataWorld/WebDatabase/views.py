@@ -1224,7 +1224,7 @@ def AddPlasmidData(request):
         plate = data['plate'] if 'plate' in data else ""
         state = data['state'] if 'state' in data else 0
         note = data['note'] if 'note' in data else ""
-        alias = data['alias']
+        alias = data['alias'] 
         username = request.session['info']['uname']
         ParentInfo = data['ParentInfo'] if 'ParentInfo' in data else ""
         username = request.session.get('info')['uname']

@@ -57,9 +57,9 @@ class ExcelProcessor:
         'ParentSourceNote':'',
     }
     
-    PART_REQUIRED_COLUMNS = ['PartName','Alias','Type','Species']
-    BACKBONE_REQUIRED_COLUMNS = ['BackboneName','Alias','Species','Note',]
-    PLASMID_REQUIRED_COLUMNS = ['PlasmidName','Alias','Level',]
+    PART_REQUIRED_COLUMNS = ['PartName','Type','Species']
+    BACKBONE_REQUIRED_COLUMNS = ['BackboneName','Species',]
+    PLASMID_REQUIRED_COLUMNS = ['PlasmidName','Level',]
     
     PLASMID_PARENT_COLUMNS = ['ParentPart','ParentBackbone','ParentPlasmid','ParentSourceNote']
     @classmethod
@@ -234,7 +234,7 @@ class ExcelProcessor:
                         # print(OriClone)
                         Ori_list = []
                         Marker_list = []
-                        data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'level':row['Level'],'sequence':row['Sequence'],'ParentInfo':row['ParentSourceNote']}
+                        data_body = {'name':row['PlasmidName'],'alias':row['Alias'],'level':row['Level'],'sequence':row['Sequence'],'note':row['Note'],'ParentInfo':row['ParentSourceNote']}
                         print(data_body)
                         response = session.post(f'{BASE_URL}AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
                         if(response.status_code != 200):
