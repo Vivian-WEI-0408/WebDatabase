@@ -21,6 +21,7 @@ urlpatterns = [
 
 
     path("Part",views.PartDataALL,name="Part"),
+    path("partcount",views.PartCount, name="PartCount"),
     path("PartByID",views.SearchByPartID,name="PartByID"),
     path("PartName",views.SearchByPartName,name="PartName"),
     path("PartAlias",views.SearchByPartAlterName,name="PartAlias"),
@@ -43,6 +44,7 @@ urlpatterns = [
     path("PartFilter",views.PartFilter,name="PartFilter"),
     path("UpdatePartSequence",views.UpdatePartSequence,name="UpdatePartSequence"),
 
+    path("plasmidcount",views.PlasmidCount,name="Plasmidcount"),
     path("Plasmid",views.PlasmidDataALL,name="Plasmid"),
     path("PlasmidName",views.SearchByPlasmidName,name="PlamsidName"),
     path("PlasmidByID",views.SearchByPlasmidID,name="PlasmidByID"),
@@ -71,6 +73,7 @@ urlpatterns = [
     path("setPlasmidCulture",views.setPlasmidCulture,name="setPlasmidCulture"),
     path("UpdatePlasmidSequence",views.UpdatePlasmidSequence, name= "UpdatePlasmidSequence"),
 
+    path("backbonecount",views.BackboneCount, name = "backbonecount"),
     path("Backbone",views.BackboneDataALL,name="Backbone"),
     path("BackboneName",views.SearchByBackboneName,name="BackboneName"),
     path("BackboneByID",views.SearchByBackboneID,name="BackboneID"),
@@ -121,6 +124,7 @@ urlpatterns = [
     path("logout",account.logout,name="logout"),
     path("register",account.register,name="register"),
     path("AdminRegister",account.admin_register, name = "AdminRegister"),
+    path("reset",account.reset_password, name="resetpassword"),
 
     path("PartNameFilter",views.SearchByPartNameFilter,name="PartNameFilter"),
     path("BackboneNameFilter",views.SearchByBackboneNameFilter,name="BackboneNameFilter"),
@@ -151,4 +155,7 @@ urlpatterns = [
 
     path("getPlasmidScar",views.getPlasmidScar,name = "getPlasmidScar"),
     path("setPlasmidScar",views.setPlasmidScar,name = "setPlasmidScar"),
+    
+    path("getuserlist",views.getuserlist,name="getuserlist"),
+    path("getalluseruploadlist",views.getAllUserUploadList,name="getalluseruploaduser"),
 ]

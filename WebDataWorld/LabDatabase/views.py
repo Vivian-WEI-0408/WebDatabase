@@ -584,8 +584,8 @@ def downloadPlasmidMap(request,plasmidid):
         else:
             return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
 
-def adminPage(request):
-    pass
+# def adminPage(request):
+#     pass
 
 def delete_part(request):
     if(request.method == "POST"):

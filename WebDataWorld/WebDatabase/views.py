@@ -38,7 +38,7 @@ class User_auth(MiddlewareMixin):
         
         
         #排除不需要登录就能访问的页面
-        if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register":
+        if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register" or request.path_info == "/WebDatabase/AdminRegister" or request.path_info == "/WebDatabase/reset":
             return
         info = request.session.get('info')
         # print(f'User_auth{info}')
@@ -95,6 +95,13 @@ def SearchByStrainName(request):
 #-------------------------------------------------------------
 #Part Table
 #ALL
+def PartCount(request):
+    if(request.method == "GET"):
+        count = Parttable.objects.values().count()
+        return JsonResponse(data = {'success':True, "data":count}, status = 200, safe = False)
+    else:
+        return JsonResponse(data = {"success":False, "message":"Juset GET method"}, status = 200, safe=False)
+    
 def PartDataALL(request):
     print("PartDataAll")
     if(request.method == "GET"):
@@ -684,9 +691,16 @@ def deletePartFile(request):
 
 
 
+
+
 #---------------------------------------------------------------
 #pladmid need
-
+def PlasmidCount(request):
+    if(request.method == "GET"):
+        count = Plasmidneed.objects.values().count()
+        return JsonResponse(data={"success":True, "data":count}, status = 200, safe=False)
+    else:
+       return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
 def getOriAndMarker(plasmid_id):
     ori_list = []
     marker_list = []
@@ -1521,6 +1535,13 @@ def setPlasmidCulture(request):
 
 #----------------------------------------------------------
 #Backbone table
+def BackboneCount(request):
+    if(request.method == "GET"):
+        count = Backbonetable.objects.values().count()
+        return JsonResponse(data={"success":True, "data":count}, status = 200, safe=False)
+    else:
+       return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
+   
 def getdefaultbackbonescar(backboneid):
     backbone_obj = Backbonescartable.objects.filter(backboneid = backboneid).first()
     if backbone_obj != None:
@@ -3077,3 +3098,25 @@ def UpdatePlasmidSequence(request):
             return JsonResponse(data = {'success':False, 'message':"Plasmid Does Not Exist"}, status = 404, safe = False)
     else:
         return JsonResponse(data = {'success':False, 'message' : "just POST method"}, status = 500, safe = False)
+    
+
+def getuserlist(request):
+    if(request.method == "GET"):
+        userlist = list(CustomUser.objects.values('uname').distinct())
+        print(userlist)
+        return JsonResponse(data = {'success':True, "data":userlist}, status = 200, safe = False)
+    else:
+        return JsonResponse(data = {"success":False, "message":"Just GET method"}, status = 400, safe=False)
+
+def getAllUserUploadList(request):
+    if(request.method == "GET"):
+        userlist = list(CustomUser.objects.values('uname').distinct())
+        result = []
+        for each_user in userlist:
+            part_count = Parttable.objects.filter(user = each_user['uname']).count()
+            backbone_count = Backbonetable.objects.filter(user = each_user['uname']).count()
+            plasmid_count = Plasmidneed.objects.filter(user = each_user['uname']).count()
+            result.append({"uname":each_user['uname'],"part_count":part_count, "backbone_count":backbone_count, "plasmid_count":plasmid_count})
+        return JsonResponse(data = {"success":True, "data":result}, status = 200, safe = False)
+    else:
+        return JsonResponse(data = {"success":False, "message":"Just GET method"},status = 200, safe = False)

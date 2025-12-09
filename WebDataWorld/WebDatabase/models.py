@@ -561,7 +561,7 @@ class UserManager(BaseUserManager):
         print(email)
         print(password)
         extra_fields.setdefault('is_staff',True)
-        extra_fields.setdefault('is_activate',True)
+        extra_fields.setdefault('is_active',True)
         if not email or not uname:
             raise ValueError(_('用户名和邮箱必须提供'))
         email = self.normalize_email(email)

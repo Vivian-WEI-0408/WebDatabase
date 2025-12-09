@@ -2,7 +2,7 @@ from datetime import datetime
 from platform import uname
 from django.contrib.auth import authenticate, login, logout,get_user_model
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm,PasswordResetForm
 from django.contrib.auth.views import LoginView,LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, UpdateView, FormView
@@ -16,7 +16,8 @@ import hashlib
 from django.shortcuts import render, HttpResponse,redirect
 from django import forms
 from django.utils.translation import gettext_lazy as _
-
+from django.db import transaction
+from django.db.models import Q
 
 #md5加密
 def md5(data):
@@ -25,7 +26,93 @@ def md5(data):
     return m.hexdigest()
 
 # User = get_user_model()
-
+class ResetPasswordForm(PasswordResetForm):
+    email = forms.EmailField(
+        label='邮箱地址',
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': '请输入注册时使用的邮箱（选填）',
+            'autocomplete': 'email',
+        }),
+    )
+    uname = forms.CharField(
+        label=_('用户名'),
+        widget=forms.TextInput(attrs={
+            'class':'form-control',
+            'placeholder':'请输入用户名（选填）',
+            'autocomplete':'uname'
+        })
+    )
+    
+    password1 = forms.CharField(
+        label=_('密码'),
+        widget=forms.PasswordInput(attrs={
+            'class':'form-control',
+            'placeholder':'请输入密码',
+            'autocomplete':'new-password'
+        })
+    )
+    
+    password2 = forms.CharField(
+        label = _('确认密码'),
+        widget=forms.PasswordInput(attrs={
+            'class':'form-control',
+            'placeholder':'请再次输入密码',
+            'autocomplete':'new-password'
+        })
+    )
+    def clean_email_username(self):
+        email = self.cleaned_data.get('email')
+        uname = self.cleaned_data.get('uname')
+        if(email != "" and uname != ""):
+            # 检查邮箱是否存在
+            print(CustomUser.objects.filter(email=email, is_active=True).exists())
+            print(CustomUser.objects.filter(uname=uname, is_active =True).exists())
+            if not CustomUser.objects.filter(email=email, is_active=True).exists() and not CustomUser.objects.filter(uname = uname, is_active=True).exists():
+                self.add_error("email","用户名或邮箱不存在")
+                self.add_error("uname","用户名或邮箱不存在")
+                return False
+            if(self.cleaned_data.get("password1") != self.cleaned_data.get("password2")):
+                self.add_error("password1","两次输入的密码不一致")
+                self.add_error("password2","两次输入的密码不一致")
+                return False
+                    # with transaction.atomic():
+                    #     the_user = CustomUser.objects.select_for_update(Q(email__iexact = email) | Q(uname__iexact = uname))
+                    #     the_user.password = md5(self.cleaned_data.get("password1"))
+                    #     the_user.save()
+            return self.cleaned_data
+        else:
+            self.add_error("email","用户名或密码至少填写一项")
+            self.add_error("uname","用户名或密码至少填写一项")
+            return False
+        
+    def authenticate_user(self, username, email, password):
+        """认证用户（支持邮箱或用户名登录）"""
+        from django.contrib.auth import authenticate
+        from .models import CustomUser
+        print("authenticated_user")
+        # 先尝试用用户名认证
+        print(username)
+        print(password)
+        user = authenticate(username=username, password=md5(password))
+        if user != None:
+            self.cleaned_data['uid'] = user.uid
+            return user
+        # 如果失败，尝试用邮箱认证
+        if user is None and '@' in email:
+            try:
+                user_obj = CustomUser.objects.get(email=email)
+                user = authenticate(username=user_obj.username, password=md5(password))
+                self.cleaned_data['uid'] = user.uid
+                return user
+            except CustomUser.DoesNotExist:
+                pass
+        else:
+            print("用户不存在")
+            self.add_error("username","用户不存在")
+            return user
+        
 class UserRegisterForm(forms.Form):
     uname = forms.CharField(
         label=_('用户名'),
@@ -92,6 +179,7 @@ class UserRegisterForm(forms.Form):
             email = self.cleaned_data.get('email'),
             password=md5(self.cleaned_data.get('password1'))
         )
+        print(md5(self.cleaned_data.get('password1')))
         print(user)
         return user
     
@@ -115,8 +203,8 @@ class UserRegisterForm(forms.Form):
         print(username)
         print(password)
         user = authenticate(username=username, password=md5(password))
-        self.cleaned_data['uid'] = user.uid
         if user != None:
+            self.cleaned_data['uid'] = user.uid
             return user
         # 如果失败，尝试用邮箱认证
         if user is None and '@' in email:
@@ -302,7 +390,10 @@ def logout(request):
 
 def admin_register(request):
     """用户注册视图"""
+    print("111111111111111111111111111111")
+    print(request.method)
     if request.method == 'POST':
+        print("balabala")
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             form.clean_data()
@@ -325,9 +416,39 @@ def admin_register(request):
                 return render (request, 'Register_admin.html',{"form":form})
         else:
             print("form is invalid")
-        
-    form = UserRegisterForm()
-    return render(request, 'Register_admin.html', {'form': form})
+    else:
+        print("77777777")
+        form = UserRegisterForm()
+        return render(request, 'Register_admin.html', {'form': form})
+
+
+def reset_password(request):
+    if(request.method == "GET"):
+        form = ResetPasswordForm()
+        return render(request, "reset_password.html",{'form':form})
+    else:
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            clean_data = form.clean_email_username()
+            print(f"clean_data is {clean_data}")
+            if(clean_data != False and "uname" in clean_data and "email" in clean_data and "password1" in clean_data and "password2" in clean_data):
+                with transaction.atomic():
+                    the_user = CustomUser.objects.select_for_update().get(Q(email = clean_data.get("email")) | Q(uname = clean_data.get("uname")))
+                    the_user.set_password(md5(clean_data.get("password1")))
+                    the_user.save()
+                
+                # 自动登录
+                # username, email, password
+                user = form.authenticate_user(clean_data['uname'], clean_data['email'], clean_data['password1'])
+                login(request, user)
+                request.session['info'] = {'uid':form.cleaned_data['uid'],'uname':form.cleaned_data['uname']}
+                # 发送欢迎邮件（可选）
+                # send_welcome_email(user)
+                messages.success(request, f'欢迎 {user.username}！注册成功！')
+                # 重定向到首页
+                return redirect('/LabDatabase/index')
+            else:
+                return render (request, 'reset_password.html',{"form":form})
 # class LoginModelForm(forms.ModelForm):
 #     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请输入密码','minlength':6,"maxlength":100,'required':True}))
 #     class Meta:
@@ -336,7 +457,7 @@ def admin_register(request):
 #     def clean_password(self):
 #         pwd = self.cleaned_data.get('password')
 #         return md5(pwd)
-    
+
 # class RegisterModelForm(forms.ModelForm):
 #     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请输入密码','minlength':6,"maxlength":100,'required':True}))
 #     password_Confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'请再次输入密码','minlength':6,"maxlength":100,'required':True}))
@@ -549,4 +670,3 @@ def admin_register(request):
 #         except Exception as e:
 #             messages.error(request, f"密码修改失败：{str(e)}")
 #     return render(request, 'change_password.html')
-

@@ -1,6 +1,6 @@
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
-
+from LabDatabase.AdminManage import admin_views
 from LabDatabase import views,admin
 urlpatterns = [
     #index
@@ -45,4 +45,7 @@ urlpatterns = [
     path("downloadPlasmidMap/<int:plasmidid>",views.downloadPlasmidMap,name="downloadPlasmidMap"),
     path("downloadBackboneMap/<int:backboneid>",views.downloadBackboneMap,name="downloadBackboneMap"),
     path("downloadPartMap/<int:partid>",views.downloadPartMap,name="downloadPartMap"),
+    
+    path("adminPage",admin_views.AdminDashbordView, name = "adminPage"),
+
 ]
