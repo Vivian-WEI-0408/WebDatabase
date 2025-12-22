@@ -5,6 +5,7 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.conf import settings
@@ -527,7 +528,7 @@ class TbPlasmidUserfileaddress(models.Model):
 
 class Temporaryrepository(models.Model):
     id = models.CharField(primary_key=True, max_length=32)
-    userid = models.ForeignKey('User', models.DO_NOTHING, db_column='userid')
+    userid = models.ForeignKey('CustomUser', models.DO_NOTHING, db_column='userid')
     repositorycreate_time = models.DateTimeField(blank=True, null=True)
     repositoryupdate_time = models.DateTimeField(blank=True, null=True)
     repositoryexpire_time = models.DateTimeField(blank=True, null=True)
@@ -538,6 +539,9 @@ class Temporaryrepository(models.Model):
     class Meta:
         managed = True
         db_table = 'temporaryrepository'
+    def is_expired(self):
+        print("is_expired")
+        return timezone.now() > self.repositoryexpire_time
 
 
 class Testdatatable(models.Model):

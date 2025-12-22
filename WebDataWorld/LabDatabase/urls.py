@@ -23,6 +23,7 @@ urlpatterns = [
     #Upload Excel File
     path("UploadFile",views.UploadFile,name="UploadFile"),
     path("task_status/<str:task_id>",views.task_status,name="task_status"),
+    path("excel_task_status/<str:task_id>",views.excel_task_status,name= "excel_task_status"),
     #Search Information
     path("part/<int:partid>",views.part_detail_show,name="part_detail"),
     path("backbone/<int:backboneid>",views.backbone_detail_show,name="backbone_detail"),
@@ -47,5 +48,14 @@ urlpatterns = [
     path("downloadPartMap/<int:partid>",views.downloadPartMap,name="downloadPartMap"),
     
     path("adminPage",admin_views.AdminDashbordView, name = "adminPage"),
-
+    path("exportUserData/<str:username>",views.exportuserdata,name="exportuserdata"),
+    path("exportallData",views.ExportAllData,name="exportallData"),
+    path("getDocument/<str:fileid>",views.getDocument,name="getDocument"),
+    path("getAssembly/<str:fileName>",views.getAssemblyFile,name="getAssembly"),
+    
+    path("createRepo",views.CreateTempRepository,name="createRepo"),
+    path("AssemblyRepo",views.AssemblyRepo,name="AssemblyRepo"),
+    
+    path("FetchExperienceDetail/<str:partName>",views.GetExperienceDetail,name="FetchExperienceDetail"),
+    
 ]

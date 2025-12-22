@@ -8,37 +8,10 @@ from pymysql.err import OperationalError,DataError
 from numpy import genfromtxt
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-# from PyQt5.QtGui import QStandardItemModel
-# from PyQt5.QtWidgets import QFileDialog, QMessageBox, QInputDialog, QLineEdit, QWidget,QApplication,QTableWidgetItem
 
-# from GGModule.SupportGG import SupportGG
 from Bio.SeqIO import parse,write
-# from FileNameScanner import FileNameScanner
-# import UI.ChoiceDialog
-# import UI.NotUploadFileShow
-# import UI.PartInputDialogShow
-# from UI.BackboneInputDialogShow import BackboneInputDialogShow
-# from UI.ProgressBar import ProgressBar
-# from UI.PlasmidInputDialogShow import PlasmidInputDialogShow
-# from UI.SeqFileInputDialog import SeqFileInputDialog
-# from snapgene_reader import snapgene_file_to_seqrecord
-# from UI.FormularFormShow import FormularFormShow
-# from UI.ExperienceDataImpotDialog import ExperienceDataImportDialog
-# from UI.ImportSeqFileChoiceShow import ImportSeqFileChoiceShow
-# from UI.DNASequenceInputUI import DNASequenceInputUI
-# from UI.BlastResultShow import BlastResultShow
-# from CaculateModule.Caculate import Caculate
-# from Entity import Gate,Part
-# from ExperienceData import plasmidsearch,partsearch
+
 import openpyxl
-# from UI.PartRPUShowView import PartRPUShowView
-# from PyQt5.QtCore import QThread,pyqtSignal
-# from PyQt5.QtWidgets import QDialog
-# from ExceptionModule.FileException import FileException
-# from re import compile,match
-# from Bio.Blast import NCBIWWW,NCBIXML
-# from matplotlib import pyplot as plt
-# from matplotlib.patches import Rectangle
 import sys
 sys.path.append(r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase')
 class Controller:
@@ -2179,117 +2152,33 @@ def ImportDataset():
 #     return Name
 
 
-# #Assembly在文件是否存在方面的操作，在的话之间加入列表，没有就自动书写文件（书写后删除）
-# def AssemblyFunction():
-#     try:
-#         FileAddressList= []
-#         FileWithoutAddress = []
-#         FileNameList = []
-#         FileWithoutAddressindex = []
-#         for part in Controller.UI.PartsToMerge:
-#             PartAddress = ManageSql.getFileAddress(0,Controller.UI.username,part,Controller.conn, Controller.c)
-#             if(PartAddress != None and exists(PartAddress)):
-#                 FileAddressList.append(PartAddress)
-#                 FileFormat = ""
-#                 if(splitext(PartAddress)[-1][1:] == "fasta"):
-#                     FileFormat = "fasta"
-#                 elif(splitext(PartAddress)[-1][1:] == "gb" or splitext(PartAddress)[-1][1:] == "gbk" or os.path.splitext(PartAddress)[-1][1:] == "ape" or os.path.splitext(PartAddress)[-1][1:] == "str"):
-#                     FileFormat = "genbank"
-#                 elif(splitext(PartAddress)[-1][1:] == "dna"):
-#                     FileFormat = "snapgene"
-#                 Name = ParseGenBankFileGetName(PartAddress,FileFormat)
-#                 if(Name == "Error"):
-#                     messageBox = QMessageBox()
-#                     messageBox.setWindowTitle("Error")
-#                     messageBox.setText("The file of this part has more than one part data!")
-#                     messageBox.exec_()
-#                     return
-#                 else:
-#                     FileNameList.append(Name)
-#             else:
-#                 FileWithoutAddress.append(part)
-#                 FileWithoutAddressindex.append(0)
-#         for Backbone in Controller.UI.BackboneToMerge:
-#             BackboneAddress = str(ManageSql.getFileAddress(1,Controller.UI.username,Backbone,Controller.conn, Controller.c))
-#             BackboneAddress = BackboneAddress.replace("\\\\","\\")
-#             if(BackboneAddress != None and exists(BackboneAddress)):
-#                 FileAddressList.append(BackboneAddress)
-#                 AddressSuffix = splitext(BackboneAddress)[-1][1:]
-#                 FileFormat = ""
-#                 if(AddressSuffix == "fasta"):
-#                     FileFormat = "fasta"
-#                 elif(AddressSuffix == "gb" or AddressSuffix == "gbk" or AddressSuffix == "ape" or AddressSuffix== "str"):
-#                     FileFormat = "genbank"
-#                 elif(AddressSuffix == "dna"):
-#                     FileFormat = "snapgene"
-#                 Name = ParseGenBankFileGetName(BackboneAddress,FileFormat)
-#                 if(Name == "Error"):
-#                     messageBox = QMessageBox()
-#                     messageBox.setWindowTitle("Error")
-#                     messageBox.setText("The file of this part has more than one part data!")
-#                     messageBox.exec_()
-#                     return
-#                 else:
-#                     FileNameList.append(Name)
-#             else:
-#                 FileWithoutAddress.append(Backbone)
-#                 FileWithoutAddressindex.append(1)
-#         for plasmid in Controller.UI.PlasmidToMerge:
-#             PlasmidAddress = ManageSql.getFileAddress(2,Controller.UI.username,plasmid,Controller.conn, Controller.c)
-#             if(PlasmidAddress != None and exists(PlasmidAddress)):
-#                 FileAddressList.append(PlasmidAddress)
-#                 FileFormat = ""
-#                 if(splitext(PlasmidAddress)[-1][1:] == "fasta"):
-#                     FileFormat = "fasta"
-#                 elif(splitext(PlasmidAddress)[-1][1:] == "gb" or splitext(PlasmidAddress)[-1][1:] == "gbk" or splitext(PlasmidAddress)[-1][1:] == "ape" or splitext(PlasmidAddress)[-1][1:] == "str"):
-#                     FileFormat = "genbank"
-#                 elif(splitext(PlasmidAddress)[-1][1:] == "dna"):
-#                     FileFormat = "snapgene"
-#                 Name = ParseGenBankFileGetName(PlasmidAddress,FileFormat)
-#                 if(Name == "Error"):
-#                     messageBox = QMessageBox()
-#                     messageBox.setWindowTitle("Error")
-#                     messageBox.setText("The file of this part has more than one part data!")
-#                     messageBox.exec_()
-#                     return
-#                 else:
-#                     FileNameList.append(Name)
-#             else:
-#                 FileWithoutAddress.append(plasmid)
-#                 FileWithoutAddressindex.append(2)
-#         i = 0
-#         for part in FileWithoutAddress:
-#             WriteGBKFile(part,FileWithoutAddressindex[i])
-#             FileAddress = join(dirname(realpath(argv[0])),part+".gbk")
-#             ParseGenBankFileGetName(FileAddress,"genbank")
-#             FileAddressList.append(FileAddress)
-#             FileNameList.append(part)
-#             Controller.UI.TempFileList.append(FileAddress)
-#             i = i+1
-#         GG = SupportGG(FileAddressList, FileNameList)
-#         GG.assemblyPart("test")
-#         GG.show()
-#         messageBox = QMessageBox()
-#         messageBox.setWindowTitle("AssemblyResult")
-#         messageBox.setText("Finish!")
-#         messageBox.exec()
-#         Controller.UI.PartsToMerge.clear()
-#         Controller.UI.BackboneToMerge.clear()
-#         Controller.UI.PlasmidToMerge.clear()
-#         Controller.UI.RefreshTable('PartTable', Controller.conn, Controller.c)
-#         Controller.UI.RefreshTable('BackboneTable',Controller.conn,Controller.c)
-#         Controller.UI.RefreshTable('PlasmidNeed',Controller.conn,Controller.c)
-#     except OperationalError as e:
-#         if(e.args[0] == 1142):
-#             messageBox = QMessageBox()
-#             messageBox.setWindowTitle("Privilege Error")
-#             messageBox.setText("You don't have this privilege.")
-#             messageBox.exec_()
-#         else:
-#             messageBox = QMessageBox()
-#             messageBox.setWindowTitle("Error")
-#             messageBox.setText(str(e.args))
-#             messageBox.exec_()
+#Assembly在文件是否存在方面的操作，在的话之间加入列表，没有就自动书写文件（书写后删除）
+def AssemblyFunction():
+    try:
+        GG = SupportGG(FileAddressList, FileNameList)
+        GG.assemblyPart("test")
+        GG.show()
+        messageBox = QMessageBox()
+        messageBox.setWindowTitle("AssemblyResult")
+        messageBox.setText("Finish!")
+        messageBox.exec()
+        Controller.UI.PartsToMerge.clear()
+        Controller.UI.BackboneToMerge.clear()
+        Controller.UI.PlasmidToMerge.clear()
+        Controller.UI.RefreshTable('PartTable', Controller.conn, Controller.c)
+        Controller.UI.RefreshTable('BackboneTable',Controller.conn,Controller.c)
+        Controller.UI.RefreshTable('PlasmidNeed',Controller.conn,Controller.c)
+    except OperationalError as e:
+        if(e.args[0] == 1142):
+            messageBox = QMessageBox()
+            messageBox.setWindowTitle("Privilege Error")
+            messageBox.setText("You don't have this privilege.")
+            messageBox.exec_()
+        else:
+            messageBox = QMessageBox()
+            messageBox.setWindowTitle("Error")
+            messageBox.setText(str(e.args))
+            messageBox.exec_()
 
 # def WriteGBKFileWithoutC(part, index,cur):
 #     CurrentSeq = ""

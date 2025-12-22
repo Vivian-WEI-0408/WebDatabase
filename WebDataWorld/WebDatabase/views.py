@@ -14,7 +14,7 @@ from django.utils.deprecation import MiddlewareMixin
 from .models import (Backbonetable,Parentplasmidtable,
                     Partrputable,Parttable,Plasmidneed,
                     Straintable,TbBackboneUserfileaddress,
-                    TbPartUserfileaddress,TbPlasmidUserfileaddress,
+                    TbPartUserfileaddress,TbPlasmidUserfileaddress, Temporaryrepository,
                     Testdatatable,CustomUser,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
                     Parentparttable, Partscartable, Backbonescartable, Plasmidscartable, \
                     Plasmid_Culture_Functions,Backbone_Culture_Functions)
@@ -95,6 +95,13 @@ def SearchByStrainName(request):
 #-------------------------------------------------------------
 #Part Table
 #ALL
+def PartFields(request):
+    fields =[field.name for field in Parttable._meta.get_fields()]
+    fields.remove("parentparttable")
+    fields.remove("partrputable")
+    fields.remove("partscartable")
+    fields.remove("tbpartuserfileaddress")
+    return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
 def PartCount(request):
     if(request.method == "GET"):
         count = Parttable.objects.values().count()
@@ -157,6 +164,8 @@ def PartFilter(request):
                 type = 4
             elif(type.lower() == "cds"):
                 type = 2
+            elif(type.lower() == "p+r"):
+                type = 5
         scarpartid = []
         if(Enzyme == "BsmBI"):
             scarpartid = list(Partscartable.objects.filter(bsmbi = Scar).values('partid'))
@@ -242,15 +251,22 @@ def PartFilter(request):
 def SearchByPartName(request):
     if(request.method == "GET"):
         Name = request.GET.get('name')
+        print(Name)
         if(Name == None or Name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
-        PartList = Parttable.objects.filter(name=Name)
-        if(len(PartList) > 0):
-            return JsonResponse(data=list(PartList.values()), status=200,safe=False)
-            # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
-        else:
-            return JsonResponse(data="No such part", status=404,safe=False)
+        try:
+            PartList = Parttable.objects.filter(name=Name)
+            print(PartList)
+            if(PartList != None):
+                print("7777777777")
+                return JsonResponse(data={"success":True, 'data':list(PartList.values())[0]}, status=200,safe=False)
+                # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
+            else:
+                
+                return JsonResponse(data="No such part", status=404,safe=False)
+        except Exception as e:
+            print(e.args)
             # return JsonResponse({'code':204,'status': 'failed', 'data': []})
 
 def SearchByPartNameFilter(request):
@@ -401,7 +417,35 @@ def SearchPartTypeByName(request):
                 return JsonResponse(data={"Type":"RBS"},status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "RBS"}})
             else:
-                return JsonResponse(data={"Type":"Carb"}, status=200)
+                return JsonResponse(data={"Type":"P+R"}, status=200)
+                # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "Carb"}})
+        else:
+            return JsonResponse(data="No such part", status=404,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
+
+def SearchPartTypeByID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('ID')
+        if(ID == None or ID == ""):
+            return JsonResponse(data="ID cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
+        Type = Parttable.objects.filter(partid=ID).first().type
+        if(Type != None):
+            if(Type == 1):
+                return JsonResponse(data={"Type":"Promoter"},status=200)
+                # return JsonResponse({'code':200,'status': 'success', 'data': {"Type":"Promoter"}})
+            elif(Type == 2):
+                return JsonResponse(data={"Type":"Terminator"},status=200)
+                # return JsonResponse({'code':200,'status':'success','data':{"Type":"Terminator"}})
+            elif(Type == 3):
+                # return HttpResponse("CDS")
+                return JsonResponse(data={"Type":"CDS"},status=200)
+                # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "CDS"}})
+            elif(Type == 4):
+                return JsonResponse(data={"Type":"RBS"},status=200)
+                # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "RBS"}})
+            else:
+                return JsonResponse(data={"Type":"P+R"}, status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "Carb"}})
         else:
             return JsonResponse(data="No such part", status=404,safe=False)
@@ -537,7 +581,7 @@ def AddPartData(request):
             type = 2
         elif(type.lower() == "rbs"):
             type = 4
-        elif(type.lower() == "carb"):
+        elif(type.lower() == "p+r"):
             type = 5
         username = request.session['info']['uname']
         if(name == "" or name == None):
@@ -577,7 +621,7 @@ def AddPartFileAddress(request):
             return JsonResponse(data="No such part", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Part Not Found'})
         # uid = User.objects.get(uid=userid)
-        user = User.objects.filter(uid=userid).first()
+        user = CustomUser.objects.filter(uid=userid).first()
         TbPartUserfileaddress.objects.create(userid=user, partid=partID, fileaddress=fileAddress)
 
         return JsonResponse(data="Added part address", status=200,safe=False)
@@ -587,28 +631,36 @@ def AddPartFileAddress(request):
 #Update
 def UpdatePart(request):
     if(request.method == "POST"):
-        OriginalName = request.POST.get('OriginalName')
-        PartID = Parttable.objects.get(name=OriginalName).id
+        data = json.loads(request.body)
+        print(data)
+        if('OriginalName' in data):
+            OriginalName = data['OriginalName']
+            PartID = Parttable.objects.get(name=OriginalName).id
+        elif('PartID' in data):
+            PartID = data['PartID']
         if(PartID == None):
             return JsonResponse(data="No such part", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Part Not Found'})
-        NewName = request.POST.get('Name')
-        NewAlias = request.POST.get('Alias')
-        NewLength = len(request.POST.get('Level0Sequence'))
-        NewLevel0Sequence = request.POST.get('Level0Sequence')
-        NewConfirmedSequence = request.POST.get('ConfirmedSequence')
-        NewInsertSequence = request.POST.get('InsertSequence')
-        NewSourceOrganism = request.POST.get("source")
-        NewReference = request.POST.get("reference")
-        NewNote = request.POST.get("note")
+        NewName = data['Name']
+        NewAlias = data['Alias']
+        NewType = data['Type']
+        NewLength = len(data['Level0Sequence'])
+        NewLevel0Sequence = data['Level0Sequence']
+        NewConfirmedSequence = data['ConfirmedSequence']
+        NewInsertSequence = data['InsertSequence']
+        NewSourceOrganism = data["source"]
+        NewReference = data["reference"]
+        NewNote = data["note"]
         if(NewName == None or NewName == ""):
             return JsonResponse(data="Parameters Name cannot be empty", status=400,safe=False)
         updateDate = timezone.now()
-        Parttable.objects.filter(partid = PartID).update(name=NewName, alias=NewAlias,lengthinlevel0=NewLength,
+        print(updateDate)
+        Parttable.objects.filter(partid = PartID).update(name=NewName, alias=NewAlias,type=NewType,lengthinlevel0=NewLength,
                                                            level0sequence=NewLevel0Sequence,confirmedsequence=NewConfirmedSequence,
                                                            insertsequence=NewInsertSequence,sourceorganism = NewSourceOrganism,
-                                                           reference=NewReference,note=NewNote, updatedate = updateDate)
-        return JsonResponse(data="Updated part data", status=200)
+                                                           reference=NewReference,note=NewNote, updatedate = updateDate,user=request.session.get('info')['uname'])
+        print("11111112222")
+        return JsonResponse(data="Updated part data", status=200,safe=False)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data updated'})
 
 def UpdatePartRPU(request):
@@ -685,8 +737,15 @@ def deletePartFile(request):
         return JsonResponse(data="Deleted part", status=200)
         # return JsonResponse({'code':200,'status': 'success','data':'Part file address deleted'})
 
-
-
+def PartListByUser(request,username):
+    if(request.method == "GET"):
+        if(username == None or username == ""):
+            return JsonResponse(data = {"success":False, "message":"Parameter cannot be empty"}, status=400, safe=False)
+        else:
+            result = list(Parttable.objects.filter(user = username).values())
+            return JsonResponse(data={"success":True, "data":result}, status = 200, safe= False)
+    else:
+        return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
 
 
 
@@ -702,6 +761,7 @@ def PlasmidCount(request):
     else:
        return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
 def getOriAndMarker(plasmid_id):
+    # print("8888888888888888")
     ori_list = []
     marker_list = []
     ori_info = Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmid_id,function_type = 'ori').values('function_content')
@@ -711,12 +771,13 @@ def getOriAndMarker(plasmid_id):
         ori_list.append(each_ori['function_content'])
     for each_marker in marker_info:
         marker_list.append(each_marker['function_content'])
+    # print([ori_list, marker_list])
     return [ori_list, marker_list]
 
 def getdefaultplasmidscar(plasmidid):
     plasmid_obj = Plasmidscartable.objects.filter(plasmidid = plasmidid).first()
     if plasmid_obj != None:
-        return plasmid_obj.bbsi
+        return plasmid_obj.bsai+"/"+plasmid_obj.bbsi
     else:
         return "No Sequence"
 
@@ -861,13 +922,13 @@ def PlasmidFilter(request):
                         result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                     if(len(result) != 0):
                         temp_result = list(result.values('plasmidid','name','alias','level','tag'))
-                        print(temp_result)
+                        # print(temp_result)
                         for each in temp_result:
                             try:
                                 info_list = getOriAndMarker(each['plasmidid'])
                                 each['ori_info'] = info_list[0]
                                 each['marker_info'] = info_list[1]
-                                print(info_list)
+                                # print(info_list)
                                 plasmid_scar_obj = Plasmidscartable.objects.filter(plasmidid = each['plasmidid']).first()
                                 if(plasmid_scar_obj != None):
                                     each['scar'] = plasmid_scar_obj.bbsi
@@ -949,8 +1010,8 @@ def SearchByPlasmidName(request):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
         PlasmidList = Plasmidneed.objects.filter(name=Name)
-        if(len(PlasmidList) > 0):
-            return JsonResponse(data=list(PlasmidList.values()), status=200,safe=False)
+        if(PlasmidList != None):
+            return JsonResponse(data={"success":True, "data":list(PlasmidList.values())[0]}, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -1286,9 +1347,12 @@ def AddPlasmidData(request):
 def AddParentPlasmid(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        sonPlasmidName = data['SonPlasmidName']
+        if('SonPlasmidName' in data):
+            sonPlasmidid = Plasmidneed.objects.filter(name = data['SonPlasmidName']).first().plasmidid
+        if('SonPlasmidId' in data):
+            sonPlasmidid = data['SonPlasmidId']
         ParentPlasmidName = data['ParentPlasmidName']
-        if(sonPlasmidName == None or sonPlasmidName == "" or ParentPlasmidName == None or ParentPlasmidName == ""):
+        if(sonPlasmidid == None or sonPlasmidid == 0 or ParentPlasmidName == None or ParentPlasmidName == ""):
             return JsonResponse(data="SonPlasmidName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
         start_time = time.time()
@@ -1296,7 +1360,7 @@ def AddParentPlasmid(request):
         while time.time() - start_time < max_wait_time:
             try:
                 with transaction.atomic():
-                    sonPlasmidObj = Plasmidneed.objects.select_for_update().get(name = sonPlasmidName)
+                    sonPlasmidObj = Plasmidneed.objects.get(plasmidid = sonPlasmidid)
                     parentPlasmidObj = Plasmidneed.objects.filter(name = ParentPlasmidName).first()
                     if(parentPlasmidObj == None):
                         return JsonResponse(data={"success":False},status=404,safe=False)
@@ -1313,6 +1377,37 @@ def AddParentPlasmid(request):
                 raise
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
+
+def AddPlasmidParentByID(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        sonPlasmidName = data['SonPlasmidName']
+        ParentPlasmidID = data['ParentPlasmidID']
+        if(sonPlasmidName == None or sonPlasmidName == "" or ParentPlasmidID == None or ParentPlasmidID == ""):
+            return JsonResponse(data="SonPlasmidName cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    sonPlasmidObj = Plasmidneed.objects.select_for_update().get(name = sonPlasmidName)
+                    parentPlasmidObj = Plasmidneed.objects.filter(plasmidid = ParentPlasmidID).first()
+                    if(parentPlasmidObj == None):
+                        return JsonResponse(data={"success":False},status=404,safe=False)
+                    if(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidObj,parentplasmidid = parentPlasmidObj).count() == 0):
+                        Parentplasmidtable.objects.create(sonplasmidid=sonPlasmidObj,parentplasmidid = parentPlasmidObj)
+                    return JsonResponse(data={"success":True},status=200,safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
+
 
 def GetParentPart(request):
     if(request.method == 'GET'):
@@ -1355,24 +1450,27 @@ def GetSonPlasmid(request):
 #Update
 def UpdatePlasmidData(request):
     if(request.method == "POST"):
-        data = json.load(request.body)
-        OriginName = data['OriginName']
-        if(OriginName == None or OriginName == ""):
-            return JsonResponse(data="OriginName cannot be empty", status=400,safe=False)
+        data = json.loads(request.body)
+        if("OriginName" in data):
+            OriginName = data['OriginName']
+            if(OriginName == None or OriginName == ""):
+                return JsonResponse(data="OriginName cannot be empty", status=400,safe=False)
+            PlasmidID = Plasmidneed.objects.get(name=OriginName).plasmidid
+        elif("id" in data):
+            PlasmidID = data['id']
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'OriginName can not be empty'})
-        PlasmidID = Plasmidneed.objects.get(name=OriginName).plasmidid
         if(PlasmidID == None):
             return JsonResponse(data="No such OriginName", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'OriginName Not Found'})
-        
+
         newName = data['newName']
         newOri = data['newOri']
         newMarker = data['newMarker']
-        newLevel = data['newLevel']
+        newLevel = data['newLevel'] if data['newLevel'] != "" else 1
         newLength = len(data['newSequence']) if data['newSequence'] != "" else 0
         newSequence = data['newSequence']
-        newPlate = data['newPlate']
-        newState = data['newState']
+        newPlate = data['newPlate'] if 'newPlate' in data else ""
+        newState = data['newState'] if 'newState' in data else 1
         newUser = request.session.get('info')['uname']
         newNote = data['newNote']
         newAlias = data['newAlias']
@@ -1380,25 +1478,28 @@ def UpdatePlasmidData(request):
         if(newName == None or newName == ""):
             return JsonResponse(data="New Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Ori,Marker,Sequence can not be empty'})
-        plasmid_obj = Plasmidneed.objects.select_for_update().get(plasmidid = PlasmidID)
-        plasmid_obj.name = newName
-        plasmid_obj.level = newLevel
-        plasmid_obj.length = newLength
-        plasmid_obj.sequenceconfirm = newSequence
-        plasmid_obj.plate = newPlate
-        plasmid_obj.alias = newAlias
-        plasmid_obj.state = newState
-        plasmid_obj.user = newUser
-        plasmid_obj.note = newNote
-        plasmid_obj.tag = tag
-        plasmid_obj.updatedate = timezone.now()
-        plasmid_obj.save()
+        with transaction.atomic():
+            plasmid_obj = Plasmidneed.objects.select_for_update().get(plasmidid = PlasmidID)
+            plasmid_obj.name = newName
+            plasmid_obj.level = newLevel
+            plasmid_obj.length = newLength
+            plasmid_obj.sequenceconfirm = newSequence
+            plasmid_obj.plate = newPlate
+            plasmid_obj.alias = newAlias
+            plasmid_obj.state = newState
+            plasmid_obj.user = newUser
+            plasmid_obj.note = newNote
+            plasmid_obj.tag = tag
+            plasmid_obj.updatedate = timezone.now()
+            plasmid_obj.save()
         Plasmid_Culture_Functions.objects.filter(plasmid_id = PlasmidID).delete()
+        plasmidOBJ = Plasmidneed.objects.get(plasmidid = PlasmidID)
         for each in newOri:
-            Plasmid_Culture_Functions.objects.create(plasmid_id = PlasmidID, function_content = each, function_type = "ori")
+            Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidOBJ, function_content = each, function_type = "ori")
         for each in newMarker:
-            Plasmid_Culture_Functions.objects.create(plasmid_id = PlasmidID, function_content = each, function_type = "marker")
-        return JsonResponse(data="Plasmid Data Updated", status=200)
+            Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidOBJ, function_content = each, function_type = "marker")
+
+        return JsonResponse(data="Plasmid Data Updated", status=200, safe = False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Updated'})
 
 
@@ -1525,6 +1626,27 @@ def setPlasmidCulture(request):
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 
+def PlasmidFields(request):
+    fields =[field.name for field in Plasmidneed._meta.get_fields()]
+    fields.remove("parentparttable")
+    fields.remove("parentplasmidtable")
+    fields.remove("parentbackbonetable")
+    fields.remove("parentplasmidtable_parentplasmidid_set")
+    fields.remove("plasmid_culture_functions")
+    fields.remove("plasmidscartable")
+    fields.remove("plasmidunessential")
+    fields.remove("tbplasmiduserfileaddress")
+    return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
+
+def PlasmidListByUser(request,username):
+    if(request.method == "GET"):
+        if(username == None or username == ""):
+            return JsonResponse(data = {"success":False, "message":"Parameter cannot be empty"}, status=400, safe=False)
+        else:
+            result = list(Plasmidneed.objects.filter(user = username).values())
+            return JsonResponse(data={"success":True, "data":result}, status = 200, safe= False)
+    else:
+        return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
 
 
 
@@ -1545,7 +1667,7 @@ def BackboneCount(request):
 def getdefaultbackbonescar(backboneid):
     backbone_obj = Backbonescartable.objects.filter(backboneid = backboneid).first()
     if backbone_obj != None:
-        return backbone_obj.bbsi
+        return backbone_obj.bsai + "/" + backbone_obj.bbsi
     else:
         return "No Sequence"
 #Search
@@ -1697,7 +1819,7 @@ def BackboneFilter(request):
                     if(Name != "" and result != None):
                         result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                     if(len(result) != 0):
-                        temp_result = list(result.values('id','name','alias','marker','ori','species','tag'))
+                        temp_result = list(result.values('id','name','alias','species','tag'))
                         for each in temp_result:
                             try:
                                 info_list = getBackboneOriAndMarker(each['id'])
@@ -1720,7 +1842,7 @@ def BackboneFilter(request):
                         result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                     if(len(result) != 0):
                         print(result)
-                        temp_result = (list(result.values('id','name','alias','marker','ori','species','tag')))[0]
+                        temp_result = (list(result.values('id','name','alias','species','tag')))[0]
                         info_list = getBackboneOriAndMarker(temp_result['id'])
                         temp_result['ori'] = info_list[0]
                         temp_result['marker'] = info_list[1]
@@ -1796,13 +1918,15 @@ def SearchByBackboneName(request):
         if(Name == None or Name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Name can not be empty'})
-        BackboneList = list(Backbonetable.objects.filter(name=Name).values())
-        if(len(BackboneList) > 0):
-            for each_id in BackboneList:
-                info_list = getBackboneOriAndMarker(each_id['id'])
-                each_id['ori'] = info_list[0]
-                each_id['marker'] = info_list[1]
-            return JsonResponse(data=BackboneList, status=200,safe=False)
+        BackboneList = Backbonetable.objects.filter(name=Name)
+        print(BackboneList)
+        if(BackboneList != None):
+            BackboneList = list(BackboneList.values())[0]
+            print(BackboneList)
+            info_list = getBackboneOriAndMarker(BackboneList["id"])
+            BackboneList['ori'] = info_list[0]
+            BackboneList['marker'] = info_list[1]
+            return JsonResponse(data={"success":True,"data":BackboneList}, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(BackboneList.values())})
         else:
             return JsonResponse(data="No such Name", status=404,safe=False)
@@ -2021,25 +2145,26 @@ def AddBackboneFileAddress(request):
 def UpdateBackboneData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        OriginalName = data['OriginalName']
-        if(OriginalName == None or OriginalName == ""):
-            return JsonResponse(data="OriginalName cannot be empty", status=400,safe=False)
+        print(data)
+        if("OriginalName" in data):
+            OriginalName = data['OriginalName']
+            if(OriginalName == None or OriginalName == ""):
+                return JsonResponse(data="OriginalName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Original name can not be empty'})
-        BackboneID = Backbonetable.objects.filter(name = OriginalName).first().id
+            BackboneID = Backbonetable.objects.filter(name = OriginalName).first().id
+        elif("BackboneID" in data):
+            BackboneID = data['BackboneID']
         if(BackboneID == None):
             return JsonResponse(data="No such BackboneID", status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Backbone Not Found'})
         newName = data['newName']
+        
         newLength = len(data['sequence']) if data['sequence'] != "" else 0
         newSequence = data['sequence'] if data['sequence'] != None else ""
-        #list
-        # newOri = data['ori']
-        # newMarker = data['marker']
         
         newSpecies = data['species']
         newCopynumber = data['copynumber']
         newNote = data['note']
-        newScar = data['scar']
         newAlias = data['alias']
         newTag = data['tag'] if 'tag' in data else "normal"
         newUser = request.session.get('info')['uname']
@@ -2047,18 +2172,21 @@ def UpdateBackboneData(request):
         if(newName == None or newName == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, Sequence can not be empty'})
-        backbone_obj = Backbonetable.objects.select_for_update().get(id = BackboneID)
-        backbone_obj.name = newName
-        backbone_obj.length = newLength
-        backbone_obj.sequence = newSequence
-        backbone_obj.species = newSpecies
-        backbone_obj.copynumber = newCopynumber
-        backbone_obj.notes = newNote
-        backbone_obj.alias = newAlias
-        backbone_obj.user = newUser
-        backbone_obj.tag = newTag
-        backbone_obj.updatedate = timezone.now()
-        backbone_obj.save()
+        with transaction.atomic():
+            backbone_obj = Backbonetable.objects.select_for_update().get(id = BackboneID)
+            
+            backbone_obj.name = newName
+            backbone_obj.length = newLength
+            backbone_obj.sequence = newSequence
+            backbone_obj.species = newSpecies
+            backbone_obj.copynumber = newCopynumber
+            backbone_obj.notes = newNote
+            backbone_obj.alias = newAlias
+            backbone_obj.user = newUser
+            backbone_obj.tag = newTag
+            backbone_obj.updatedate = timezone.now()
+            backbone_obj.save()
+            print("aaaaaaaaaaaaaaaaaaaaaaa")
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Updated'})
 
@@ -2126,7 +2254,10 @@ def DeleteBackboneFileAddress(request):
 def setBackboneCulture(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        BackboneName = data["name"]
+        if("id" in data):
+            backboneid = data['id']
+        elif("name" in data):
+            BackboneName = data["name"]
         Ori_list = data["ori"]
         Marker_list = data["marker"]
         start_time = time.time()
@@ -2134,15 +2265,19 @@ def setBackboneCulture(request):
         while time.time() - start_time < max_wait_time:
             try:
                 with transaction.atomic():
-                    backboneid = Backbonetable.objects.filter(name=BackboneName).first()
+                    if("name" in data):
+                        backboneid = Backbonetable.objects.filter(name=BackboneName).first().id
                     Backbone_culture_exist = Backbone_Culture_Functions.objects.filter(backbone_id = backboneid).values()
                     if(len(Backbone_culture_exist) != 0):
                         Backbone_Culture_Functions.objects.filter(backbone_id = backboneid).delete()
+                    backbone_id_obj = Backbonetable.objects.get(id = backboneid)
                     for each_ori in Ori_list:
-                        Backbone_Culture_Functions.objects.create(backbone_id = backboneid,function_content = each_ori, function_type = "ori")
+                        print(each_ori)
+                        Backbone_Culture_Functions.objects.create(backbone_id = backbone_id_obj,function_content = each_ori, function_type = "ori")
                     for each_marker in Marker_list:
-                        Backbone_Culture_Functions.objects.create(backbone_id = backboneid,function_content = each_marker, function_type="marker")
-                    backbone_obj = Backbonetable.objects.select_for_update().get(name=BackboneName)
+                        print(each_marker)
+                        Backbone_Culture_Functions.objects.create(backbone_id = backbone_id_obj,function_content = each_marker, function_type="marker")
+                    backbone_obj = Backbonetable.objects.select_for_update().get(id=backboneid)
                     backbone_obj.tag = "abnormal" if len(Ori_list) > 1 or len(Marker_list) > 1 or len(Ori_list) == 0 or len(Marker_list) == 0 else "normal"
                     backbone_obj.updatedata = timezone.now()
                     backbone_obj.save()
@@ -2158,6 +2293,25 @@ def setBackboneCulture(request):
         print("timeout")
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
+
+def BackboneFields(request):
+    fields =[field.name for field in Backbonetable._meta.get_fields()]
+    fields.remove("backbone_culture_functions")
+    fields.remove("backbonescartable")
+    fields.remove("tbbackboneuserfileaddress")
+    fields.remove("parentbackbonetable")
+    print(fields)
+    return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
+
+def BackboneListByUser(request,username):
+    if(request.method == "GET"):
+        if(username == None or username == ""):
+            return JsonResponse(data = {"success":False, "message":"Parameter cannot be empty"}, status=400, safe=False)
+        else:
+            result = list(Backbonetable.objects.filter(user = username).values())
+            return JsonResponse(data={"success":True, "data":result}, status = 200, safe= False)
+    else:
+        return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
 
 
 
@@ -2522,6 +2676,21 @@ def GetPartIDByName(request):
         else:
             return JsonResponse(data = "Name cannot be empty",status=400,safe=False)
 
+
+def GetPartNameByID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('ID')
+        if(ID != None and ID != ""):
+            Name = Parttable.objects.filter(partid = ID).first()
+            if(Name != None):
+                return JsonResponse(data = {"PartName":Name.name},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such part",status=404, safe=False)
+        else:
+            return JsonResponse(data = "ID cannot be empty",status=400,safe=False)
+
+
+
 def GetPartSeqByID(request):
     if(request.method == "GET"):
         ID = request.GET.get('partid')
@@ -2550,6 +2719,19 @@ def GetBackboneIDByName(request):
                 return JsonResponse(data = "No such Backbone",status=404, safe=False)
         else:
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+        
+        
+def GetBackboneNameByID(request):
+    if(request.method == 'GET'):
+        ID = request.GET.get('ID')
+        if(ID != None and ID != ''):
+            Name = Backbonetable.objects.filter(id=ID).first()
+            if(Name != None):
+                return JsonResponse(data={"BackboneName":Name.name},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such Backbone",status=404, safe=False)
+        else:
+            return JsonResponse(data="ID cannot be empty",status=400,safe=False)
 
 def GetPlasmidIDByName(request):
     if(request.method=='GET'):
@@ -2562,15 +2744,32 @@ def GetPlasmidIDByName(request):
                 return JsonResponse(data = "No such Plasmid",status=400, safe=False)
         else:
             return JsonResponse(data = "Name cannot be empty",status=400,safe=False)
+        
+        
+def GetPlasmidNameByID(request):
+    if(request.method=='GET'):
+        ID = request.GET.get('ID')
+        if(ID != None and ID != ""):
+            Name = Plasmidneed.objects.filter(plasmidid = ID).first()
+            if(Name != None):
+                return JsonResponse(data = {"PlasmidName":Name.name},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such Plasmid",status=400, safe=False)
+        else:
+            return JsonResponse(data = "ID cannot be empty",status=400,safe=False)
 
 
 def AddPlasmidParentInfo(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        plasmidName = data["PlasmidName"]
+        if("PlasmidName" in data):
+            plasmidName = data["PlasmidName"]
+            plasmidID = Plasmidneed.objects.filter(name = plasmidName).first().plasmidid
+        if("PlasmidID" in data):
+            plasmidID = data['PlasmidID']
         ParentInfo = data["PlasmidParentInfo"]
         print(data)
-        if(plasmidName == "" or ParentInfo == ""):
+        if(plasmidID == 0 or ParentInfo == ""):
             print("empty")
             return JsonResponse(data = {"success":False,"data":"Parameter is empty"},status = 400, safe=False)
         start_time = time.time()
@@ -2578,7 +2777,7 @@ def AddPlasmidParentInfo(request):
         while time.time() - start_time < max_wait_time:
             try:
                 with transaction.atomic():
-                    Plasmidneed.objects.filter(name=plasmidName).update(customparentinformation = ParentInfo)
+                    Plasmidneed.objects.filter(plasmidid = plasmidID).update(customparentinformation = ParentInfo)
                     return JsonResponse(data = {"success":True,"data":"success upload"},status=200, safe=False)
             except Plasmidneed.DoesNotExist:
                 time.sleep(0.5)
@@ -2598,12 +2797,14 @@ def AddParentPart(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
         print(data)
-        sonPlasmidName = data['SonPlasmidName']
+        if('SonPlasmidName' in data):
+            sonPlasmidid = Plasmidneed.objects.filter(name = data['SonPlasmidName']).first().plasmidid
+        if('SonPlasmidId' in data):
+            sonPlasmidid = data['SonPlasmidId']
         ParentPartName = data['ParentPartName']
-        print(sonPlasmidName)
         # print(sonPlasmidName)
         # print(ParentPartName)
-        if(sonPlasmidName == None or sonPlasmidName == "" or ParentPartName == None or ParentPartName == ""):
+        if(sonPlasmidid == None or sonPlasmidid == 0 or ParentPartName == None or ParentPartName == ""):
             return JsonResponse(data="PlasmidName or PartName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
         start_time = time.time()
@@ -2611,7 +2812,7 @@ def AddParentPart(request):
         while time.time() - start_time < max_wait_time:
             try:
                 with transaction.atomic():
-                    sonPlasmidObj = Plasmidneed.objects.get(name = sonPlasmidName)
+                    sonPlasmidObj = Plasmidneed.objects.get(plasmidid = sonPlasmidid)
                     parentPartObj = Parttable.objects.filter(name = ParentPartName).first()
                     if(parentPartObj == None):
                         return JsonResponse(data={"success":False},status=404,safe=False)
@@ -2630,32 +2831,18 @@ def AddParentPart(request):
                     continue
                 raise
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
-                # sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
-                # if(sonPlasmidID == None):
-                    # return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
-                    # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
-        # parentPartList = ParentPartName.split(',')
-        # if(len(parentPartList) == 0):
-        #     return JsonResponse(data="No such ParentPart", status=404,safe=False)
-        #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
-        # for parent in parentPartList:
-        #     parentpartID = Parttable.objects.filter(name=parent).first()
-        #     if(parentpartID != None):
-        #         Parentparttable.objects.create(sonplasmidid=sonPlasmidID, parentpartid=parentpartID)
-        #     else:
-        #         return JsonResponse(data="Parent Part Not Found", status=404,safe=False)
-        #         # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
-        # return JsonResponse(data="Parent Part Added", status=200,safe=False)
-        # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
 
-def AddParentBackbone(request):
+def AddParentPartByID(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        sonPlasmidName = data['SonPlasmidName']
-        ParentBackboneName = data['ParentBackboneName']
         print(data)
-        if(sonPlasmidName == None or sonPlasmidName == "" or ParentBackboneName == None or ParentBackboneName == ""):
-            return JsonResponse(data="PlasmidName or BackboneName cannot be empty", status=400,safe=False)
+        sonPlasmidName = data['SonPlasmidName']
+        ParentPartID = data['ParentPartID']
+        print(sonPlasmidName)
+        # print(sonPlasmidName)
+        # print(ParentPartName)
+        if(sonPlasmidName == None or sonPlasmidName == "" or ParentPartID == None or ParentPartID == ""):
+            return JsonResponse(data="PlasmidName or PartName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
         start_time = time.time()
         max_wait_time = 5
@@ -2663,6 +2850,43 @@ def AddParentBackbone(request):
             try:
                 with transaction.atomic():
                     sonPlasmidObj = Plasmidneed.objects.get(name = sonPlasmidName)
+                    parentPartObj = Parttable.objects.filter(partid = ParentPartID).first()
+                    if(parentPartObj == None):
+                        return JsonResponse(data={"success":False},status=404,safe=False)
+                    if(Parentparttable.objects.filter(sonplasmidid = sonPlasmidObj,parentpartid = parentPartObj).count() == 0):
+                        Parentparttable.objects.create(sonplasmidid=sonPlasmidObj,parentpartid = parentPartObj)
+                    return JsonResponse(data={"success":True},status=200,safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except Parttable.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
+
+def AddParentBackbone(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        if('SonPlasmidName' in data):
+            sonPlasmidid = Plasmidneed.objects.filter(name = data['SonPlasmidName']).first().plasmidid
+        if('SonPlasmidId' in data):
+            sonPlasmidid = data['SonPlasmidId']
+        ParentBackboneName = data['ParentBackboneName']
+        print(data)
+        if(sonPlasmidid == None or sonPlasmidid == 0 or ParentBackboneName == None or ParentBackboneName == ""):
+            return JsonResponse(data="PlasmidName or BackboneName cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    sonPlasmidObj = Plasmidneed.objects.get(plasmidid = sonPlasmidid)
                     parentBackboneObj = Backbonetable.objects.filter(name = ParentBackboneName).first()
                     # print(parentBackboneObj)
                     if(parentBackboneObj == None):
@@ -2684,23 +2908,55 @@ def AddParentBackbone(request):
                 raise
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
-        # sonPlasmidID = Plasmidneed.objects.filter(name=sonPlasmidName).first()
-        # if(sonPlasmidID == None):
-        #     return JsonResponse(data="No such SonPlasmid", status=404,safe=False)
-        #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
-        # parentBackboneList = ParentBackboneName.split(',')
-        # if(len(parentBackboneList) == 0):
-        #     return JsonResponse(data="No such Parent Backbone", status=404,safe=False)
-        #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'The Number of Parent Plasmid should greater than 0'})
-        # for parent in parentBackboneList:
-        #     parentBackboneID = Backbonetable.objects.filter(name=parent).first()
-        #     if(parentBackboneID != None):
-        #         Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidID, parentbackboneid=parentBackboneID)
-        #     else:
-        #         return JsonResponse(data="Parent Backbone Not Found", status=404,safe=False)
-        #         # return JsonResponse({'code':403,'status':'failed','data':'Parent Plasmid Not Found'})
-        # return JsonResponse(data="Parent Backbone Added", status=200,safe=False)
-        # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
+
+def AddBackboneParentByID(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        sonPlasmidName = data['SonPlasmidName']
+        ParentBackboneID = data['ParentBackboneID']
+        print(data)
+        if(sonPlasmidName == None or sonPlasmidName == "" or ParentBackboneID == None or ParentBackboneID == ""):
+            return JsonResponse(data="PlasmidName or BackboneName cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    sonPlasmidObj = Plasmidneed.objects.get(name = sonPlasmidName)
+                    parentBackboneObj = Backbonetable.objects.filter(id = ParentBackboneID).first()
+                    # print(parentBackboneObj)
+                    if(parentBackboneObj == None):
+                        return JsonResponse(data={"success":False},status=404,safe=False)
+                    print(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count())
+                    if(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count() == 0):
+                        Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidObj,parentbackboneid = parentBackboneObj)
+                    return JsonResponse(data={"success":True},status=200,safe=False)
+            except Plasmidneed.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except Backbonetable.DoesNotExist:
+                time.sleep(0.5)
+                continue
+            except OperationalError as e:
+                if 'lock' in str(e).lower():
+                    time.sleep(0.5)
+                    continue
+                raise
+        return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
+
+
+def DeletePlasmidParent(request):
+    if(request.method == "GET"):
+        plasmidID = request.GET.get("plasmidid")
+        print(plasmidID)
+        try:
+            Parentparttable.objects.filter(sonplasmidid = plasmidID).delete()
+            Parentbackbonetable.objects.filter(sonplasmidid = plasmidID).delete()
+            Parentplasmidtable.objects.filter(sonplasmidid = plasmidID).delete()
+            return JsonResponse({"success":True}, status=200,safe=False)
+        except Exception as e:
+            return JsonResponse({"success":False,"message":str(e.args)},status = 400, safe=False)
 
 def getPartValueList(request,column):
     if(request.method == 'GET'):
@@ -2839,34 +3095,36 @@ def getBackboneScar(request):
 def setBackboneScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
-        print(data)
-        name = data['name']
+        if("name" in data):
+            name = data['name']
+        elif("backboneid" in data):
+            id = data['backboneid']
         bsmbi = data['bsmbi']
         bsai = data['bsai']
         bbsi = data['bbsi']
         aari = data['aari']
         sapi = data['sapi']
-        if(name != None and name != ""):
+        if(("name" in data and name != None and name != "") or ("backboneid" in data and id != None and id != "")):
             start_time = time.time()
             max_wait_time = 5
             while time.time() - start_time < max_wait_time:
                 try:
                     with transaction.atomic():
                         # backbone_obj = Backbonetable.objects.filter(name = name).first()
-                        backbone_obj = Backbonetable.objects.select_for_update().get(name = name)
-                        if(len(Backbonescartable.objects.filter(backboneid = backbone_obj)) != 0):
-                            backbone_scar_obj = Backbonescartable.objects.select_for_update().get(backboneid = backbone_obj)
+                        if("name" in data):
+                            id = Backbonetable.objects.get(name = name).id
+                        try:
+                            backbone_scar_obj = Backbonescartable.objects.select_for_update().get(backboneid = id)
                             backbone_scar_obj.bsmbi = bsmbi
                             backbone_scar_obj.bsai = bsai
                             backbone_scar_obj.bbsi = bbsi
                             backbone_scar_obj.aari = aari
                             backbone_scar_obj.sapi = sapi
                             backbone_scar_obj.save()
-                            backbone_obj.updatedate = timezone.now()
-                            backbone_obj.save()
-                            # Backbonescartable.objects.filter(backboneid = backbone_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-                        else:
+                        except Backbonescartable.DoesNotExist:
+                            backbone_obj = Backbonetable.objects.get(id = id)
                             Backbonescartable.objects.create(backboneid = backbone_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
+                            # Backbonescartable.objects.filter(backboneid = backbone_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
                         return JsonResponse(data = {'success':True}, status = 200, safe = False)
                 except Backbonetable.DoesNotExist:
                     time.sleep(0.5)
@@ -2904,22 +3162,27 @@ def setPlasmidScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
         print(data)
-        name = data['name']
+        if("name" in data):
+            name = data['name']
+        elif("plasmidid" in data):
+            id = data['plasmidid']
         bsmbi = data['bsmbi']
         bsai = data['bsai']
         bbsi = data['bbsi']
         aari = data['aari']
         sapi = data['sapi']
-        if(name != None and name != ""):
+        if(("name" in data and name != None and name != "") or ("plasmidid" in data and id != None and id != "")):
             start_time = time.time()
             max_wait_time = 5
             while time.time() - start_time < max_wait_time:
                 try:
                     with transaction.atomic():
                         # plasmid_obj = Plasmidneed.objects.filter(name = name).first()
-                        plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
-                        if(len(Plasmidscartable.objects.filter(plasmidid = plasmid_obj).values()) != 0):
-                            plasmid_scar_obj = Plasmidscartable.objects.select_for_update().get(plasmidid = plasmid_obj)
+                        if("name" in data):
+                            id = Plasmidneed.objects.get(name = name).plasmidid
+                        plasmid_obj = Plasmidneed.objects.get(plasmidid = id)
+                        try:
+                            plasmid_scar_obj = Plasmidscartable.objects.select_for_update().get(plasmidid = id)
                             plasmid_scar_obj.bsmbi = bsmbi
                             plasmid_scar_obj.bsai = bsai
                             plasmid_scar_obj.bbsi = bbsi
@@ -2927,7 +3190,7 @@ def setPlasmidScar(request):
                             plasmid_scar_obj.sapi = sapi
                             plasmid_scar_obj.save()
                             # Plasmidscartable.objects.filter(plasmidid = plasmid_obj).update(bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
-                        else:
+                        except Plasmidscartable.DoesNotExist:
                             Plasmidscartable.objects.create(plasmidid = plasmid_obj, bsmbi = bsmbi, bsai = bsai, bbsi = bbsi,aari = aari, sapi = sapi)
                         plasmid_obj.updatedate = timezone.now()
                         plasmid_obj.save()
@@ -3120,3 +3383,542 @@ def getAllUserUploadList(request):
         return JsonResponse(data = {"success":True, "data":result}, status = 200, safe = False)
     else:
         return JsonResponse(data = {"success":False, "message":"Just GET method"},status = 200, safe = False)
+    
+    
+@csrf_exempt
+def create_repository(request):
+    print(request.method)
+    if(request.method == "POST"):
+        # print(request.POST)
+        # Name = request.POST.get('Name')
+        # Note = request.POST.get('Note')
+        # print(Name)
+        # print(Note)
+        data = json.loads(request.body)
+        Name = data.get("Name")
+        Note = data.get("Note")
+        print(Name)
+        if(Name != None and Name != ""):
+            try:
+                repository_id = str(uuid.uuid1())
+                ttl_hours = 24
+                expires_at = timezone.now()+timezone.timedelta(hours = ttl_hours)
+                user = CustomUser.objects.filter(uid=request.session['info']['uid']).first()
+                with transaction.atomic():
+                    if(Temporaryrepository.objects.filter(userid = user,name=Name).exists()):
+                        Temporaryrepository.objects.filter(userid=user, name=Name).delete()
+                    Temporaryrepository.objects.create(id=repository_id,name=Name,userid=user,repositorycreate_time = timezone.now(),repositoryupdate_time = timezone.now(),repositoryexpire_time = expires_at,note=Note)
+                return JsonResponse(data={'success':True,'repository_id':repository_id,'repository_name':Name,'url':f'/repository/{repository_id}','expires_at':expires_at},status=200,safe=False)
+            except Exception as e:
+                print(e.args)
+        else:
+            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+@csrf_exempt
+#Get Repositories of the user
+def get_repositories(request):
+    if(request.method == "GET"):
+        try:
+            user = CustomUser.objects.get(uid=request.session['info']['uid'])
+            repositories = list(Temporaryrepository.objects.only('id','name').filter(userid=user).values())
+            # repositories = list(Temporaryrepository.objects.filter(userid=user).values())
+            if(len(repositories) > 0):
+                return JsonResponse(data={'success':True,'repo':repositories},status=200,safe=False)
+            else:
+                return JsonResponse(data="No repository, Please create Repository firstly",status=400,safe=False)
+        except Exception as e:  
+            return JsonResponse(data=str(e),status=404,safe=False)
+
+@csrf_exempt
+#Get a repository of the user
+def get_repository(request):
+    if(request.method == "POST"):
+        userid = request.session['info']['uid']
+        data = json.loads(request.body)
+        Name = data.get("Name")
+        try:
+            user = CustomUser.objects.get(uid=request.session['info']['uid'])
+            repository = Temporaryrepository.objects.filter(userid=user,name=Name).first()
+            print(repository)
+            if(repository != None):
+                if(repository.is_expired()):
+                    repository.delete()
+                    return JsonResponse({'success':False,'message':'Repository expired'},status = 410)
+                return JsonResponse(data={'success':True,'repository':repository.id,'data':repository.data}, status = 200, safe = False)
+            else:
+                return JsonResponse(data={'error':'Repository not found'},status = 404,safe=False)
+        except Temporaryrepository.DoesNotExist:
+            return JsonResponse(data={'error':'Repository not found'},status = 404,safe=False)
+    else:
+        return JsonResponse(data={"success":False,"message":"Just POST method"},status=400,safe=False)
+
+@csrf_exempt
+def add_part_to_repository(request):
+    """
+    将元件ID添加到用户的临时仓库中
+    支持单个元件ID或元件ID列表
+    """
+    print("add_part_to_repository")
+    print(request.method)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+    
+    try:
+        # 检查用户是否已登录
+        if 'info' not in request.session or 'uid' not in request.session['info']:
+            print("aaaaa")
+            return JsonResponse({'error': 'User not logged in'}, status=401)
+        
+        user_id = request.session['info']['uid']
+        user = CustomUser.objects.get(uid=user_id)
+
+        try:
+            request_data = json.loads(request.body)
+            print(request_data)
+            repositoryName = request_data.get('RepoName')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # 获取或创建用户的临时仓库
+        try:
+            repository = Temporaryrepository.objects.get(userid=user,name=repositoryName)
+            print(repository)
+        except Temporaryrepository.DoesNotExist:
+            # 创建新的临时仓库,询问名称
+            repository_id = uuid.uuid4()
+            ttl_hours = 24
+            expires_at = timezone.now() + timezone.timedelta(hours=ttl_hours)
+            user = CustomUser.objects.filter(uid=user_id).first()
+            
+            if not user:
+                return JsonResponse({'error': 'User not found'}, status=404)
+            
+            repository = Temporaryrepository.objects.create(
+                id=repository_id,
+                name=repositoryName,
+                userid=user,
+                repositorycreate_time=timezone.now(),
+                repositoryupdate_time=timezone.now(),
+                repositoryexpire_time=expires_at,
+                data={}
+            )
+        
+        # 检查仓库是否过期
+        print(" 检查仓库是否过期")
+        try:
+            print("6666666")
+            print(repository.is_expired())
+        except Exception as e:
+            print("aaaaaaa")
+            print(e.args)
+        if repository.is_expired():
+            repositoryID = repository.id
+            repository.delete()
+            print(request_data)
+            return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
+        
+        # 获取请求数据
+        
+        # 验证必需字段
+        print("验证必需字段")
+        if 'part_ids' not in request_data:
+            return JsonResponse({'error': 'part_ids field is required'}, status=400)
+        
+        part_ids = request_data['part_ids']
+        print(part_ids)
+        
+        # 确保part_ids是列表格式
+        if not isinstance(part_ids, list):
+            part_ids = [part_ids]
+        
+        # 验证元件ID格式
+        for part_id in part_ids:
+            if not isinstance(part_id, (int, str)) or not str(part_id).strip():
+                return JsonResponse({'error': f'Invalid part_id: {part_id}'}, status=400)
+        
+        # 获取现有数据
+        current_data = repository.data if repository.data else {}
+        
+        # 确保parts列表存在
+        if 'parts' not in current_data:
+            current_data['parts'] = []
+        
+        # 添加新的元件ID（避免重复）
+        existing_part_ids = set(str(pid) for pid in current_data['parts'])
+        new_parts = []
+        
+        for part_id in part_ids:
+            part_id_str = str(part_id)
+            if part_id_str not in existing_part_ids:
+                new_parts.append(part_id)
+                existing_part_ids.add(part_id_str)
+        
+        # 更新数据
+        current_data['parts'].extend(new_parts)
+        # current_data['last_updated'] = timezone.now().isoformat()
+        current_data['total_parts'] = len(current_data['parts'])
+        print(f"current data: {current_data}")
+        # 保存到数据库
+        repository.data = current_data
+        repository.repositoryupdate_time = timezone.now()
+        repository.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully added {len(new_parts)} parts to repository',
+            'added_parts': new_parts,
+            'total_parts': current_data['total_parts'],
+            'repository_id': str(repository.id),
+            'expires_at': repository.repositoryexpire_time.isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'Internal server error: {str(e)}'}, status=500)
+
+@csrf_exempt
+def add_backbone_to_repository(request):
+    """
+    将元件ID添加到用户的临时仓库中
+    支持单个元件ID或元件ID列表
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+    
+    try:
+        # 检查用户是否已登录
+        if 'info' not in request.session or 'uid' not in request.session['info']:
+            return JsonResponse({'error': 'User not logged in'}, status=401)
+        
+        user_id = request.session['info']['uid']
+        user = CustomUser.objects.get(uid=user_id)
+
+        try:
+            request_data = json.loads(request.body.decode('utf-8'))
+            repositoryName = request_data.get('RepoName')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # 获取或创建用户的临时仓库
+        try:
+            repository = Temporaryrepository.objects.get(userid=user,name=repositoryName)
+        except Temporaryrepository.DoesNotExist:
+            # 创建新的临时仓库,询问名称
+            repository_id = uuid.uuid4()
+            ttl_hours = 24
+            expires_at = timezone.now() + timezone.timedelta(hours=ttl_hours)
+            user = CustomUser.objects.filter(uid=user_id).first()
+            
+            if not user:
+                return JsonResponse({'error': 'User not found'}, status=404)
+            
+            repository = Temporaryrepository.objects.create(
+                id=repository_id,
+                name=repositoryName,
+                userid=user,
+                repositorycreate_time=timezone.now(),
+                repositoryupdate_time=timezone.now(),
+                repositoryexpire_time=expires_at,
+                data={}
+            )
+        
+        # 检查仓库是否过期
+        if repository.is_expired():
+            repositoryID = repository.id
+            repository.delete()
+            print(request_data)
+            return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
+        
+        # 获取请求数据
+        
+        # 验证必需字段
+        if 'backbone_ids' not in request_data:
+            return JsonResponse({'error': 'backbone_ids field is required'}, status=400)
+        
+        backbone_ids = request_data['backbone_ids']
+        print(backbone_ids)
+        
+        # 确保part_ids是列表格式
+        if not isinstance(backbone_ids, list):
+            backbone_ids = [backbone_ids]
+        
+        # 验证元件ID格式
+        for backbone_id in backbone_ids:
+            if not isinstance(backbone_id, (int, str)) or not str(backbone_id).strip():
+                return JsonResponse({'error': f'Invalid backbone_id: {backbone_id}'}, status=400)
+        
+        # 获取现有数据
+        current_data = repository.data if repository.data else {}
+        
+        # 确保parts列表存在
+        if 'backbones' not in current_data:
+            current_data['backbones'] = []
+        
+        # 添加新的元件ID（避免重复）
+        existing_backbone_ids = set(str(bid) for bid in current_data['backbones'])
+        new_backbones = []
+        
+        for backbone_id in backbone_ids:
+            backbone_id_str = str(backbone_id)
+            if backbone_id_str not in existing_backbone_ids:
+                new_backbones.append(backbone_id)
+                existing_backbone_ids.add(backbone_id_str)
+        
+        # 更新数据
+        current_data['backbones'].extend(new_backbones)
+        # current_data['last_updated'] = timezone.now().isoformat()
+        current_data['total_backbones'] = len(current_data['backbones'])
+        
+        # 保存到数据库
+        repository.data = current_data
+        repository.repositoryupdate_time = timezone.now()
+        repository.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully added {len(new_backbones)} backbones to repository',
+            'added_backbones': new_backbones,
+            'total_backbones': current_data['total_backbones'],
+            'repository_id': str(repository.id),
+            'expires_at': repository.repositoryexpire_time.isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'Internal server error: {str(e)}'}, status=500)
+
+@csrf_exempt
+def add_plasmid_to_repository(request):
+    """
+    将元件ID添加到用户的临时仓库中
+    支持单个元件ID或元件ID列表
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+    
+    try:
+        # 检查用户是否已登录
+        if 'info' not in request.session or 'uid' not in request.session['info']:
+            return JsonResponse({'error': 'User not logged in'}, status=401)
+        
+        user_id = request.session['info']['uid']
+        user = CustomUser.objects.get(uid=user_id)
+
+        try:
+            request_data = json.loads(request.body.decode('utf-8'))
+            repositoryName = request_data.get('RepoName')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        # 获取或创建用户的临时仓库
+        try:
+            repository = Temporaryrepository.objects.get(userid=user,name=repositoryName)
+        except Temporaryrepository.DoesNotExist:
+            # 创建新的临时仓库,询问名称
+            repository_id = uuid.uuid4()
+            ttl_hours = 24
+            expires_at = timezone.now() + timezone.timedelta(hours=ttl_hours)
+            user = CustomUser.objects.filter(uid=user_id).first()
+            
+            if not user:
+                return JsonResponse({'error': 'User not found'}, status=404)
+            
+            repository = Temporaryrepository.objects.create(
+                id=repository_id,
+                name=repositoryName,
+                userid=user,
+                repositorycreate_time=timezone.now(),
+                repositoryupdate_time=timezone.now(),
+                repositoryexpire_time=expires_at,
+                data={}
+            )
+        
+        # 检查仓库是否过期
+        if repository.is_expired():
+            repositoryID = repository.id
+            repository.delete()
+            print(request_data)
+            return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
+        
+        # 获取请求数据
+        
+        # 验证必需字段
+        if 'plasmid_ids' not in request_data:
+            return JsonResponse({'error': 'plasmid_ids field is required'}, status=400)
+        
+        plasmid_ids = request_data['plasmid_ids']
+        print(plasmid_ids)
+        
+        # 确保part_ids是列表格式
+        if not isinstance(plasmid_ids, list):
+            plasmid_ids = [plasmid_ids]
+        
+        # 验证元件ID格式
+        for plasmid_id in plasmid_ids:
+            if not isinstance(plasmid_id, (int, str)) or not str(plasmid_id).strip():
+                return JsonResponse({'error': f'Invalid plasmid_id: {plasmid_id}'}, status=400)
+        
+        # 获取现有数据
+        current_data = repository.data if repository.data else {}
+        
+        # 确保parts列表存在
+        if 'plasmids' not in current_data:
+            current_data['plasmids'] = []
+        
+        # 添加新的元件ID（避免重复）
+        existing_plasmid_ids = set(str(pid) for pid in current_data['plasmids'])
+        new_plasmids = []
+        
+        for plasmid_id in plasmid_ids:
+            plasmid_id_str = str(plasmid_id)
+            if plasmid_id_str not in existing_plasmid_ids:
+                new_plasmids.append(plasmid_id)
+                existing_plasmid_ids.add(plasmid_id_str)
+        
+        # 更新数据
+        current_data['plasmids'].extend(new_plasmids)
+        # current_data['last_updated'] = timezone.now().isoformat()
+        current_data['total_plasmids'] = len(current_data['plasmids'])
+        
+        # 保存到数据库
+        repository.data = current_data
+        repository.repositoryupdate_time = timezone.now()
+        repository.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully added {len(new_plasmids)} plasmids to repository',
+            'added_plasmids': new_plasmids,
+            'total_plasmids': current_data['total_plasmids'],
+            'repository_id': str(repository.id),
+            'expires_at': repository.repositoryexpire_time.isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'Internal server error: {str(e)}'}, status=500)
+    
+    
+
+@csrf_exempt
+def remove_part_from_repository(request):
+    """
+    从用户的临时仓库中移除元件ID
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+    
+    try:
+        # 检查用户是否已登录
+        if 'info' not in request.session or 'uid' not in request.session['info']:
+            return JsonResponse({'error': 'User not logged in'}, status=401)
+        
+        user_id = request.session['info']['uid']
+        user = User.objects.get(uid=user_id)
+        repositoryName = request.POST.get('RepoName')
+        # 获取用户的临时仓库
+        try:
+            repository = Temporaryrepository.objects.get(userid_id=user,name=repositoryName)
+        except Temporaryrepository.DoesNotExist:
+            return JsonResponse({'error': 'Repository not found'}, status=404)
+        
+        # 检查仓库是否过期
+        if repository.is_expired():
+            repository.delete()
+            return JsonResponse({'error': 'Repository expired'}, status=410)
+        
+        # 获取请求数据
+        import json
+        try:
+            request_data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        
+        # 验证必需字段
+        if 'part_ids' not in request_data:
+            return JsonResponse({'error': 'part_ids field is required'}, status=400)
+        
+        part_ids = request_data['part_ids']
+        
+        # 确保part_ids是列表格式
+        if not isinstance(part_ids, list):
+            part_ids = [part_ids]
+        
+        # 获取现有数据
+        current_data = repository.data if repository.data else {}
+        
+        if 'parts' not in current_data:
+            return JsonResponse({'error': 'No parts in repository'}, status=404)
+        
+        # 移除指定的元件ID
+        original_count = len(current_data['parts'])
+        current_data['parts'] = [pid for pid in current_data['parts'] 
+                                if str(pid) not in [str(part_id) for part_id in part_ids]]
+        removed_count = original_count - len(current_data['parts'])
+        
+        # 更新数据
+        # current_data['last_updated'] = timezone.now().isoformat()
+        current_data['total_parts'] = len(current_data['parts'])
+        
+        # 保存到数据库
+        repository.data = current_data
+        repository.repositoryupdate_time = timezone.now()
+        repository.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully removed {removed_count} parts from repository',
+            'removed_parts': part_ids,
+            'total_parts': current_data['total_parts'],
+            'repository_id': str(repository.id)
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'Internal server error: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+def get_repository_parts(request):
+    """
+    获取用户临时仓库中的所有元件ID
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Only GET method allowed'}, status=405)
+    
+    try:
+        # 检查用户是否已登录
+        if 'info' not in request.session or 'uid' not in request.session['info']:
+            return JsonResponse({'error': 'User not logged in'}, status=401)
+        
+        user_id = request.session['info']['uid']
+        
+        # 获取用户的临时仓库
+        try:
+            repository = Temporaryrepository.objects.get(userid_id=user_id)
+        except Temporaryrepository.DoesNotExist:
+            return JsonResponse({
+                'success': True,
+                'parts': [],
+                'total_parts': 0,
+                'message': 'Repository not found or empty'
+            })
+        
+        # 检查仓库是否过期
+        if repository.is_expired():
+            repository.delete()
+            return JsonResponse({
+                'success': True,
+                'parts': [],
+                'total_parts': 0,
+                'message': 'Repository expired'
+            })
+        
+        # 获取元件数据
+        current_data = repository.data if repository.data else {}
+        parts = current_data.get('parts', [])
+        
+        return JsonResponse({
+            'success': True,
+            'parts': parts,
+            'total_parts': len(parts),
+            'repository_id': str(repository.id),
+            'created_at': repository.repositorycreate_time.isoformat() if repository.repositorycreate_time else None,
+            'updated_at': repository.repositoryupdate_time.isoformat() if repository.repositoryupdate_time else None,
+            'expires_at': repository.repositoryexpire_time.isoformat() if repository.repositoryexpire_time else None,
+            'last_updated': current_data.get('last_updated')
+        })
+    except Exception as e:
+        return JsonResponse({'error': f'Internal server error: {str(e)}'}, status=500)

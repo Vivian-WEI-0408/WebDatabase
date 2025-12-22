@@ -30,19 +30,17 @@ class SupportGG:
     def AddPart(self, records):
         self.repository.add_records(records)
 
-# if __name__ == '__main__':
-#     AddressList = ["/home/wby/Desktop/LabDNASeqSearch/pDJH50_1812_backbone.gbk",
-#     "/home/wby/Desktop/LabDNASeqSearch/pDJH51_Level1_Psxyl1(DJH)_bc_scar.gbk",
-#     "/home/wby/Desktop/LabDNASeqSearch/pDJH52_Level1_araA_from_bao(+tct)_bc_scar.gbk",
-#     "/home/wby/Desktop/LabDNASeqSearch/pDJH53_Level1_araB_from_bao(+tct)_bc_scar.gbk",
-#     "/home/wby/Desktop/LabDNASeqSearch/pDJH54_Level1_araD_from_cyx531(+tct)_bc_scar.gbk",
-#     "/home/wby/Desktop/LabDNASeqSearch/pDJH55_Level1_xks(+tct)_bc_scar.gbk"]
-#     FileName = ["440",
-#                 "441",
-#                 "442",
-#                 "443",
-#                 "444",
-#                 "445"]
-#     test = SupportGG(AddressList,FileName)
-#     test.assemblyPart()
-#     test.show()
+if __name__ == '__main__':
+    AddressList = [r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-5747.gbk",
+    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-5723.gbk",
+    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-1241.gbk",
+    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-7272.gbk",
+    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\backbone-398.gbk",]
+    FileName = ["part-5747",
+                "part-5723",
+                "part-1241",
+                "part-7272",
+                "backbone-398",]
+    test = SupportGG(AddressList,FileName)
+    test.assemblyPart("webtest")
+    test.show()

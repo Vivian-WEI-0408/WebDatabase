@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>编辑基因元件信息 - 元件ID: 7309</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f9fc;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            background-image: linear-gradient(to bottom, #e8f4f8, #f0f7fa);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1a6a9e, #2a8bc5);
+            color: white;
+            padding: 24px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header-left .subtitle {
+            font-size: 15px;
+            opacity: 0.85;
+        }
+        
+        .element-id {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background-color: #f0f7ff;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header h2 {
+            color: #1a6a9e;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .section-header i {
+            color: #2a8bc5;
+            margin-right: 8px;
+        }
+        
+        .section-content {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 22px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .form-group label {
+            width: 180px;
+            font-weight: 600;
+            color: #444;
+            padding-top: 10px;
+            flex-shrink: 0;
+        }
+        
+        .form-control {
+            flex-grow: 1;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #2a8bc5;
+            box-shadow: 0 0 0 3px rgba(42, 139, 197, 0.1);
+        }
+        
+        .form-control.readonly {
+            background-color: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+            font-family: monospace;
+            line-height: 1.5;
+        }
+        
+        .form-hint {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        
+        .sequence-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: #2a8bc5;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1a6a9e;
+        }
+        
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-updated {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .last-update {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .form-group label {
+                width: 100%;
+                margin-bottom: 8px;
+                padding-top: 0;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1><i class="fas fa-dna"></i> 编辑基因元件信息</h1>
+                <div class="subtitle">修改并更新基因元件详细信息</div>
+            </div>
+            <div class="element-id" id="gene-id">元件ID: {{part.partid}}</div>
+        </header>
+        
+        <div class="content">
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-info-circle"></i> 基本信息</h2>
+                    <div class="status-badge status-pending">待更新</div>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="name">元件名称（Name）:</label>
+                        <input type="text" id="name" class="form-control" value={{part.name}}>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gene-aliad">元件别称（Alias）:</label>
+                        <input type="text" id="gene-alias" class="form-control" value={{part.alias}}>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-tags"></i> 元件属性</h2>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="element-type">元件类型:</label>
+                        <select id="element-type" class="form-control">
+                            <option value="Promoter" selected>Promoter (启动子)</option>
+                            <option value="Terminator">Terminator (终止子)</option>
+                            <option value="RBS">RBS (核糖体结合位点)</option>
+                            <option value="CDS">CDS (编码序列)</option>
+                            <option value="P+R">P+R (启动子+核糖体结合位点)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="species-source">物种来源:</label>
+                        <input type="text" id="species-source" class="form-control" placeholder="例如: Escherichia coli, Homo sapiens">
+                        <div class="form-hint">原始数据: {{part.sourceorganism}}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-sticky-note"></i> 备注</h2>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="notes">备注信息:</label>
+                        <textarea id="notes" class="form-control" placeholder="请输入关于此元件的备注信息..."></textarea>
+                        <div class="form-hint">原始数据: {{part.note}}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-code"></i> 元件序列</h2>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="sequence">DNA序列:</label>
+                        <textarea id="sequence" class="form-control">{{part.level0sequence}}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>序列预览:</label>
+                        <div class="sequence-box">
+                            <span class = "StartScar"></span>
+                            <span class = "sequenceContent"></span>
+                            <span class = "EndScar"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-book"></i> 参考文献</h2>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="references">参考文献:</label>
+                        <textarea id="references" class="form-control" placeholder="请输入相关参考文献，每行一个引用..."></textarea>
+                        <div class="form-hint">原始数据: {{part.reference}}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" id="cancel-btn">
+                    <i class="fas fa-times"></i> 取消编辑
+                </button>
+                <button type="button" class="btn btn-primary" id="save-btn">
+                    <i class="fas fa-save"></i> 保存更改
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const saveBtn = document.getElementById('save-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const sequenceTextarea = document.getElementById('sequence');
+            const sequenceContentPreview = document.querySelector('.StartScar');
+            const sequenceStartScarPreview = document.querySelector('.StartScar');
+            const sequenceEndScarPreview = document.querySelector('.EndScar');
+            // const elementSizeInput = document.getElementById('element-size');
+            
+            // 更新序列预览
+            function updateSequencePreview() {
+                var partType = document.getElementById("element-type").value;
+                
+                if(partType === "Promoter"){
+                    sequenceStartScarPreview.textContent = "GTGC";
+                    sequenceEndScarPreview.textContent = "ATCA";
+                }
+                else if(partType === "Terminator"){
+                    sequenceStartScarPreview.textContent = "TAAA";
+                    sequenceEndScarPreview.textContent = "CCTC";
+                }
+                else if(partType === "RBS"){
+                    sequenceStartScarPreview.textContent = "ATCA";
+                    sequenceEndScarPreview.textContent = "AATG";
+                }
+                else if(partType === "CDS"){
+                    sequenceStartScarPreview.textContent = "AATG";
+                    sequenceEndScarPreview.textContent = "TAAA";
+                }
+                else if(partType === "P+R"){
+                    sequenceStartScarPreview.textContent = "GTGC";
+                    sequenceEndScarPreview.textContent = "AATG";
+                }
+
+                const sequence = sequenceTextarea.value;
+                sequenceContentPreview.textContent = sequence;
+                
+                // 更新元件大小
+                // const cleanSequence = sequence.replace(/\s/g, '');
+                // elementSizeInput.value = cleanSequence.length;
+            }
+            
+            // 初始化序列预览
+            updateSequencePreview();
+            
+            // 监听序列变化
+            sequenceTextarea.addEventListener('input', updateSequencePreview);
+            
+            // 保存按钮点击事件
+            saveBtn.addEventListener('click', function() {
+                // 收集表单数据
+                var partid = document.getElementById("gene-id").innerText.split(": ")[1];
+                console.log(partid);
+                const formData = {
+                    elementId: partid,
+                    geneName: document.getElementById('name').value,
+                    geneAlias:document.getElementById('gene-alias').value,
+                    elementType: document.getElementById('element-type').value,
+                    speciesSource: document.getElementById('species-source').value || '',
+                    elementSize: document.getElementById('sequence').value.length,
+                    notes: document.getElementById('notes').value || '',
+                    sequence: document.getElementById('sequence').value,
+                    references: document.getElementById('references').value || ''
+                };
+                
+                // 模拟保存操作
+                // console.log('保存基因元件信息:', formData);
+                fetch(`/LabDatabase/modifypart/${partid}`,{
+                    method:"POST",
+                    body:JSON.stringify(formData),
+                    headers:{
+                        'X-CSRFToken':csrfToken,
+                        'Content-Type':"application/json",
+                    }
+                })
+                .then(response => response.json())
+                .then(data =>{
+                    if(data.success){
+                        alert("更新成功");
+                        window.history.back();
+                    }
+                    else{
+                        alert(data.message);
+                    }
+                });
+                // 更新状态提示
+                const statusBadge = document.querySelector('.status-badge');
+                statusBadge.textContent = '已更新';
+                statusBadge.className = 'status-badge status-updated';
+                
+            });
+            
+            // 取消按钮点击事件
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('确定要取消编辑吗？所有未保存的更改将会丢失。')) {
+                    // 模拟返回上一页
+                    window.history.back();
+                }
+            });
+            
+            // 自动调整序列文本域高度
+            function autoResizeTextarea(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = (textarea.scrollHeight) + 'px';
+            }
+            
+            // 为所有文本域添加自动高度调整
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    autoResizeTextarea(this);
+                });
+                // 初始化调整
+                autoResizeTextarea(textarea);
+            });
+        });
+    </script>
+</body>
+</html>

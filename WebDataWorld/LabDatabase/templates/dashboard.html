@@ -682,11 +682,11 @@
                         
                         <td>
                             <button class="btn btn-sm btn-outline-primary"
-                                    onclick="viewUserComponents(${user.uname})">
+                                    onclick="viewUserComponents('${user.uname}')">
                                 查看元件
                             </button>
                             <button class="btn btn-sm btn-outline-info"
-                                    onclick="exportUserData(${user.uname})">
+                                    onclick="exportUserData('${user.uname}')">
                                 导出数据
                             </button>
                         </td>
@@ -745,7 +745,6 @@
         function goToUserPage(page) {
             currentUserPage = page;
             alert("跳转到用户页");
-            // loadUserStats();
         }
         
         // 搜索用户
@@ -756,24 +755,24 @@
         
         // 查看用户元件
         function viewUserComponents(userId) {
-            alert("查看用户元件")
+            console.log(userId);
             // window.open(`/admin/user/${userId}/components/`, '_blank');
         }
         
         // 加载用户列表（用于导出筛选）
         function loadUserList() {
             fetch('/WebDatabase/getuserlist')
-                .then(response => response.json())
-                .then(data => {
-                    const userSelect = document.getElementById('userSelect');
-                    userSelect.innerHTML = '';
-                    console.log(data.data);
-                    data.data.forEach(user => {
-                        const option = document.createElement('option');
-                        option.text = `${user.uname}`;
-                        userSelect.appendChild(option);
-                    });
+            .then(response => response.json())
+            .then(data => {
+                const userSelect = document.getElementById('userSelect');
+                userSelect.innerHTML = '';
+                console.log(data.data);
+                data.data.forEach(user => {
+                    const option = document.createElement('option');
+                    option.text = `${user.uname}`;
+                    userSelect.appendChild(option);
                 });
+            });
         }
         
         // 设置最近30天
@@ -787,71 +786,71 @@
         }
         
         // 提交导出请求
-        function submitExport() {
-            // 收集筛选条件
-            const filters = {
-                start_date: document.getElementById('startDate').value || null,
-                end_date: document.getElementById('endDate').value || null,
-                user_ids: Array.from(document.getElementById('userSelect').selectedOptions)
-                    .map(option => parseInt(option.value)),
-                component_types: Array.from(document.querySelectorAll('.component-type:checked'))
-                    .map(checkbox => checkbox.value),
-                statuses: Array.from(document.querySelectorAll('.component-status:checked'))
-                    .map(checkbox => checkbox.value),
-                format: document.getElementById('exportFormat').value,
-                include_sequence: document.getElementById('includeSequence').checked,
-                include_attachments: document.getElementById('includeAttachments').checked
-            };
+        // function submitExport() {
+        //     // 收集筛选条件
+        //     const filters = {
+        //         start_date: document.getElementById('startDate').value || null,
+        //         end_date: document.getElementById('endDate').value || null,
+        //         user_ids: Array.from(document.getElementById('userSelect').selectedOptions)
+        //             .map(option => parseInt(option.value)),
+        //         component_types: Array.from(document.querySelectorAll('.component-type:checked'))
+        //             .map(checkbox => checkbox.value),
+        //         statuses: Array.from(document.querySelectorAll('.component-status:checked'))
+        //             .map(checkbox => checkbox.value),
+        //         format: document.getElementById('exportFormat').value,
+        //         include_sequence: document.getElementById('includeSequence').checked,
+        //         include_attachments: document.getElementById('includeAttachments').checked
+        //     };
             
-            // 如果没有选择用户，清空数组
-            if (filters.user_ids.length === 0) {
-                delete filters.user_ids;
-            }
+        //     // 如果没有选择用户，清空数组
+        //     if (filters.user_ids.length === 0) {
+        //         delete filters.user_ids;
+        //     }
             
-            // 验证
-            if (filters.start_date && filters.end_date) {
-                const start = new Date(filters.start_date);
-                const end = new Date(filters.end_date);
-                if (start > end) {
-                    showError('开始日期不能晚于结束日期');
-                    return;
-                }
-            }
+        //     // 验证
+        //     if (filters.start_date && filters.end_date) {
+        //         const start = new Date(filters.start_date);
+        //         const end = new Date(filters.end_date);
+        //         if (start > end) {
+        //             showError('开始日期不能晚于结束日期');
+        //             return;
+        //         }
+        //     }
             
-            showLoading('正在创建导出任务...');
+        //     showLoading('正在创建导出任务...');
             
-            fetch('/LabDatabase/export/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify(filters)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading();
+        //     fetch('/LabDatabase/export/', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'X-CSRFToken': getCSRFToken()
+        //         },
+        //         body: JSON.stringify(filters)
+        //     })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             hideLoading();
                     
-                    if (data.job_id) {
-                        Swal.fire({
-                            title: '导出任务已创建',
-                            text: '任务正在后台处理，处理完成后会自动通知您',
-                            icon: 'success',
-                            confirmButtonText: '确定'
-                        }).then(() => {
-                            // 切换到导出历史标签页
-                            document.querySelector('a[href="#export-history"]').click();
-                            // 开始检查任务状态
-                            startCheckingJobStatus(data.job_id);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('创建导出任务失败:', error);
-                    hideLoading();
-                    showError('创建导出任务失败');
-                });
-        }
+        //             if (data.job_id) {
+        //                 Swal.fire({
+        //                     title: '导出任务已创建',
+        //                     text: '任务正在后台处理，处理完成后会自动通知您',
+        //                     icon: 'success',
+        //                     confirmButtonText: '确定'
+        //                 }).then(() => {
+        //                     // 切换到导出历史标签页
+        //                     document.querySelector('a[href="#export-history"]').click();
+        //                     // 开始检查任务状态
+        //                     startCheckingJobStatus(data.job_id);
+        //                 });
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('创建导出任务失败:', error);
+        //             hideLoading();
+        //             showError('创建导出任务失败');
+        //         });
+        // }
         
         // 开始检查任务状态
         function startCheckingJobStatus(jobId) {
@@ -1032,86 +1031,129 @@
         }
         
         // 导出单个用户数据
-        function exportUserData(userId) {
-            Swal.fire({
-                title: '导出用户数据',
-                text: '确定要导出该用户的所有元件数据吗？',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '确定导出',
-                cancelButtonText: '取消'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // 设置用户筛选
-                    document.getElementById('userSelect').value = userId;
-                    document.getElementById('selectAllUsers').checked = false;
-                    
-                    // 切换到导出标签页
-                    document.querySelector('a[href="#export"]').click();
-                    
-                    // 滚动到导出面板
-                    setTimeout(() => {
-                        document.getElementById('export').scrollIntoView({ behavior: 'smooth' });
-                    }, 300);
-                }
-            });
+        async function exportUserData(userId) {
+            console.log(userId);
+            // window.location.href = `/LabDatabase/exportUserData/${userId}`;
+            const response = await fetch(`/LabDatabase/exportUserData/${userId}`);
+            const result = await response.json();
+            // const result = await response.json()
+            if(result.task_id){
+                alert(result.message);
+                pollTaskStatus(result.task_id);
+            }
+            else{
+                displayResult(result);
+            }
         }
         
         // 导出用户统计
-        function exportUserStats() {
-            showLoading('正在导出用户统计...');
-            
-            const params = new URLSearchParams({
-                search: userSearchQuery,
-                sort_by: userSortBy,
-                export: 'true'
-            });
-            
-            fetch(`/LabDatabase/user-stats/?${params}`)
-                .then(response => response.json())
-                .then(data => {
-                    // 创建CSV数据
-                    const csvContent = createUserStatsCSV(data.users);
+        async function exportUserStats() {
+            const response = await fetch(`/LabDatabase/exportallData`);
+            const result = await response.json();
+            console.log(result);
+            if(result.task_id){
+                alert(result.message);
+                pollTaskStatus(result.task_id);
+            }
+            else{
+                displayResult(result);
+            }
+        }
+
+        function displayError(message){
+            alert(message);
+        }
+
+        function displayResult(result){
+            if(result.status === "completed"){
+                if(result.message){
+                    alert(result.message);
+                }
+                else{
+                    alert("上传完成")
+                }
+            }
+            else{
+                alert('处理失败：'+result.error)
+            }
+        }
+            // fetch(`/LabDatabase/user-stats/?${params}`)
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         // 创建CSV数据
+            //         const csvContent = createUserStatsCSV(data.users);
                     
-                    // 下载文件
-                    downloadCSV(csvContent, `用户统计_${new Date().toISOString().slice(0, 10)}.csv`);
+            //         // 下载文件
+            //         downloadCSV(csvContent, `用户统计_${new Date().toISOString().slice(0, 10)}.csv`);
                     
-                    hideLoading();
-                    showSuccess('用户统计导出成功');
-                })
-                .catch(error => {
-                    console.error('导出用户统计失败:', error);
-                    hideLoading();
-                    showError('导出用户统计失败');
-                });
+            //         hideLoading();
+            //         showSuccess('用户统计导出成功');
+            //     })
+            //     .catch(error => {
+            //         console.error('导出用户统计失败:', error);
+            //         hideLoading();
+            //         showError('导出用户统计失败');
+            //     });
+        // }
+
+        function pollTaskStatus(taskId){
+            const pollInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch(`/LabDatabase/excel_task_status/${taskId}`);
+                        const contentType = await response.headers.get('content-type');
+                        console.log(contentType);
+                        // if(contentType.toString() !== "application/json"){
+                        //     console.log("completed");
+                        //     clearInterval(pollInterval);
+                        //     alert("导出完成");
+                        // }
+                        
+                            const result = await response.json();
+                            console.log(result);
+                            if(result.status === "completed"){
+                                console.log("completed");
+                                clearInterval(pollInterval);
+                                displayResult(result);
+                                window.location.href = `/LabDatabase/getDocument/${result.file_id}`;
+                            }
+                            else if(result.status === "failed"){
+                                clearInterval(pollInterval);
+                                displayError(result);
+                            }
+                    }
+                    catch(error){
+                        clearInterval(pollInterval);
+                        displayError('轮询失败：'+error.message);
+                    }
+                }, 2000);
         }
         
         // 创建用户统计CSV
-        function createUserStatsCSV(users) {
-            const headers = ['用户名', '邮箱', '姓名', '注册时间', '最后登录', 
-                           '总上传数', '已通过', '待审核', '已拒绝', '最后上传时间'];
+        // function createUserStatsCSV(users) {
+        //     const headers = ['用户名', '邮箱', '姓名', '注册时间', '最后登录',
+        //                    '总上传数', '已通过', '待审核', '已拒绝', '最后上传时间'];
             
-            let csv = headers.join(',') + '\n';
+        //     let csv = headers.join(',') + '\n';
             
-            users.forEach(user => {
-                const row = [
-                    user.username,
-                    user.email,
-                    `${user.first_name || ''} ${user.last_name || ''}`.trim(),
-                    formatDateTime(user.date_joined),
-                    user.last_login ? formatDateTime(user.last_login) : '从未登录',
-                    user.total_components,
-                    user.approved_components,
-                    user.pending_components,
-                    user.rejected_components,
-                    user.last_upload_time ? formatDateTime(user.last_upload_time) : '从未上传'
-                ].map(field => `"${field}"`).join(',');
+        //     users.forEach(user => {
+        //         const row = [
+        //             user.username,
+        //             user.email,
+        //             `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        //             formatDateTime(user.date_joined),
+        //             user.last_login ? formatDateTime(user.last_login) : '从未登录',
+        //             user.total_components,
+        //             user.approved_components,
+        //             user.pending_components,
+        //             user.rejected_components,
+        //             user.last_upload_time ? formatDateTime(user.last_upload_time) : '从未上传'
+        //         ].map(field => `"${field}"`).join(',');
                 
-                csv += row + '\n';
-            });
+        //         csv += row + '\n';
+        //     });
             
-            return csv;
-        }
+        //     return csv;
+        // }
         
         // 下载CSV文件
         function downloadCSV(content, filename) {

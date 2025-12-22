@@ -27,11 +27,13 @@ urlpatterns = [
     path("PartAlias",views.SearchByPartAlterName,name="PartAlias"),
     path("PartType",views.SearchByPartType,name="PartType"),
     path("TypeByName",views.SearchPartTypeByName,name="TypeByName"),
+    path("TypeByID",views.SearchPartTypeByID,name="TypeByID"),
     path("PartRPU",views.SearchByRPU,name="PartRPU"),
     path("PartSeq",views.SearchBySeq,name="PartSeq"),
     path("PartFile",views.SearchPartFile,name="PartFile"),
     path('SearchRPU',views.GetPartRPU,name="SearchRPU"),
     path('PartID',views.GetPartIDByName,name="PartID"),
+    path("PartNameByID",views.GetPartNameByID,name="PartNameByID"),
     path("GetPartSeqByID",views.GetPartSeqByID,name="GetPartSeqByID"),
     path("AddPartRPU",views.AddPartRPU,name="AddPartRPU"),
     path("AddPartData",views.AddPartData,name="AddPartData"),
@@ -43,6 +45,8 @@ urlpatterns = [
     path("deletePartFile",views.deletePartFile,name="deletePartFile"),
     path("PartFilter",views.PartFilter,name="PartFilter"),
     path("UpdatePartSequence",views.UpdatePartSequence,name="UpdatePartSequence"),
+    path("partlistbyuser/<str:username>",views.PartListByUser,name="partlistbyuser"),
+    path("partfields",views.PartFields,name="partfields"),
 
     path("plasmidcount",views.PlasmidCount,name="Plasmidcount"),
     path("Plasmid",views.PlasmidDataALL,name="Plasmid"),
@@ -60,6 +64,7 @@ urlpatterns = [
     path("PlasmidParentByID",views.SearchPlasmidParentByID,name="PlasmidParentByID"),
     path("GetParentID",views.GetParentID,name="GetParentID"),
     path("PlasmidID",views.GetPlasmidIDByName,name="PlasmidID"),
+    path("PlasmidNameByID",views.GetPlasmidNameByID,name="PlasmidNameByID"),
     path("PlasmidFile",views.SearchPlasmidFileAddress,name="PlasmidFile"),
     path("AddPlasmidFile",views.AddPlasmidFileAddress,name="AddPlasmidFile"),
     path("AddPlasmidData",views.AddPlasmidData,name="AddPlasmidData"),
@@ -72,6 +77,8 @@ urlpatterns = [
     path("UpdateParentInfo",views.AddPlasmidParentInfo,name="UpdateParentInfo"),
     path("setPlasmidCulture",views.setPlasmidCulture,name="setPlasmidCulture"),
     path("UpdatePlasmidSequence",views.UpdatePlasmidSequence, name= "UpdatePlasmidSequence"),
+    path("plasmidlistbyuser/<str:username>",views.PlasmidListByUser,name="plasmidlistbyuser"),
+    path("plasmidfields",views.PlasmidFields,name="plasmidfields"),
 
     path("backbonecount",views.BackboneCount, name = "backbonecount"),
     path("Backbone",views.BackboneDataALL,name="Backbone"),
@@ -85,6 +92,7 @@ urlpatterns = [
     path("BackboneCopyNumber",views.SearchByCopyNumber,name="BackboneCopyNumber"),
     path("BackboneFile",views.SearchBackboneFileAddress,name="BackboneFile"),
     path("BackboneID",views.GetBackboneIDByName,name="BackboneID"),
+    path("BackboneNameByID",views.GetBackboneNameByID,name="BackboneNameByID"),
     path("AddBackbone",views.AddBackboneData,name="AddBackbone"),
     path("AddBackboneFile",views.AddBackboneFileAddress,name="AddBackboneFile"),
     path("UpdateBackbone",views.UpdateBackboneData,name="UpdateBackbone"),
@@ -94,6 +102,8 @@ urlpatterns = [
     path("BackboneFilter",views.BackboneFilter,name="BackboneFilter"),
     path("UpdateBackboneSequence",views.UpdateBackboneSequence,name="UpdateBackboneSequence"),
     path("setBackboneCulture",views.setBackboneCulture,name="setBackboneCulture"),
+    path("backbonelistbyuser/<str:username>",views.BackboneListByUser,name="backbonelistbyuser"),
+    path("backbonefields",views.BackboneFields,name="backbonefields"),
 
     path("TestDataName",views.SearchByTestdataName,name="TestDataName"),
 
@@ -131,14 +141,19 @@ urlpatterns = [
     path("PlasmidNameFilter",views.SearchByPlasmidNameFilter,name="PlasmidNameFilter"),
 
     path("AddPartParent",views.AddParentPart,name="AddPartParent"),
+    path("AddPartParentByID",views.AddParentPartByID,name="AddPartParentByID"),
     path("AddBackboneParent",views.AddParentBackbone,name="AddParentBackbone"),
+    path("AddBackboneParentByID",views.AddBackboneParentByID,name="AddBackboneParentByID"),
     path("AddPlasmidParent",views.AddParentPlasmid,name="AddParentPlasmid"),
+    path("AddPlasmidParentByID",views.AddPlasmidParentByID,name="AddPlasmidParentByID"),
 
     path("GetPartParent",views.GetParentPart, name = "GetPartParent"),
     path("GetBackboneParent",views.GetParentBackbone,name="GetBackboneParent"),
     path("GetPlasmidParent",views.GetParentPlasmid,name="GetPlasmidParent"),
     path("GetPlasmidSon",views.GetSonPlasmid,name="GetPlasmidSon"),
 
+    path("DeletePlasmidParent",views.DeletePlasmidParent,name = "deleteplasmidparent"),
+    
     path("getPartValueList/<str:column>",views.getPartValueList,name="getPartValueList"),
     path("getBackboneValueList/<str:column>",views.getBackboneValueList,name="getBackboneValueList"),
     path("getPlasmidValueList/<str:column>",views.getPlasmidValueList,name="getPlasmidValueList"),
@@ -158,4 +173,14 @@ urlpatterns = [
     
     path("getuserlist",views.getuserlist,name="getuserlist"),
     path("getalluseruploadlist",views.getAllUserUploadList,name="getalluseruploaduser"),
+    
+    
+    path("createRepo",views.create_repository,name="createrepo"),
+    path("getrepos",views.get_repositories,name="getrepos"),
+    path("getrepo",views.get_repository,name="getrepo"),
+    path("addparts",views.add_part_to_repository,name="addparts"),
+    path("addbackbones",views.add_backbone_to_repository,name="addbackbones"),
+    path("addplasmids",views.add_plasmid_to_repository, name="addplasmids"),
+    path("removeparts",views.remove_part_from_repository,name="removeparts"),
+    path("getparts",views.get_repository_parts,name="getparts"),
 ]

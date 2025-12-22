@@ -14,6 +14,7 @@ class KmerIndex:
         self.index = defaultdict(list)
     
     def add_sequence(self,seq_id,sequence):
+        sequence = sequence.upper()
         seq_len = len(sequence)
 
         if seq_len < self.k:
@@ -24,6 +25,7 @@ class KmerIndex:
             self.index[kmer].append((seq_id,i))
 
     def query(self,sequence, min_matches=4):
+        sequence = sequence.upper()
         matches = defaultdict(list)
         query_len = len(sequence)
         for i in range(query_len - self.k+1):
@@ -74,5 +76,5 @@ class KmerIndex:
                                             'start':min(positions),
                                             'end':max(positions)+self.k}
         # significant_matches.sort(key=lambda x:x['match_count'],reverse=True)
-        print(significant_matches)
+        # print(significant_matches)
         return significant_matches

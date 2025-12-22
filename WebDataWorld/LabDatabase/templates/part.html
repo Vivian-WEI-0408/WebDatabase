@@ -95,6 +95,16 @@
             font-size: 0.9rem;
             line-height: 1.4;
         }
+
+        .StartScar{
+            font-family: 'Courier New', monospace;
+            color: lightskyblue;
+        }
+
+        .EndScar{
+            font-family: 'Courier New', monospace;
+            color: lightgreen;
+        }
         
         .reference-list {
             list-style-type: none;
@@ -227,7 +237,7 @@
             <div class="info-section">
                 <h2><i>📋</i> 基本信息</h2>
                 <h3><i class="fa-solid fa-user-secret"></i>  {{part.user}}</h3>
-                <div class="gene-name">{{part.name}}({{part.alias}})</div>
+                <div class="gene-name" id="gene-name-div">{{part.name}}({{part.alias}})</div>
                 
                 <div class="info-grid">
                     <div class="info-card">
@@ -262,7 +272,37 @@
                 <p>以下是{{part.name}}基因的DNA编码序列：</p>
                 <div class="sequence-container">
                     <div class="sequence" id="SequenceContainer">
+                        {% if part.type == "Promoter" %}
+                        <span class="StartScar">GTGC</span>
+                        {% endif %}
+                        {% if part.type == "CDS" %}
+                        <span class="StartScar">AATG</span>
+                        {% endif %}
+                        {% if part.type == "RBS" %}
+                        <span class="StartScar">ATCA</span>
+                        {% endif %}
+                        {% if part.type == "Terminator" %}
+                        <span class="StartScar">TAAA</span>
+                        {% endif %}
+                        {% if part.type == "P+R" %}
+                        <span class="StartScar">GTGC</span>
+                        {% endif %}
                         {{part.level0sequence}}
+                        {% if part.type == "Promoter" %}
+                        <span class="EndScar">ATCA</span>
+                        {% endif %}
+                        {% if part.type == "CDS" %}
+                        <span class="EndScar">TAAA</span>
+                        {% endif %}
+                        {% if part.type == "RBS" %}
+                        <span class="EndScar">AATG</span>
+                        {% endif %}
+                        {% if part.type == "Terminator" %}
+                        <span class="EndScar">CCTC</span>
+                        {% endif %}
+                        {% if part.type == "P+R" %}
+                        <span class="EndScar">AATG</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -276,25 +316,36 @@
                 </ul>
             </div>
             <div class="download-section">
-                <button class="btn" id="downPartMapButton"><i>📥</i> 下载质粒图谱</button>
+                <button class="btn" id="downPartMapButton"><i>📥</i>下载质粒图谱</button>
                 <button class="btn"><i>🧬</i> 下载序列文件</button>
                 <button class="btn"><i>📋</i> 下载详细说明</button>
+                <button class="btn" id="getExperienceData"><i class="fa-solid fa-circle-info"></i>查看测试数据</button>
             </div>
         </div>
 
-        
         <footer>
-            <p>基因元件数据库 &copy; 2025 | 最后更新: 2025年11月27日</p>
+            <p>基因元件数据库 &copy; 2025 | 最后更新: 2025年12月15日</p>
         </footer>
     </div>
 
     <script>
+
+        // document.addEventListener('DOMContentLoaded',function(){
+
+        // })
         document.getElementById('downPartMapButton').addEventListener('click',function(){
             let pathname_list = window.location.pathname.split('/');
             let partid = pathname_list[pathname_list.length -1];
             console.log(partid);
             window.location.href = `/LabDatabase/downloadPartMap/${partid}`;
         })
+
+        document.getElementById("getExperienceData").addEventListener('click',function(){
+            let partName = document.getElementById("gene-name-div").innerText.split('(')[0];
+            console.log(partName);
+            window.location.href = `/LabDatabase/FetchExperienceDetail/${partName}`;
+        })
+
     </script>
 </body>
 </html>

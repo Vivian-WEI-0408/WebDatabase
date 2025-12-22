@@ -173,7 +173,7 @@ def scarFunction(seq):
             elif(NoSite['Scar']['end'].upper() == "TTTT"):
                 scar_str += "T"
         if(scar_str == ""):
-            scar_list.append("Enzyme Not Available")
+            scar_list.append("-")
         else:
             scar_list.append(scar_str)
     return scar_list
