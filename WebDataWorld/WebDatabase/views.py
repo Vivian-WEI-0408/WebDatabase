@@ -434,10 +434,10 @@ def SearchPartTypeByID(request):
             if(Type == 1):
                 return JsonResponse(data={"Type":"Promoter"},status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type":"Promoter"}})
-            elif(Type == 2):
+            elif(Type == 3):
                 return JsonResponse(data={"Type":"Terminator"},status=200)
                 # return JsonResponse({'code':200,'status':'success','data':{"Type":"Terminator"}})
-            elif(Type == 3):
+            elif(Type == 2):
                 # return HttpResponse("CDS")
                 return JsonResponse(data={"Type":"CDS"},status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "CDS"}})

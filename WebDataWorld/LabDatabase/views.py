@@ -31,9 +31,10 @@ from Bio.SeqIO import parse
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
-File_Address = r"C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
-Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\output"
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Exp_URL = "http://10.30.76.75:8009/"
+File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
+Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
 TASK_STATUS_PREFIX = 'file_task_'
 # class User_auth(MiddlewareMixin):
 
@@ -194,7 +195,7 @@ def download_template(request,type):
             response = FileResponse(open(template_path,'rb'),as_attachment=True,filename='plasmid_template.xlsx')
             return response
     elif(type == "assembly"):
-        template_path = r'C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\AssemblyPlan.xlsx'
+        template_path = r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\AssemblyPlan.xlsx'
         if(os.path.exists(template_path)):
             response = FileResponse(open(template_path,'rb'),as_attachment=True,filename='AssemblyPlan_template.xlsx')
             return response
@@ -1164,6 +1165,7 @@ def modify_part(request,partid):
         'Content-Type':'application/json',
         'X-CSRFToken':token,
     })
+    
     if(request.method != "POST"):
         if(partid == None or partid == ""):
             return JsonResponse({"success":False,"message":"Parameter is empty"},status = 400, safe = False)
@@ -1316,7 +1318,7 @@ def GetExperienceDetail(request, partName):
         'User-Agent':'Django-App/1.0',
         'Content-Type':'application/json',
     })
-    response = session.get(f"http://10.30.76.75:8009/api/part/view?filter=name={partName}")
+    response = session.get(f"{Exp_URL}/api/part/view?filter=name={partName}")
     print(response.json())
     ID = response.json()['parts'][0]['ID']
-    return redirect(f"http://10.30.76.75:8009/part/{ID}")
+    return redirect(f"{Exp_URL}/part/{ID}")
