@@ -2844,7 +2844,20 @@ function setupMenuEvents() {
             // const menuHeader = document.querySelectorAll('.menu-header');
             // const submenuHeader = document.querySelectorAll(".submenuHeader");
             
-
+            // 侧边栏（展开）切换
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+                
+                console.log("siderToggle click!");
+                // 切换按钮图标
+                const icon = sidebarToggle.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.className = 'fas fa-bars';
+                } else {
+                    icon.className = 'fas fa-times';
+                }
+            });
 
 
             
