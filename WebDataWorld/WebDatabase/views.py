@@ -748,7 +748,13 @@ def PartListByUser(request,username):
         return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
 
 
-
+def GetPartSource(request, partID):
+    if(request.method == "GET"):
+        try:
+            source = Parttable.objects.get(partid = partID).sourceorganism
+            return JsonResponse(data={"success":True,"source":source},status=200,safe=False)
+        except Parttable.DoesNotExist:
+            return JsonResponse(data={"success":False},status=400, safe=False)
 
 
 

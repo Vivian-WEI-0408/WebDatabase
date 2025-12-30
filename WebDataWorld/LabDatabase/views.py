@@ -1009,16 +1009,35 @@ def process_assembly_repo(repositoryName, django_request, task_id):
             partType = (session.get(f"{Base_URL}TypeByID?ID={each_part}", cookies=django_request.COOKIES)).json()['Type'].lower()
             partName = (session.get(f"{Base_URL}PartNameByID?ID={each_part}",cookies=django_request.COOKIES)).json()['PartName']
             print(partType)
-            if(partType == "promoter"):
-                sequence = "GGTCTCAGTGC" + sequence + "ATCAAGAGACC"
-            elif(partType == "terminator"):
-                sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
-            elif(partType == "cds"):
-                sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
-            elif(partType == "rbs"):
-                sequence = "GGTCTCAATCA" + sequence + "AATGAGAGACC"
-            elif(partType == "p+r"):
-                sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
+            partSource = (session.get(f"{Base_URL}partSource/{each_part}",cookies=django_request.COOKIES)).json()
+            print(partSource)
+            if(partSource['success'] != True):
+                task_status = {
+                'status':'failed',
+                'progress':0,
+                'result':None,
+                'error':"组装Scar错误",
+                }
+                cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=100000)
+                return
+            if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                if(partType == "promoter"):
+                    sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
+                elif(partType == "terminator"):
+                    sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+                elif(partType == "cds"):
+                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                elif(partType == "rbs"):
+                    sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+                elif(partType == "p+r"):
+                    sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+            else:
+                if(partType == "promoter"):
+                    sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+                elif(partType == "terminator"):
+                    sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+                elif(partType == "cds"):
+                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
             print(sequence)
             seq_obj = Seq(sequence)
             seq_reverse = str(seq_obj.reverse_complement())
