@@ -748,7 +748,13 @@ def PartListByUser(request,username):
         return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
 
 
-
+def GetPartSource(request, partID):
+    if(request.method == "GET"):
+        try:
+            source = Parttable.objects.get(partid = partID).sourceorganism
+            return JsonResponse(data={"success":True,"source":source},status=200,safe=False)
+        except Parttable.DoesNotExist:
+            return JsonResponse(data={"success":False},status=400, safe=False)
 
 
 
@@ -929,11 +935,7 @@ def PlasmidFilter(request):
                                 each['ori_info'] = info_list[0]
                                 each['marker_info'] = info_list[1]
                                 # print(info_list)
-                                plasmid_scar_obj = Plasmidscartable.objects.filter(plasmidid = each['plasmidid']).first()
-                                if(plasmid_scar_obj != None):
-                                    each['scar'] = plasmid_scar_obj.bbsi
-                                else:
-                                    each['scar'] = "No Sequence"
+                                each['scar'] = getdefaultplasmidscar(each['plasmidid'])
                             except Plasmidscartable.DoesNotExist:
                                 each['scar'] = "No Sequence"
                             except Plasmid_Culture_Functions.DoesNotExist:
@@ -952,11 +954,7 @@ def PlasmidFilter(request):
                         info_list = getOriAndMarker(temp_result['plasmidid'])
                         temp_result['ori_info'] = info_list[0]
                         temp_result['marker_info'] = info_list[1]
-                        plasmid_scar_obj = Plasmidscartable.objects.filter(plasmidid = temp_result['plasmidid']).first()
-                        if(plasmid_scar_obj != None):
-                            temp_result['scar'] = plasmid_scar_obj.bbsi
-                        else:
-                            temp_result['scar'] = "No Sequence"
+                        each['scar'] = getdefaultplasmidscar(each['plasmidid'])
                         PlasmidResult.append(temp_result)
         # print(PlasmidResult)
         if(len(PlasmidResult) != 0):
@@ -1834,13 +1832,12 @@ def BackboneFilter(request):
                                 info_list = getBackboneOriAndMarker(each['id'])
                                 each['ori'] = info_list[0]
                                 each['marker'] = info_list[1]
-                                backbone_scar_obj = Backbonescartable.objects.filter(backboneid = each['id']).first()
-                                if(backbone_scar_obj != None):
-                                    each['scar'] = backbone_scar_obj.bbsi
-                                else:
-                                    each['scar'] = "No sequence"
+                                each['scar'] = getdefaultbackbonescar(each['id'])
                             except Backbonescartable.DoesNotExist:
                                 each['scar'] = "No sequence"
+                            except Backbone_Culture_Functions.DoesNotExist:
+                                each['ori'] = "No sequence"
+                                each['marker'] = "No sequence"
                             BackboneResult.append(each)
                     # PlasmidResult = (list(result.order_by('name').values('plasmidid','name','alias','oricloning','orihost','markercloning','markerhost','level')))
             else:
@@ -1855,11 +1852,7 @@ def BackboneFilter(request):
                         info_list = getBackboneOriAndMarker(temp_result['id'])
                         temp_result['ori'] = info_list[0]
                         temp_result['marker'] = info_list[1]
-                        backbone_scar_obj = Backbonescartable.objects.filter(backboneid = each['id']).first()
-                        if(backbone_scar_obj != None):
-                            temp_result['scar'] = backbone_scar_obj.bbsi
-                        else:
-                            temp_result['scar'] = "No sequence"
+                        each['scar'] = getdefaultbackbonescar(each['id'])
                         BackboneResult.append(temp_result)
         print(BackboneResult)
         if(len(BackboneResult) != 0):

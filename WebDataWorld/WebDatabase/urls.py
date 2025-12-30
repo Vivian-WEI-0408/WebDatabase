@@ -47,6 +47,7 @@ urlpatterns = [
     path("UpdatePartSequence",views.UpdatePartSequence,name="UpdatePartSequence"),
     path("partlistbyuser/<str:username>",views.PartListByUser,name="partlistbyuser"),
     path("partfields",views.PartFields,name="partfields"),
+    path("partSource/<int:partID>",views.GetPartSource,name="partSource"),
 
     path("plasmidcount",views.PlasmidCount,name="Plasmidcount"),
     path("Plasmid",views.PlasmidDataALL,name="Plasmid"),
