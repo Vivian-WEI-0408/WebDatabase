@@ -1416,7 +1416,7 @@ def GetParentPart(request):
         pplist = []
         # print(ppResult)
         for each_id in ppResult:
-            pplist.append(list(Parttable.objects.filter(partid = each_id['parentpartid']).values('name','note'))[0])
+            pplist.append(list(Parttable.objects.filter(partid = each_id['parentpartid']).values('name','alias'))[0])
         # print(pplist)
         return JsonResponse(data={'success':True,'data':pplist},status = 200, safe = False)
 
@@ -1426,7 +1426,7 @@ def GetParentBackbone(request):
         pbResult = list(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidid).values('parentbackboneid'))
         pblist = []
         for each_id in pbResult:
-            pblist.append(list(Backbonetable.objects.filter(id = each_id['parentbackboneid']).values('name','notes'))[0])
+            pblist.append(list(Backbonetable.objects.filter(id = each_id['parentbackboneid']).values('name','alias'))[0])
         return JsonResponse(data={'success':True, 'data':pblist},status = 200, safe = False)
 
 def GetParentPlasmid(request):
@@ -1435,7 +1435,7 @@ def GetParentPlasmid(request):
         ppResult = list(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidid).values('parentplasmidid'))
         pplist = []
         for each_id in ppResult:
-            pplist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['parentplasmidid']).values('name','note'))[0])
+            pplist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['parentplasmidid']).values('name','alias'))[0])
         return JsonResponse(data = {'success':True,'data':pplist},status = 200, safe = False)
 
 def GetSonPlasmid(request):
@@ -1444,7 +1444,7 @@ def GetSonPlasmid(request):
         spResult = list(Parentplasmidtable.objects.filter(parentplasmidid = parentPlasmidid).values('sonplasmidid'))
         splist = []
         for each_id in spResult:
-            splist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['sonplasmidid']).values('name','note'))[0])
+            splist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['sonplasmidid']).values('name','alias'))[0])
         return JsonResponse(data = {'success':True, 'data':splist},status = 200, safe = False)
 
 #Update
@@ -1625,6 +1625,15 @@ def setPlasmidCulture(request):
         print("timeout")
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
+def getPlasmidCulture(request):
+    if(request.method == "GET"):
+        plasmidid = request.GET.get("plasmidId");
+        try:
+            CustomInfo = Plasmidneed.objects.get(plasmidid = plasmidid).customparentinformation
+            return JsonResponse(data = {"success":True,"customInfo":CustomInfo},status = 200, safe=False)
+        except Plasmidneed.DoesNotExist:
+            return JsonResponse(data = {"success":False, "message":"No such plasmid"}, status=400, safe=False)
+            
 
 def PlasmidFields(request):
     fields =[field.name for field in Plasmidneed._meta.get_fields()]
@@ -3383,6 +3392,40 @@ def getAllUserUploadList(request):
         return JsonResponse(data = {"success":True, "data":result}, status = 200, safe = False)
     else:
         return JsonResponse(data = {"success":False, "message":"Just GET method"},status = 200, safe = False)
+
+def getUserPartCount(request,uname):
+    if(request.method == "GET"):
+        print(uname)
+        count = Parttable.objects.filter(user = uname).count()
+        return JsonResponse({"success":True,"count":count},status=200, safe=False)
+    else:
+        return JsonResponse({"success":False,"message":"Just Get Method"},status=400,safe=False)
+    
+def getUserBackboneCount(request,uname):
+    if(request.method == "GET"):
+        count = Backbonetable.objects.filter(user = uname).count()
+        return JsonResponse({"success":True,"count":count},status=200, safe=False)
+    else:
+        return JsonResponse({"success":False,"message":"Just Get Method"},status=400,safe=False)
+
+def getUserPlasmidCount(request,uname):
+    if(request.method == "GET"):
+        count = Plasmidneed.objects.filter(user = uname).count()
+        return JsonResponse({"success":True,"count":count},status=200, safe=False)
+    else:
+        return JsonResponse({"success":False,"message":"Just Get Method"},status=400,safe=False)
+
+def getUserrepositoryCount(request,uid):
+    if(request.method == "GET"):
+        print(uid)
+        count = 0
+        repositoryList = Temporaryrepository.objects.filter(userid = uid)
+        for each in repositoryList:
+            print(each)
+            if(each.is_expired() == False):
+                count +=1
+        return JsonResponse(data={"success":True,"count":count},status=200,safe=False)
+                
     
     
 @csrf_exempt
@@ -3425,7 +3468,7 @@ def get_repositories(request):
                 return JsonResponse(data={'success':True,'repo':repositories},status=200,safe=False)
             else:
                 return JsonResponse(data="No repository, Please create Repository firstly",status=400,safe=False)
-        except Exception as e:  
+        except Exception as e:
             return JsonResponse(data=str(e),status=404,safe=False)
 
 @csrf_exempt

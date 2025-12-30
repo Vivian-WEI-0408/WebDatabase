@@ -31,7 +31,7 @@ from Bio.SeqIO import parse
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Base_URL = "http://10.30.76.2:8004/WebDatabase/"
 Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
@@ -56,7 +56,23 @@ TASK_STATUS_PREFIX = 'file_task_'
 
 def index(request):
     if(request.method == "GET"):
-        return render(request,'index.html',{"user":request.user})
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent':'Django-App/1.0',
+            'Content-Type':'application/json',
+        })
+        username = request.user.uname
+        userid = request.user.uid
+        user_repository_count = session.get(f"{Base_URL}getrepocountbyuser/{userid}",cookies=request.COOKIES).json()['count']
+        user_part_count = session.get(f"{Base_URL}getuserpartcount/{username}",cookies=request.COOKIES).json()['count']
+        user_backbone_count = session.get(f"{Base_URL}getuserbackbonecount/{username}",cookies=request.COOKIES).json()['count']
+        user_plasmid_count = session.get(f"{Base_URL}getuserplasmidcount/{username}",cookies=request.COOKIES).json()['count']
+        user_info = {}
+        user_info['repoCount'] = user_repository_count
+        user_info['partCount'] = user_part_count
+        user_info['backboneCount'] = user_backbone_count
+        user_info['plasmidCount'] = user_plasmid_count
+        return render(request,'index.html',{"user":request.user,"user_info":user_info})
 
 def getData(request):
     # print(request.session['info']['uname'])
@@ -1322,3 +1338,76 @@ def GetExperienceDetail(request, partName):
     print(response.json())
     ID = response.json()['parts'][0]['ID']
     return redirect(f"{Exp_URL}/part/{ID}")
+
+
+def user(request, username):
+    session = requests.session()
+    session.headers.update({
+        'User-Agent':'Django-App/1.0',
+        'Content-Type':'application/json',
+    })
+    if(request.method == "GET"):
+        username = request.session['info']['uname']
+        user = request.user
+        userid = request.user.uid
+        user_repository_count = session.get(f"{Base_URL}getrepocountbyuser/{userid}",cookies=request.COOKIES).json()['count']
+        user_part_count = session.get(f"{Base_URL}getuserpartcount/{username}",cookies=request.COOKIES).json()['count']
+        user_backbone_count = session.get(f"{Base_URL}getuserbackbonecount/{username}",cookies=request.COOKIES).json()['count']
+        user_plasmid_count = session.get(f"{Base_URL}getuserplasmidcount/{username}",cookies=request.COOKIES).json()['count']
+        user_info = {}
+        user_info['repoCount'] = user_repository_count
+        user_info['partCount'] = user_part_count
+        user_info['backboneCount'] = user_backbone_count
+        user_info['plasmidCount'] = user_plasmid_count
+        return render(request,'ProfilePage.html',{"user":request.user,"user_info":user_info})
+    
+    
+
+
+def GetParentInfo(request):
+    session = requests.session()
+    session.headers.update({
+        'User-Agent':'Django-App/1.0',
+        'Content-Type':'application/json',
+    })
+    if(request.method == "GET"):
+        plasmidName = request.GET.get("PlasmidName");
+        print(plasmidName)
+        plasmidID = session.get(f"{Base_URL}PlasmidID?name={plasmidName}",cookies=request.COOKIES).json()["PlasmidID"];
+        
+        plasmidParentPart = session.get(f'{Base_URL}GetPartParent?plasmidid={plasmidID}',cookies=request.COOKIES)
+        
+        plasmidParentBackbone = session.get(f'{Base_URL}GetBackboneParent?plasmidid={plasmidID}',cookies=request.COOKIES)
+        
+        plasmidParentPlasmid = session.get(f'{Base_URL}GetPlasmidParent?plasmidid={plasmidID}',cookies=request.COOKIES)
+        
+        plasmidSonPlasmid = session.get(f'{Base_URL}GetPlasmidSon?plasmidid={plasmidID}',cookies = request.COOKIES)
+
+        plasmidCustomInfo = session.get(f"{Base_URL}getPlasmidCulture?plasmidId={plasmidID}",cookies=request.COOKIES)
+        
+        if(plasmidParentPart.status_code == 200 and plasmidParentBackbone.status_code == 200 and
+            plasmidParentPlasmid.status_code == 200 and plasmidSonPlasmid.status_code == 200 and plasmidCustomInfo.status_code == 200):
+            result = {
+                    'Part':[],
+                    "Backbone":[],
+                    "Plasmid":[],
+                }
+            CustomInfo = plasmidCustomInfo.json()['customInfo']
+            if(CustomInfo != None and CustomInfo != 'None' and CustomInfo != 'NULL' and CustomInfo != "nan"):
+                pattern = r'(\w+)\(([ a-zA-z0-9]+)\)'
+                matches = re.findall(pattern, CustomInfo)
+                print(result)
+                for component_type, letter in matches:
+                    if(component_type == "Part"):
+                        result['Part'].append(letter)
+                    elif(component_type == "Backbone"):
+                        result['Backbone'].append(letter)
+                    elif(component_type == "Plasmid"):
+                        result['Plasmid'].append(letter)
+            print({"parentPart":plasmidParentPart.json()['data'],"parentBackbone":plasmidParentBackbone.json()['data'],
+                                        "parentPlasmid":plasmidParentPlasmid.json()['data'],"parentInfo":result})
+            return JsonResponse(data = {"success":True,"parentPart":plasmidParentPart.json()['data'],"parentBackbone":plasmidParentBackbone.json()['data'],
+                                        "parentPlasmid":plasmidParentPlasmid.json()['data'],"parentInfo":result},status=200,safe=False)
+        else:
+            return render(request,'error.html',{'error':"获取层级信息错误"})
+        

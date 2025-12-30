@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>质粒信息 - 基因元件数据库</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>    <title>质粒信息 - 基因元件数据库</title>
     <style>
         * {
             margin: 0;
@@ -158,33 +158,29 @@
             font-weight: bold;
             margin-top: 10px;
         }
+
+        .tree{
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: 650px;
+        }
+
+        #plasmid_tree{
+            width: 100%;
+            height: 600px;
+        }
         
-        .hierarchy-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        /* .hierarchy-section {
+            display: block;
+            /* grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); */
+            /* gap: 20px;
             margin-top: 20px;
-        }
+        } */
         
-        .hierarchy-card {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border-top: 4px solid #1a6fc4;
-        }
         
-        .hierarchy-card h3 {
-            color: #0d4d8a;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .hierarchy-card h3 i {
-            margin-right: 8px;
-        }
-        
-        .hierarchy-list {
+        /* .hierarchy-list {
             list-style-type: none;
         }
         
@@ -216,7 +212,7 @@
         .hierarchy-item-warning:hover {
             transform: translateX(5px);
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
+        } */
 
         .item-name {
             font-weight: bold;
@@ -494,63 +490,12 @@
                 <!-- <p>pEGFP-N1质粒的构建来源和使用情况：</p> -->
                 
                 <div class="hierarchy-section">
-                    <div class="hierarchy-card">
-                        <h3><i>⬆️</i> 上级元件</h3>
-                        <p>构建此质粒所使用的元件：</p>
-                        <ul class="hierarchy-list">
-                            {% for item in partparent %}
-                            <li class="hierarchy-item">
-                                <div class="item-name">{{item.name}}</div>
-                                <div class="item-desc">{{item.note}}</div>
-                            </li>
-                            {% endfor %}
-                            {% for item in ParentPartInfo%}
-                            <li class = "hierarchy-item-warning">
-                                <div class = "item-name">{{item}}</div>
-                            </li>
-                            {% endfor %}
-                        <h3><i>⬆️</i> 上级载体</h3>
-                        <p>构建此质粒所使用的载体：</p>
-                            {% for item in backboneparent %}
-                            <li class="hierarchy-item">
-                                <div class="item-name">{{item.name}}</div>
-                                <div class="item-desc">{{item.note}}</div>
-                            </li>
-                            {% endfor %}
-                            {% for item in ParentBackboneInfo%}
-                            <li class = "hierarchy-item-warning">
-                                <div class = "item-name">{{item}}</div>
-                            </li>
-                            {% endfor %}
-                        <h3><i>⬆️</i> 上级质粒</h3>
-                        <p>构建此质粒所使用的质粒：</p>
-                            {% for item in plasmidparent %}
-                            <li class="hierarchy-item">
-                                <div class="item-name">{{item.name}}</div>
-                                <div class="item-desc">{{item.note}}</div>
-                            </li>
-                            {% endfor %}
-                            {% for item in ParentPlasmidInfo%}
-                            <li class = "hierarchy-item-warning">
-                                <div class = "item-name">{{item}}</div>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                    <div class="tree" id="plasmid_tree">
+                        <!--树型结构图部分-->
                     </div>
-                    
-                    <div class="hierarchy-card">
-                        <h3><i>⬇️</i> 下层质粒</h3>
-                        <p>使用此质粒构建的下游质粒：</p>
-                        <ul class="hierarchy-list">
-                            {% for item in plasmidson %}
-                            <li class="hierarchy-item">
-                                <div class="item-name">{{item.name}}</div>
-                                <div class="item-desc">{{item.note}}</div>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                    <button class="btn btn-primary" id="collapseAll">折叠全部节点</button>
                 </div>
+                
             </div>
             
             <div class="info-section">
@@ -584,7 +529,7 @@
         </div>
         
         <footer>
-            <p>基因元件数据库 &copy; 2023 | 最后更新: 2023年11月15日</p>
+            <p>基因元件数据库 &copy; 2025 | 最后更新: 2023年11月15日</p>
         </footer>
     </div>
 
@@ -621,19 +566,26 @@
                 plasmid_map_div.appendChild(tab);
             })
             // 质粒图谱交互效果
-        document.querySelectorAll('.plasmid-label').forEach(label => {
-            label.addEventListener('mouseover', function() {
-                this.style.backgroundColor = 'rgba(255,255,255,0.9)';
-                this.style.boxShadow = '0 0 5px rgba(0,0,0,0.2)';
-                this.style.zIndex = '10';
-            });
+            document.querySelectorAll('.plasmid-label').forEach(label => {
+                label.addEventListener('mouseover', function() {
+                    this.style.backgroundColor = 'rgba(255,255,255,0.9)';
+                    this.style.boxShadow = '0 0 5px rgba(0,0,0,0.2)';
+                    this.style.zIndex = '10';
+                });
             
-            label.addEventListener('mouseout', function() {
-                this.style.backgroundColor = 'rgba(255,255,255,0.7)';
-                this.style.boxShadow = 'none';
-                this.style.zIndex = '1';
+                label.addEventListener('mouseout', function() {
+                    this.style.backgroundColor = 'rgba(255,255,255,0.7)';
+                    this.style.boxShadow = 'none';
+                    this.style.zIndex = '1';
+                });
             });
-        });
+
+            // parseTreeData();
+
+            initChart();
+
+            document.getElementById('collapseAll').addEventListener('click',collapseAllNodes);
+
         })
         document.getElementById('downMapButton').addEventListener('click',function(){
             let pathname_list = window.location.pathname.split('/');
@@ -652,15 +604,292 @@
                 }, 1500);
             });
         });
+
+        let chart;
         
-        // 层级关系项点击效果
-        document.querySelectorAll('.hierarchy-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const name = this.querySelector('.item-name').textContent;
-                alert(`正在跳转到 ${name} 的详细信息页面...`);
-                // 在实际应用中，这里会跳转到对应的页面
+        function initChart() {
+            const chartDom = document.getElementById('plasmid_tree');
+            chart = echarts.init(chartDom);
+
+            updateChart();
+
+            setupEventListeners();
+
+            window.addEventListener('resize',function() {
+                chart.resize();
             });
-        });
+        }
+
+        function getChartOption(treeData){
+            const baseOption = {
+                title:{
+                    text: "层级关系",
+                    left: 'center',
+                    textStyle :{
+                        color:'#2c3e50',
+                        fontSize: 20,
+                        fontWeight: 'bold'
+                    }
+                },
+                tooltip: {
+                    trigger: 'item',
+                    triggerOn: 'mousemove',
+                    formatter: function(params) {
+                        const name = params.name;
+                        const value = params.value || 0;
+                        const depth = params.data.depth || 0;
+                        return `
+                        <div style="padding: 5px;">
+                            <strong>${name}</strong><br/>
+                            深度: ${depth}
+                        </div>`;
+                    }
+                },
+                series: [{type: 'tree',
+                        data: [treeData],
+                        top: '10%',
+                        left: '10%',
+                        bottom: '10%',
+                        right: '30%',
+                        symbolSize: 10,
+                        label: {
+                            position: 'left',
+                            verticalAlign: 'middle',
+                            align: 'right',
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            color: '#2c3e50'
+                        },
+                        leaves: {
+                            label: {
+                                position: 'right',
+                                verticalAlign: 'middle',
+                                align: 'left'
+                            }
+                        },
+                        emphasis: {
+                            focus: 'descendant',
+                            itemStyle: {
+                                color: '#2ecc71'
+                            }
+                        },
+                        expandAndCollapse: true,
+                        initialTreeDepth: 1,
+                        lineStyle: {
+                            color: '#95a5a6',
+                            width: 2,
+                            curveness: 0.2
+                        },
+                        itemStyle: {
+                            color: function(params) {
+                                // 根据节点深度设置颜色
+                                const depth = params.data.depth;
+                                const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
+                                return colors[depth % colors.length];
+                            },
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        tooltip: {
+                            formatter: function(params) {
+                                const name = params.name;
+                                const value = params.value || 0;
+                                const childrenCount = params.data.children ? params.data.children.length : 0;
+                                return `
+                                <div style="padding: 10px; min-width: 150px;">
+                                    <div style="font-weight: bold; margin-bottom: 5px;">${name}</div>
+                                    <div>子节点数: <span style="color: #2ecc71;">${childrenCount}</span></div>
+                                    <div>深度: <span style="color: #f39c12;">${params.data.depth}</span></div>
+                                </div>`;
+                            }
+                        }
+                    }
+                ]
+            };
+            return baseOption;
+        }
+
+        async function parseTreeData(){
+            try{
+                const response = await fetch(`/LabDatabase/GetParent?PlasmidName={{plasmid.name}}`);
+                const data = await response.json();
+                    if(data.success) {
+                        // console.log(data);
+                        let json_value = `{"name":"{{plasmid.name}}","children":[`;
+                        // let json_obj = JSON.parse(json_value);
+                        let sub_part_value = "";
+                        data.parentPart.forEach(part =>{
+                            sub_part_value = sub_part_value + `{"name":"${part.name}"},`;
+                            // console.log(sub_part_value);
+                        })
+                        data.parentBackbone.forEach(backbone => {
+                            sub_part_value = sub_part_value + `{"name":"${backbone.name}"},`;
+                        })
+                        // let sub_backbone_obj = JSON.parse(sub_backbone_value);
+
+                        data.parentPlasmid.forEach(part => {
+                            sub_part_value = sub_part_value + `{"name":"${plasmid.name}"},`
+                        })
+                        // let sub_plasmid_obj = JSON.parse(sub_plasmid_value);
+                        data.parentInfo.Part.forEach(part => {
+                            sub_part_value = sub_part_value + `{"name":"${part}"},`
+                        })
+
+                        data.parentInfo.Backbone.forEach(backbone => {
+                            sub_part_value = sub_part_value + `{"name":"${backbone}"},`
+                        })
+
+                        data.parentInfo.Plasmid.forEach(plasmid => {
+                            sub_part_value = sub_part_value + `{"name":${plasmid}},`
+                        })
+
+                        sub_part_value = sub_part_value.substring(0,sub_part_value.length-1);
+                        json_value = json_value + sub_part_value + "]}";
+                        // let sub_list = [sub_part_obj, sub_backbone_obj, sub_plasmid_obj];
+                        // json_obj.children = sub_list;
+
+                        // let newJsonstr = JSON.stringify(json_obj);
+                        // console.log(json_value);
+                        // console.log(JSON.parse(json_value));
+                        return JSON.parse(json_value);
+                        // return JSON.parse(json_value);
+                    }
+                    else{
+                        alert('获取数据失败');
+                        return null;
+                    }
+                }
+            catch{
+                console.log("ssssssssssss");
+                alert('数据结构错误');
+                return null;
+            }
+        }
+
+        async function updateChart(){
+            console.log("updateChart");
+            let treeData = await parseTreeData();
+            console.log(treeData);
+            if(! treeData) return;
+
+            addDepthInfo(treeData);
+            const option = getChartOption(treeData);
+            console.log(option);
+            chart.setOption(option);
+        }
+
+        function addDepthInfo(node, depth = 0){
+            node.depth = depth;
+            console.log(node);
+            if(node.children && node.children.length > 0){
+                node.children.forEach(child => {
+                    addDepthInfo(child, depth + 1);
+                });
+            }
+        }
+
+        // 展开所有节点
+        function expandAllNodes() {
+            const option = chart.getOption();
+            if (option.series && option.series[0]) {
+                option.series[0].initialTreeDepth = 100; // 设置为很大的值
+                chart.setOption(option);
+            }
+        }
+
+        // 折叠所有节点
+        function collapseAllNodes() {
+            const option = chart.getOption();
+            if (option.series && option.series[0]) {
+                option.series[0].initialTreeDepth = 0;
+                chart.setOption(option);
+            }
+        }
+
+
+        // 导出为图片
+        function exportToImage() {
+            const url = chart.getDataURL({
+                type: 'png',
+                pixelRatio: 2,
+                backgroundColor: '#fff'
+            });
+            
+            const link = document.createElement('a');
+            link.download = `树状图_${currentChartType}_${new Date().getTime()}.png`;
+            link.href = url;
+            link.click();
+        }
+
+        async function addNode(plasmidName){
+            try{
+                const response = await fetch(`/LabDatabase/GetParent?PlasmidName=${plasmidName}`);
+                const data = await response.json();
+                    if(data.success) {
+                        // console.log(data);
+                        let json_value = `{"name":"{{plasmid.name}}","children":[`;
+                        // let json_obj = JSON.parse(json_value);
+                        let sub_part_value = "";
+                        data.parentPart.forEach(part =>{
+                            sub_part_value = sub_part_value + `{"name":"${part.name}"},`;
+                            // console.log(sub_part_value);
+                        })
+                        data.parentBackbone.forEach(backbone => {
+                            sub_part_value = sub_part_value + `{"name":"${backbone.name}"},`;
+                        })
+                        // let sub_backbone_obj = JSON.parse(sub_backbone_value);
+
+                        data.parentPlasmid.forEach(part => {
+                            sub_part_value = sub_part_value + `{"name":"${plasmid.name}"},`
+                        })
+                        // let sub_plasmid_obj = JSON.parse(sub_plasmid_value);
+                        data.parentInfo.Part.forEach(part => {
+                            sub_part_value = sub_part_value + `{"name":"${part}"},`
+                        })
+
+                        data.parentInfo.Backbone.forEach(backbone => {
+                            sub_part_value = sub_part_value + `{"name":"${backbone}"},`
+                        })
+
+                        data.parentInfo.Plasmid.forEach(plasmid => {
+                            sub_part_value = sub_part_value + `{"name":${plasmid}},`
+                        })
+
+                        sub_part_value = sub_part_value.substring(0,sub_part_value.length-1);
+                        json_value = json_value + sub_part_value + "]}";
+                        // let sub_list = [sub_part_obj, sub_backbone_obj, sub_plasmid_obj];
+                        // json_obj.children = sub_list;
+
+                        // let newJsonstr = JSON.stringify(json_obj);
+                        // console.log(json_value);
+                        // console.log(JSON.parse(json_value));
+                        return JSON.parse(json_value);
+                        // return JSON.parse(json_value);
+                    }
+                    else{
+                        alert('获取数据失败');
+                        return null;
+                    }
+
+            }
+            catch{
+                alert("获取数据失败");
+                return null;
+            }
+        }
+
+        async function setupEventListeners(){
+            chart.on('click',function(params){
+                if(params.componentType === 'series'&& params.seriesType === 'tree'){
+                    const nodeData = params.data;
+                    console.log('点击的节点:', nodeData.name);
+                    console.log('点击的节点depth：',nodeData.depth);
+                    
+                }
+            })
+        }
+        
+
     </script>
 </body>
 </html>

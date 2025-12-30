@@ -76,6 +76,7 @@ urlpatterns = [
     path("PlasmidFilter",views.PlasmidFilter,name="PlasmidFilter"),
     path("UpdateParentInfo",views.AddPlasmidParentInfo,name="UpdateParentInfo"),
     path("setPlasmidCulture",views.setPlasmidCulture,name="setPlasmidCulture"),
+    path("getPlasmidCulture",views.getPlasmidCulture,name="getPlasmidCulture"),
     path("UpdatePlasmidSequence",views.UpdatePlasmidSequence, name= "UpdatePlasmidSequence"),
     path("plasmidlistbyuser/<str:username>",views.PlasmidListByUser,name="plasmidlistbyuser"),
     path("plasmidfields",views.PlasmidFields,name="plasmidfields"),
@@ -173,8 +174,11 @@ urlpatterns = [
     
     path("getuserlist",views.getuserlist,name="getuserlist"),
     path("getalluseruploadlist",views.getAllUserUploadList,name="getalluseruploaduser"),
+    path("getuserpartcount/<str:uname>",views.getUserPartCount,name="getuserpartcount"),
+    path("getuserbackbonecount/<str:uname>",views.getUserBackboneCount,name="getuserbackbonecount"),
+    path("getuserplasmidcount/<str:uname>",views.getUserPlasmidCount,name="getuserplasmidcount"),
     
-    
+    path("getrepocountbyuser/<str:uid>",views.getUserrepositoryCount,name="getrepocountbyuser"),
     path("createRepo",views.create_repository,name="createrepo"),
     path("getrepos",views.get_repositories,name="getrepos"),
     path("getrepo",views.get_repository,name="getrepo"),

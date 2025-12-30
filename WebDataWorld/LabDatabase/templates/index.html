@@ -83,6 +83,190 @@
         .card-body {
             padding: 25px;
         }
+
+        /* 用户名片基础样式 */
+        .user-card {
+            display: inline-block;
+            position: relative;
+            margin: 10px 50px 10px 10px;
+        }
+        
+        /* 用户名链接样式 */
+        .username-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .username-link:hover {
+            background-color: #f0f7ff;
+            color: #1a6a9e;
+        }
+        
+        /* 用户信息卡片样式 */
+        .user-info-card {
+            position: absolute;
+            top: 100%;
+            left: -210%;
+            width: 320px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 0;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        
+        /* 悬停时显示卡片 */
+        .user-card:hover .user-info-card {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(5px);
+        }
+        
+        /* 卡片箭头 */
+        .user-info-card::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 220px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            transform: rotate(45deg);
+            border-left: 1px solid #e2e8f0;
+            border-top: 1px solid #e2e8f0;
+            z-index: 1;
+        }
+        
+        /* 卡片头部 */
+        .card-header {
+            background: linear-gradient(to right, #1a6a9e, #2a8bc5);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        
+        .user-basic-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-basic-info p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* 卡片内容 */
+        .card-content {
+            padding: 20px;
+        }
+        
+        .user-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2a8bc5;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .user-details {
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .detail-item {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .detail-item i {
+            width: 20px;
+            color: #94a3b8;
+            margin-right: 10px;
+        }
+        
+        /* 卡片底部 */
+        .card-footer {
+            padding: 15px 20px;
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .card-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-profile {
+            background-color: #2a8bc5;
+            color: white;
+            border: none;
+        }
+        
+        .btn-profile:hover {
+            background-color: #1a6a9e;
+        }
+        
+        .btn-message {
+            background-color: transparent;
+            color: #2a8bc5;
+            border: 1px solid #2a8bc5;
+        }
+        
+        .btn-message:hover {
+            background-color: #f0f7ff;
+        }
         
         .nav-tabs {
             border-bottom: 2px solid var(--border-color);
@@ -1486,6 +1670,16 @@
             .footer-content {
                 flex-direction: column;
             }
+            .user-info-card {
+                width: 280px;
+                left: 50%;
+                transform: translateX(-50%) translateY(10px);
+            }
+            
+            .user-info-card::before {
+                left: 50%;
+                transform: translateX(-50%) rotate(45deg);
+            }
         }
 
     </style>
@@ -1497,21 +1691,65 @@
         <div class="header-container">
             <div>
                 <h1>🧬 生物元件管理系统</h1>
-                <p>管理 Part、Backbone 和 Plasmid 数据</p>    
+                <p>管理 Part、Backbone 和 Plasmid 数据</p>
             </div>
-            <div style="padding: 10px;">
+            <div class="user-card">
                 {% if user.is_authenticated %}
-                    <h3>你好，{{user.username}}</h3>
+                    <a href="/LabDatabase/user/{{user.username}}" class="username-link"><i class="fas fa-user-circle"></i> {{user.username}}</a>
                 {% endif %}
-                {% if user.is_superuser %}
-                    <button id = "admin_index" class="badge bg-light text-dark"><span class="badge bg-light text-dark">管理</span></button>
-                {% endif %}
-                {% if user.is_authenticated %}
-                    <button id = "logout" class="badge bg-light text-dark" onclick="window.location.href = '/WebDatabase/logout'"><span class="badge bg-light text-dark">退出登录</span></button>
-                {% else %}
+
+                <div class="user-info-card">
+                    <div class="card-header">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-basic-info">
+                            <h3>{{user.uname}}</h3>
+                            <!-- <p>{{user.group}}</p> -->
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="user-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{user_info.repoCount}}</div>
+                                <div class="stat-label">仓库</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{user_info.partCount}}</div>
+                                <div class="stat-label">元件</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{user_info.backboneCount}}</div>
+                                <div class="stat-label">载体</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{user_info.plasmidCount}}</div>
+                                <div class="stat-label">质粒</div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="card-footer">
+                        <a href="/LabDatabase/user/{{user.username}}" class="card-btn btn-profile">
+                            <i class="fas fa-user-circle"></i> 查看主页
+                        </a>
+                        <a href='/WebDatabase/logout' class="card-btn btn-message">
+                            <i class="fas fa-envelope"></i> 退出登录
+                        </a>
+
+                        {% if user.is_superuser %}
+                        <a href="/LabDatabase/adminPage" class="card-btn btn-message">
+                            <i class="fas fa-envelope"></i> 管理员页面
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if not user.is_authenticated %}
                     <button id = "login" class="badge bg-light text-dark" onclick="window.location.href = '/WebDatabase/login'"><span class="badge bg-light text-dark">登录</span></button>
                 {% endif %}
-                <span class="badge bg-light text-dark">v2.1.0</span>
+                <!-- <span class="badge bg-light text-dark">v2.1.0</span> -->
             </div>
         </div>
     </div>
@@ -2824,6 +3062,73 @@ function setupMenuEvents() {
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
+
+            document.addEventListener('click',function(event){
+                const userCards = document.querySelectorAll('.user-card');
+
+                userCards.forEach(card => {
+                    const cardContent = card.querySelector('.user-info-card');
+                    const usernameLink = card.querySelector('.username-link');
+
+                    if(!card.contains(event.target) && cardContent.style.visibility === 'visible'){
+                        cardContent.style.opacity = '0';
+                        cardContent.style.visibility = 'hidden';
+                        cardContent.style.transform = 'translateY(10px)';
+                    }
+                })
+            });
+
+            const infoCards = document.querySelectorAll('.user-info-card');
+            infoCards.forEach(card => {
+                card.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                });
+            });
+            
+            // 添加卡片显示/隐藏的动画延迟效果（可选）
+            const usernameLinks = document.querySelectorAll('.username-link');
+            usernameLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    console.log("aaaaaaaaaa");
+                    const card = this.closest('.user-card').querySelector('.user-info-card');
+                    if (card) {
+                        // 清除之前的定时器
+                        clearTimeout(card.hideTimer);
+                        
+                        // 显示卡片
+                        card.style.opacity = '1';
+                        card.style.visibility = 'visible';
+                        card.style.transform = 'translateY(5px)';
+                    }
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    const card = this.closest('.user-card').querySelector('.user-info-card');
+                    if (card) {
+                        // 设置延迟隐藏，防止鼠标移动到卡片上的瞬间隐藏
+                        card.hideTimer = setTimeout(() => {
+                            card.style.opacity = '0';
+                            card.style.visibility = 'hidden';
+                            card.style.transform = 'translateY(10px)';
+                        }, 100);
+                    }
+                });
+            });
+            
+            // 卡片本身也需要监听鼠标事件，防止过早隐藏
+            infoCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    clearTimeout(this.hideTimer);
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.hideTimer = setTimeout(() => {
+                        this.style.opacity = '0';
+                        this.style.visibility = 'hidden';
+                        this.style.transform = 'translateY(10px)';
+                    }, 100);
+                });
+            });
             // 初始化所有标签页
             
             renderTable('part',false, currentPages.part);
@@ -3044,10 +3349,10 @@ function setupMenuEvents() {
                 console.log(data);
                 if(data.success){
                     data.repo.forEach((eachRepo) =>{
-                    console.log(eachRepo.name)
-                    const repoOption = document.createElement("option");
-                    repoOption.innerText=eachRepo.name;
-                    modalOverlayPlate_Section.appendChild(repoOption);
+                        console.log(eachRepo.name)
+                        const repoOption = document.createElement("option");
+                        repoOption.innerText=eachRepo.name;
+                        modalOverlayPlate_Section.appendChild(repoOption);
                 });
                 }else{
                     showNotification(data.message || '创建失败',true);

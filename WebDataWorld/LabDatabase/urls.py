@@ -58,4 +58,7 @@ urlpatterns = [
     
     path("FetchExperienceDetail/<str:partName>",views.GetExperienceDetail,name="FetchExperienceDetail"),
     
+    path("user/<str:username>",views.user,name="user"),
+    
+    path("GetParent",views.GetParentInfo,name="GetParent"),
 ]
