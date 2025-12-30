@@ -117,10 +117,8 @@ def DataFilter(request):
     })
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
         type = data.get("SearchType")
         page = data.get("page",1)
-        print(type)
         if(type == "part"):
             try:
                 request_body = {'type':data.get('Type',""),"Enzyme":data.get('Enzyme',""),"Scar":data.get('Scar',""),"name":data.get('name',""),"page":page,"page_size":10}
