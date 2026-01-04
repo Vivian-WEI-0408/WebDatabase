@@ -12,7 +12,6 @@ TAAA   C
 CCTC   D
 GCTT   E
 CTGA   F
-CTGA   F
 TACG   G
 TTCC   H
 AGGT   I

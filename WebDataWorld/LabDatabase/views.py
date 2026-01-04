@@ -31,7 +31,7 @@ from Bio.SeqIO import parse
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
 Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
@@ -625,6 +625,7 @@ def downloadPartMap(request,partid):
             'Content-Type':'application/json',
         })
         sequence = (session.get(f'{Base_URL}GetPartSeqByID?partid={partid}',cookies = request.COOKIES)).json()['data']['level0sequence'].lower()
+        type = (session.get(f"{Base_URL}TypeByID?ID={partid}",cookies=request.COOKIES)).json()['Type'].lower()
         print(sequence)
         seq_obj = Seq(sequence)
         seq_reverse = str(seq_obj.reverse_complement())
@@ -635,18 +636,23 @@ def downloadPartMap(request,partid):
         sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partid}')
         file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
         thread = threading.Thread(
-            target = sa.GenerateGBKFile(),
-            args= (file_address)
+            target = sa.GenerateGBKFile,
+            args= (file_address,type)
         )
         thread.daemon = True
         thread.start()
         # sa.GenerateGBKFile()
+        max_wait_time = 5
+        start_time = time.time()
         map_path = rf'{file_address}\part-{partid}.gbk'
-        if(os.path.exists(map_path)):
-            response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'part-{partid}.gbk')
-            return response
-        else:
-            return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
+        while time.time() - start_time < max_wait_time:
+            if(os.path.exists(map_path) and os.stat(map_path).st_size != 0):
+                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'part-{partid}.gbk')
+                return response
+            else:
+                time.sleep(1)
+                continue
+        return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
 
 def downloadBackboneMap(request,backboneid):
     if(request.method == "GET"):
@@ -665,18 +671,24 @@ def downloadBackboneMap(request,backboneid):
         sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneid}')
         file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
         thread = threading.Thread(
-            target = sa.GenerateGBKFile(),
-            args= (file_address)
+            target = sa.GenerateGBKFile,
+            args= (file_address,)
         )
         thread.daemon = True
         thread.start()
         # sa.GenerateGBKFile()
         map_path = rf'{file_address}backbone-{backboneid}.gbk'
-        if(os.path.exists(map_path)):
-            response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'backbone-{backboneid}.gbk')
-            return response
-        else:
-            return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
+        start_time = time.time()
+        max_wait_time = 5
+        while time.time() - start_time < max_wait_time:
+            if(os.path.exists(map_path) and os.stat(map_path).st_size != 0):
+                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'backbone-{backboneid}.gbk')
+                return response
+            else:
+                time.sleep(1)
+                continue
+            
+        return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
 
 def downloadPlasmidMap(request,plasmidid):
     if(request.method == "GET"):
@@ -695,18 +707,23 @@ def downloadPlasmidMap(request,plasmidid):
         sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidid}')
         file_address = r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\'
         thread = threading.Thread(
-            target = sa.GenerateGBKFile(),
-            args= (file_address)
+            target = sa.GenerateGBKFile,
+            args= (file_address,)
         )
         thread.daemon = True
         thread.start()
         # sa.GenerateGBKFile()
         map_path = rf'{file_address}plasmid-{plasmidid}.gbk'
-        if(os.path.exists(map_path)):
-            response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'plasmid-{plasmidid}.gbk')
-            return response
-        else:
-            return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
+        max_wait_time = 5
+        start_time = time.time()
+        while time.time() - start_time < max_wait_time:
+            if(os.path.exists(map_path) and os.stat(map_path).st_size != 0):
+                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'plasmid-{plasmidid}.gbk')
+                return response
+            else:
+                time.sleep(1)
+                continue
+        return JsonResponse(data={'success':False,'data':'Generate fail'},status = 400, safe = False)
 
 # def adminPage(request):
 #     pass

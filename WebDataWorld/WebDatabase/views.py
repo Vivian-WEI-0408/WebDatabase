@@ -3437,7 +3437,8 @@ def create_repository(request):
         if(Name != None and Name != ""):
             try:
                 repository_id = str(uuid.uuid1())
-                ttl_hours = 24
+                ttl_hours = 24*30
+                
                 expires_at = timezone.now()+timezone.timedelta(hours = ttl_hours)
                 user = CustomUser.objects.filter(uid=request.session['info']['uid']).first()
                 with transaction.atomic():
