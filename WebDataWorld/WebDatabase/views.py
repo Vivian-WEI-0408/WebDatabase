@@ -17,7 +17,7 @@ from .models import (Backbonetable,Parentplasmidtable,
                     TbPartUserfileaddress,TbPlasmidUserfileaddress, Temporaryrepository,
                     Testdatatable,CustomUser,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
                     Parentparttable, Partscartable, Backbonescartable, Plasmidscartable, \
-                    Plasmid_Culture_Functions,Backbone_Culture_Functions)
+                    Plasmid_Culture_Functions,Backbone_Culture_Functions,Backbonefeaturetable,)
 from django.views.decorators.csrf import csrf_exempt
 # from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
 #     PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
@@ -1310,7 +1310,6 @@ def AddPlasmidData(request):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
-            print("Plasmidneed.objects.filter(name = name).first()")
             try:
                 Plasmidneed.objects.create(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,customparentinformation = ParentInfo,
@@ -1319,7 +1318,6 @@ def AddPlasmidData(request):
             except Exception as e:
                 return JsonResponse(data="fail upload",status = 400, safe=False)
         else:
-            print("Update")
             try:
                 with transaction.atomic():
                     plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
@@ -2085,17 +2083,16 @@ def SearchBackboneFileAddress(request):
 def AddBackboneData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
+        print(data)
         name = data['name']
         length = len(data['sequence']) if data['sequence'] != "" else 0
         sequence = data['sequence']
-        
-        species = data['species']
+        species = data['species'] if "species" in data else ""
         copynumber = data['copynumber'] if 'copynumber' in data else ""
         note = data['note'] if 'note' in data else ""
         alias = data['alias'] if 'alias' in data else ""
         username = request.session['info']['uname']
         tag = data['tag'] if 'tag' in data else "normal"
-        print(data)
         if(name == None or name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
@@ -2315,11 +2312,46 @@ def BackboneListByUser(request,username):
     else:
         return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
 
+def AddBackboneFeature(request, BackboneName):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        start_position = data['start_position']
+        end_position = data['end_position']
+        label = data['label']
+        type = data['feature_type']
+        color = data['color']
+        ape_info = data['ape_info']
+        max_wait_time = 5
+        start_time = time.time()
+        while time.time() - start_time < max_wait_time:
+            try:
+                with transaction.atomic():
+                    # print("99999999999999999999")
+                    backbone_obj = Backbonetable.objects.get(name = BackboneName)
+                    Backbonefeaturetable.objects.create(backboneid = backbone_obj, feature_start = start_position, feature_end  = end_position,
+                                                    feature_type = type, feature_label = label, feature_color = color, feature_apeinfo = ape_info)
+                return JsonResponse(data={'success':True}, status = 200 , safe=False)
+            except Backbonetable.DoesNotExist:
+                time.sleep(0.5)
+                continue
+    else:
+        return JsonResponse(data={'success':False,'message':"Just POST Method"}, status = 200, safe=False)
 
-
-
-
-
+def GetBackboneFeature(request, BackboneID):
+    if(request.method == "GET"):
+        try:
+            print(BackboneID)
+            with transaction.atomic():
+                result = Backbonefeaturetable.objects.filter(backboneid=BackboneID).values()
+                print(result)
+                return JsonResponse(data={"success":True,"data":list(result)},status = 200, safe=False)
+        except Backbonefeaturetable.DoesNotExist:
+            return JsonResponse(data={"success":False,"message":"BackboneFeatureTable Does Not Exist"}, status=400, safe=False)
+        except Exception as e:
+            print(e.args)
+    else:
+        return JsonResponse(data={"successs":False,"message":"Just Get Method"},status=400,safe=False)
+            
 
 
 #=========================================================================================

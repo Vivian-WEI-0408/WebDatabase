@@ -106,7 +106,10 @@ urlpatterns = [
     path("setBackboneCulture",views.setBackboneCulture,name="setBackboneCulture"),
     path("backbonelistbyuser/<str:username>",views.BackboneListByUser,name="backbonelistbyuser"),
     path("backbonefields",views.BackboneFields,name="backbonefields"),
-
+    path("AddBackboneFeature/<str:BackboneName>",views.AddBackboneFeature,name="AddBackboneFeature"),
+    path("GetBackboneFeature/<int:BackboneID>",views.GetBackboneFeature,name="GetBackboneFeature"),
+    
+    
     path("TestDataName",views.SearchByTestdataName,name="TestDataName"),
 
     path("GetDBDList",views.GetDBDList,name="GetDBDList"),

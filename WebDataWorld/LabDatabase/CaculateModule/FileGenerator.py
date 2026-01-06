@@ -34,6 +34,65 @@ class SequenceAnnotator:
             'BsubAmy':'#cccccc',
             'sgRNA':'#FF9CCD',
         }
+        
+    @staticmethod
+    def GeneratorBackboneNoSa(name,sequence,file_address, feature_list):
+        accession = "."
+        version = "1.0"
+        Keywords = "."
+        definition = "synthetic circular DNA"
+        reference = "synthetic"
+        if os.path.exists(os.path.join(f'{file_address}',f'{name}.gbk')):
+            return
+        with open(os.path.join(f'{file_address}',f'{name}.gbk'),'w') as file:
+            file.write(("LOCUS       Exported              {0:>6} bp    DNA     {1:>8} CST \
+                {2}\n").format(len(sequence),"circular",datetime.datetime.now().strftime(DATE_FORMAT)))
+            file.write("DEFINITION  {}\n".format(definition))
+            file.write("ACCESSION   {}\n".format(accession))
+            file.write("VERSION     {}\n".format(version))
+            file.write("KEYWODS     {}\n".format(Keywords))
+            file.write("SOURCE      {}\n".format(reference))
+            file.write("FEATURES             Location/Qualifiers\n")
+            for each_feature in feature_list:
+                # print(each_feature)
+                if(each_feature["feature_start"] > each_feature["feature_end"]):
+                    file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
+                    file.write(f"                     /label={each_feature['feature_label']}\n")
+                    file.write(f"                     /color={each_feature['feature_color']}\n")
+                    file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
+                else:
+                    file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{each_feature['feature_end']})\n")
+                    file.write(f"                     /label={each_feature['feature_label']}\n")
+                    file.write(f"                     /color={each_feature['feature_color']}\n")
+                    file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
+                
+
+            file.write("ORIGIN\n")
+            numOfline = (len(sequence) // 60) + 1
+            offset = 0
+            for each_line in range(0,numOfline):
+                file.write(f" "*(9-len(str(1+(60*each_line))))+f"{1+(60*each_line)} ")
+                if each_line != numOfline - 1:
+                    for i in range(0,6):
+                        if(i != 5):
+                            file.write(f"{sequence[offset:offset+10]} ")
+                            offset = offset + 10
+                        else:
+                            file.write(f"{sequence[offset:offset+10]}")
+                            offset = offset + 10
+                else:
+                    col_number = (len(sequence[offset:]) // 10) + 1
+                    for i in range(0,col_number):
+                        if(i != col_number -1):
+                            file.write(f"{sequence[offset:offset+10]} ")
+                            offset = offset + 10
+                        else:
+                            file.write(f"{sequence[offset:offset+10]} ")
+                            offset = offset + 10
+                file.write("\n")
+            file.write('//')
+            file.flush()
+            file.close()
 
     def GenerateGBKFile(self, file_address, type="circular"):
         # print(file_address)

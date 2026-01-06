@@ -226,7 +226,6 @@ def process_map_async(upload_map, file_name, upload_type, django_request, task_i
         upload_map_temp = upload_map.read()
         upload_map.seek(0)
         if(file_name[1] == "dna"):
-            print("file_name_dna")
             result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
         else:
             upload_map_temp = upload_map_temp.decode("utf-8")
@@ -662,21 +661,31 @@ def downloadBackboneMap(request,backboneid):
             'Content-Type':'application/json',
         })
         sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={backboneid}',cookies = request.COOKIES)).json()['data']['sequence'].lower()
-        seq_obj = Seq(sequence)
-        seq_reverse = str(seq_obj.reverse_complement())
-        fi = featureIdentify()
-        feature_list = fi.featureMatch(sequence)
-        reverse_feature_list = fi.featureMatch(seq_reverse)
-        scar_list = scarPosition(sequence)
-        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneid}')
+        backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{backboneid}",cookies=request.COOKIES)).json()
         file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
-        thread = threading.Thread(
-            target = sa.GenerateGBKFile,
-            args= (file_address,)
-        )
-        thread.daemon = True
-        thread.start()
-        # sa.GenerateGBKFile()
+
+        if(backboneFeature["success"] != True):
+            seq_obj = Seq(sequence)
+            seq_reverse = str(seq_obj.reverse_complement())
+            fi = featureIdentify()
+            feature_list = fi.featureMatch(sequence)
+            reverse_feature_list = fi.featureMatch(seq_reverse)
+            scar_list = scarPosition(sequence)
+            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneid}')
+            thread = threading.Thread(
+                target = sa.GenerateGBKFile,
+                args= (file_address,)
+            )
+            thread.daemon = True
+            thread.start()
+        else:
+            thread = threading.Thread(
+                target = SequenceAnnotator.GeneratorBackboneNoSa,
+                args = (f'backbone-{backboneid}',sequence,file_address,backboneFeature['data'])
+            )
+            thread.daemon = True
+            thread.start()
+            # sa.GenerateGBKFile()
         map_path = rf'{file_address}backbone-{backboneid}.gbk'
         start_time = time.time()
         max_wait_time = 5
@@ -1085,15 +1094,20 @@ def process_assembly_repo(repositoryName, django_request, task_id):
             sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={each_backbone}',cookies = django_request.COOKIES)).json()['data']['sequence'].lower()
             backboneName = (session.get(f'{Base_URL}BackboneNameByID?ID={each_backbone}',cookies=django_request.COOKIES)).json()['BackboneName']
             print(sequence)
-            seq_obj = Seq(sequence)
-            seq_reverse = str(seq_obj.reverse_complement())
-            fi = featureIdentify()
-            feature_list = fi.featureMatch(sequence)
-            reverse_feature_list = fi.featureMatch(seq_reverse)
-            scar_list = scarPosition(sequence)
-            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneName}')
+            backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
             file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile"
-            sa.GenerateGBKFile(file_address)
+
+            if(backboneFeature["success"] != True):
+                seq_obj = Seq(sequence)
+                seq_reverse = str(seq_obj.reverse_complement())
+                fi = featureIdentify()
+                feature_list = fi.featureMatch(sequence)
+                reverse_feature_list = fi.featureMatch(seq_reverse)
+                scar_list = scarPosition(sequence)
+                sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneName}')
+                sa.GenerateGBKFile(file_address)
+            else:
+                SequenceAnnotator.GeneratorBackboneNoSa(f'backbone-{backboneName}',sequence,file_address,backboneFeature['data'])
             file_address_list.append(os.path.join(f"{file_address}",f"backbone-{backboneName}.gbk"))
             file_name_list.append(f"backbone-{backboneName}")
         for each_plasmid in plasmid:

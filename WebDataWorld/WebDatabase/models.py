@@ -716,3 +716,18 @@ class Yeastparts(models.Model):
     class Meta:
         managed = False
         db_table = 'yeastparts'
+
+
+class Backbonefeaturetable(models.Model):
+    bfif = models.AutoField(primary_key=True)
+    backboneid = models.ForeignKey('Backbonetable', models.CASCADE, db_column='backboneid')
+    feature_start = models.IntegerField()
+    feature_end = models.IntegerField()
+    feature_type = models.CharField(max_length=50)
+    feature_label = models.CharField(max_length=50)
+    feature_color = models.CharField(max_length=50)
+    feature_apeinfo = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'BackboneFeatureTable'
