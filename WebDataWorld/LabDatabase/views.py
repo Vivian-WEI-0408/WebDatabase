@@ -233,29 +233,30 @@ def process_map_async(upload_map, file_name, upload_type, django_request, task_i
             result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
         print(result)
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+        print(index)
+        print(number_of_task)
+        print(task_status)
         if(result):
             task_status_new = {
                 'status':'processing',
                 'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
                 'result':None,
-                'error':[]
+                'error':task_status['error']
             }
             # print(task_id)
             # print(task_status)
             cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
         else:
+            
             task_status_new = {
                 'status':'processing',
                 'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
                 'result':None,
+                'error':task_status['error'].append(f"{file_name} 上传失败"),
             }
-            task_status_new['error'].append(f'{file_name} 上传失败')
-            # print(task_id)
-            # print(task_status)
             cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
-            print(task_status_new)
     except Exception as e:
-        print(str(e))
+        print(str(e.args))
         
                 
 

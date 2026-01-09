@@ -1295,7 +1295,7 @@ def AddPlasmidData(request):
         # orihost = data['orihost']
         # markerclone = data['markerclone']
         # markerhost = data['markerhost']
-        level = data['level']
+        level = data['level'] if "level" in data else 1
         length = len(data['sequence']) if data['sequence']!="" else 0
         sequence = data['sequence']
         plate = data['plate'] if 'plate' in data else ""
@@ -1310,6 +1310,7 @@ def AddPlasmidData(request):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
+            print("IN Database")
             try:
                 Plasmidneed.objects.create(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,customparentinformation = ParentInfo,
@@ -1318,6 +1319,7 @@ def AddPlasmidData(request):
             except Exception as e:
                 return JsonResponse(data="fail upload",status = 400, safe=False)
         else:
+            print("Not in Database")
             try:
                 with transaction.atomic():
                     plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
@@ -1749,9 +1751,8 @@ def BackboneFilter(request):
             scarBackboneid = list(Backbonescartable.objects.filter(sapi = Scar).values('backboneid'))
         if(Enzyme != "" and len(scarBackboneid) == 0):
             return JsonResponse(data={'success':False,'error':'No data'}, status = 404, safe = False)
-        # print(scarBackboneid)
+        print(f"scarBackboneid:{scarBackboneid}")
         BackboneResult = []
-        # print(scarBackboneid)
         if(len(scarBackboneid) != 0):
             for each_id in scarBackboneid:
                 # print(each_id)

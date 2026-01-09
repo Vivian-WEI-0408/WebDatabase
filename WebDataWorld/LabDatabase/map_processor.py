@@ -45,6 +45,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             scar_data_body = scarFunction(Sequence)
             request_body = {"name":name, "sequence":Sequence}
             SequenceUpdateResponse = session.post(f"{Base_URL}UpdatePlasmidSequence",json=request_body,cookies=django_request.COOKIES)
+            print(SequenceUpdateResponse.json())
             if(SequenceUpdateResponse.json()['success'] == False and SequenceUpdateResponse.json()['message'] == "Plasmid Does Not Exist"):
                 add_request_body = {"name":name,"sequence":Sequence,"alias":""}
                 AddSequenceUpdateResponse = session.post(f"{Base_URL}AddPlasmidData",json=add_request_body,cookies=django_request.COOKIES)
