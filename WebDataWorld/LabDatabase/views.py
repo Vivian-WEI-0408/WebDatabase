@@ -225,6 +225,7 @@ def process_map_async(upload_map, file_name, upload_type, django_request, task_i
         Sequence = ""
         upload_map_temp = upload_map.read()
         upload_map.seek(0)
+        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         if(file_name[1] == "dna"):
             result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
         else:
@@ -232,10 +233,8 @@ def process_map_async(upload_map, file_name, upload_type, django_request, task_i
             upload_map = io.StringIO(upload_map_temp)
             result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
         print(result)
-        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
-        print(index)
-        print(number_of_task)
-        print(task_status)
+        
+        print(task_status['error'])
         if(result):
             task_status_new = {
                 'status':'processing',
@@ -256,6 +255,13 @@ def process_map_async(upload_map, file_name, upload_type, django_request, task_i
             }
             cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
     except Exception as e:
+        task_status_new = {
+                'status':'processing',
+                'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
+                'result':None,
+                'error':task_status['error'].append(f"{file_name} 上传失败"),
+            }
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
         print(str(e.args))
         
                 
@@ -490,8 +496,10 @@ def UploadMap(request):
         # title = request.POST.get('title', file.name)
         pattern = r'^([^\_|.]+)'
         number_of_task = len(files)
+        print(number_of_task)
         index = 0
         for each in files:
+            print(each)
             suffix = each.name.split('.')[1]
             each_name = []
             match = re.match(pattern, each.name)

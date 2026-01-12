@@ -56,108 +56,114 @@ def snapgene_to_dict(file_obj):
     )
 
     while True:
-        next_byte = file_obj.read(1)
-        if next_byte == b"":
-            break
-        block_size = unpack(4, "I")
+        try:
+            next_byte = file_obj.read(1)
+            if next_byte == b"":
+                print("888899900")
+                break
+            block_size = unpack(4, "I")
         
-        temp = ord(next_byte)
-        print(temp)
-        if ord(next_byte) == 0:
-            # READ THE SEQUENCE AND ITS PROPERTIES
-            props = unpack(1, "b")
-            data["dna"] = dict(
-                topology="circular" if props & 0x01 else "linear",
-                strandedness="double" if props & 0x02 > 0 else "single",
-                damMethylated=props & 0x04 > 0,
-                dcmMethylated=props & 0x08 > 0,
-                ecoKIMethylated=props & 0x10 > 0,
-                length=block_size - 1,
-            )
-            data["seq"] = file_obj.read(block_size - 1).decode("ascii")
-            # break
-        elif ord(next_byte) == 6:
-            block_content = file_obj.read(block_size - 1).decode("utf-8")
-            note_data = parse_dict(xmltodict.parse(block_content))
-            data["notes"] = note_data["Notes"]
-        elif ord(next_byte) == 10:
-            # READ THE FEATURES
-            strand_dict = {"0": ".", "1": "+", "2": "-", "3": "="}
-            format_dict = {"@text": parse, "@int": int}
-            try:
-                features_data = xmltodict.parse(file_obj.read(block_size))
-            except Exception as e:
-                continue
-            features = features_data["Features"]["Feature"]
-            if not isinstance(features, list):
-                features = [features]
-            for feature in features:
-                segments = feature["Segment"]
-                if not isinstance(segments, list):
-                    segments = [segments]
-                segments_ranges = [
-                    sorted([int(e) for e in segment["@range"].split("-")])
-                    for segment in segments
-                ]
-                qualifiers = feature.get("Q", [])
-                if not isinstance(qualifiers, list):
-                    qualifiers = [qualifiers]
-                parsed_qualifiers = {}
-                for qualifier in qualifiers:
-                    if qualifier["V"] is None:
-                        pass
-                    elif isinstance(qualifier["V"], list):
-                        if len(qualifier["V"][0].items()) == 1:
-                            parsed_qualifiers[qualifier["@name"]] = l_v = []
-                            for e_v in qualifier["V"]:
-                                fmt, value = e_v.popitem()
-                                fmt = format_dict.get(fmt, parse)
-                                l_v.append(fmt(value))
-                        else:
-                            parsed_qualifiers[qualifier["@name"]] = d_v = {}
-                            for e_v in qualifier["V"]:
-                                (fmt1, value1), (_, value2) = e_v.items()
-                                fmt = format_dict.get(fmt1, parse)
-                                d_v[value2] = fmt(value1)
-                    else:
-                        fmt, value = qualifier["V"].popitem()
-                        fmt = format_dict.get(fmt, parse)
-                        parsed_qualifiers[qualifier["@name"]] = fmt(value)
-
-                if "label" not in parsed_qualifiers:
-                    parsed_qualifiers["label"] = feature["@name"]
-                if "note" not in parsed_qualifiers:
-                    parsed_qualifiers["note"] = []
-                if not isinstance(parsed_qualifiers["note"], list):
-                    parsed_qualifiers["note"] = [parsed_qualifiers["note"]]
-                color = segments[0]["@color"]
-                parsed_qualifiers["note"].append("color: " + color)
-
-                data["features"].append(
-                    dict(
-                        start=min([start - 1 for (start, end) in segments_ranges]),
-                        end=max([end for (start, end) in segments_ranges]),
-                        strand=strand_dict[feature.get("@directionality", "0")],
-                        type=feature["@type"],
-                        name=feature["@name"],
-                        color=segments[0]["@color"],
-                        textColor="black",
-                        segments=segments,
-                        row=0,
-                        isOrf=False,
-                        qualifiers=parsed_qualifiers,
-                    )
+            temp = ord(next_byte)
+            print(temp)
+            if ord(next_byte) == 0:
+                # READ THE SEQUENCE AND ITS PROPERTIES
+                props = unpack(1, "b")
+                data["dna"] = dict(
+                    topology="circular" if props & 0x01 else "linear",
+                    strandedness="double" if props & 0x02 > 0 else "single",
+                    damMethylated=props & 0x04 > 0,
+                    dcmMethylated=props & 0x08 > 0,
+                    ecoKIMethylated=props & 0x10 > 0,
+                    length=block_size - 1,
                 )
-        else:
-            # WE IGNORE THE WHOLE BLOCK
-            file_obj.read(block_size)
-            pass
+                data["seq"] = file_obj.read(block_size - 1).decode("ascii")
+                # break
+            elif ord(next_byte) == 6:
+                block_content = file_obj.read(block_size - 1).decode("utf-8")
+                note_data = parse_dict(xmltodict.parse(block_content))
+                data["notes"] = note_data["Notes"]
+            elif ord(next_byte) == 10:
+                # READ THE FEATURES
+                strand_dict = {"0": ".", "1": "+", "2": "-", "3": "="}
+                format_dict = {"@text": parse, "@int": int}
+                try:
+                    features_data = xmltodict.parse(file_obj.read(block_size))
+                except Exception as e:
+                    continue
+                features = features_data["Features"]["Feature"]
+                if not isinstance(features, list):
+                    features = [features]
+                for feature in features:
+                    segments = feature["Segment"]
+                    if not isinstance(segments, list):
+                        segments = [segments]
+                    segments_ranges = [
+                        sorted([int(e) for e in segment["@range"].split("-")])
+                        for segment in segments
+                    ]
+                    qualifiers = feature.get("Q", [])
+                    if not isinstance(qualifiers, list):
+                        qualifiers = [qualifiers]
+                    parsed_qualifiers = {}
+                    for qualifier in qualifiers:
+                        if qualifier["V"] is None:
+                            pass
+                        elif isinstance(qualifier["V"], list):
+                            if len(qualifier["V"][0].items()) == 1:
+                                parsed_qualifiers[qualifier["@name"]] = l_v = []
+                                for e_v in qualifier["V"]:
+                                    fmt, value = e_v.popitem()
+                                    fmt = format_dict.get(fmt, parse)
+                                    l_v.append(fmt(value))
+                            else:
+                                parsed_qualifiers[qualifier["@name"]] = d_v = {}
+                                for e_v in qualifier["V"]:
+                                    (fmt1, value1), (_, value2) = e_v.items()
+                                    fmt = format_dict.get(fmt1, parse)
+                                    d_v[value2] = fmt(value1)
+                        else:
+                            fmt, value = qualifier["V"].popitem()
+                            fmt = format_dict.get(fmt, parse)
+                            parsed_qualifiers[qualifier["@name"]] = fmt(value)
+
+                    if "label" not in parsed_qualifiers:
+                        parsed_qualifiers["label"] = feature["@name"]
+                    if "note" not in parsed_qualifiers:
+                        parsed_qualifiers["note"] = []
+                    if not isinstance(parsed_qualifiers["note"], list):
+                        parsed_qualifiers["note"] = [parsed_qualifiers["note"]]
+                    color = segments[0]["@color"]
+                    parsed_qualifiers["note"].append("color: " + color)
+
+                    data["features"].append(
+                        dict(
+                            start=min([start - 1 for (start, end) in segments_ranges]),
+                            end=max([end for (start, end) in segments_ranges]),
+                            strand=strand_dict[feature.get("@directionality", "0")],
+                            type=feature["@type"],
+                            name=feature["@name"],
+                            color=segments[0]["@color"],
+                            textColor="black",
+                            segments=segments,
+                            row=0,
+                            isOrf=False,
+                            qualifiers=parsed_qualifiers,
+                        )
+                    )
+            else:
+                # WE IGNORE THE WHOLE BLOCK
+                file_obj.read(block_size)
+        except Exception as e:
+            print("77777777777")
+            print(e.args)
+            break
+
     file_obj.close()
     print("pppppppppppppppppppppppppppppppppppppppppppppppppppp")
-    print(data)
+    
     return data
 
 if __name__ == "__main__":
-    file_address = r"c:\Users\admin\Desktop\样例数据\level3\CY1802.dna"
-    print(snapgene_to_dict())
+    file_address = r"c:\Users\admin\xwechat_files\wxid_hh7vrsekcboh21_db9a\msg\file\2026-01\LXY344 ptac-BCD7-TALlaa B0030 4CLlaa-DT54.dna"
+    print(snapgene_to_dict(open(file_address,'rb')))
     

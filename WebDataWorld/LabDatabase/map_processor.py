@@ -8,6 +8,7 @@ from ControllerModule import FittingLabels
 from CaculateModule.ScarIdentify import scarPosition,scarFunction
 def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL):
     FeatureList = []
+    print(type(upload_map))
     if (file_name[1] == "fasta"):
         records = parse(upload_map, "fasta")
         for record in records:
@@ -17,6 +18,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
         records = parse(upload_map, "genbank")
         for record in records:
             Sequence = str(record.seq)
+            print(Sequence)
             FeatureList = record.features
             print(Sequence)
             break
@@ -25,6 +27,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
         print(record)
         FeatureList = record['features']
         Sequence = record['seq']
+        print(Sequence)
     if(Sequence != ""):
         session = requests.Session()
         token = django_request.COOKIES.get('csrftoken')
@@ -33,7 +36,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             'Content-Type':'application/json',
             'X-CSRFToken':token,
         })
-        name = file_name[0]
+        name = file_name[0][:20]
         if(upload_type == "plasmid"):
             Ori_list = []
             Marker_list = []
@@ -49,6 +52,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             if(SequenceUpdateResponse.json()['success'] == False and SequenceUpdateResponse.json()['message'] == "Plasmid Does Not Exist"):
                 add_request_body = {"name":name,"sequence":Sequence,"alias":""}
                 AddSequenceUpdateResponse = session.post(f"{Base_URL}AddPlasmidData",json=add_request_body,cookies=django_request.COOKIES)
+                print(AddSequenceUpdateResponse.json())
                 if(AddSequenceUpdateResponse.status_code!= 200):
                     return False
             Culture_request_body = {"name":name,"ori" : Ori_list,"marker":Marker_list}
