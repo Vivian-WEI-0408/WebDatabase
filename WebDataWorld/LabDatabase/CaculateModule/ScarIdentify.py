@@ -6,7 +6,7 @@ from Bio.SeqRecord import SeqRecord
 '''
 Scar  标识
 GTGC   A
-ATCA   A*
+ATCA   A2
 AATG   B
 TAAA   C
 CCTC   D
@@ -74,7 +74,7 @@ def scarName(seq):
     elif(seq.upper() == "GTGC"):
         scar_str += "A"
     elif(seq.upper() == "ATCA"):
-        scar_str += "A*"
+        scar_str += "A2"
     elif(seq.upper() == "AATG"):
         scar_str += "B"
     elif(seq.upper() == "TAAA"):
@@ -116,7 +116,7 @@ def scarFunction(seq):
             elif(NoSite["Scar"]["start"].upper() == "GTGC"):
                 scar_str += "A"
             elif(NoSite["Scar"]["start"].upper() == "ATCA"):
-                scar_str += "A*"
+                scar_str += "A2"
             elif(NoSite["Scar"]["start"].upper() == "AATG"):
                 scar_str += "B"
             elif(NoSite["Scar"]["start"].upper() == "TAAA"):
@@ -150,7 +150,7 @@ def scarFunction(seq):
             elif(NoSite["Scar"]["end"].upper() == "GTGC"):
                 scar_str += "A"
             elif(NoSite["Scar"]["end"].upper() == "ATCA"):
-                scar_str += "A*"
+                scar_str += "A2"
             elif(NoSite["Scar"]["end"].upper() == "AATG"):
                 scar_str += "B"
             elif(NoSite["Scar"]["end"].upper() == "TAAA"):

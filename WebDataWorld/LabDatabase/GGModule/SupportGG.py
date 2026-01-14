@@ -8,6 +8,7 @@ class SupportGG:
         self.PartAddress_List = PartAddress_list
         self.PartName_List = PartName_list
         self.repository = dnacauldron.SequenceRepository()
+        print(self.PartName_List)
 
     def assemblyPart(self,name):
         temp = len(self.repository.get_all_part_names())

@@ -1408,33 +1408,46 @@ def AddPlasmidParentByID(request):
 
 
 def GetParentPart(request):
-    if(request.method == 'GET'):
-        sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
-        ppResult = Parentparttable.objects.filter(sonplasmidid = sonPlasmidid).values('parentpartid')
-        pplist = []
-        # print(ppResult)
-        for each_id in ppResult:
-            pplist.append(list(Parttable.objects.filter(partid = each_id['parentpartid']).values('name','alias'))[0])
-        # print(pplist)
-        return JsonResponse(data={'success':True,'data':pplist},status = 200, safe = False)
+    try:
+        if(request.method == 'GET'):
+            sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
+            ppResult = Parentparttable.objects.filter(sonplasmidid = sonPlasmidid).values('parentpartid')
+            pplist = []
+            # print(ppResult)
+            for each_id in ppResult:
+                pplist.append(list(Parttable.objects.filter(partid = each_id['parentpartid']).values('name','alias','partid'))[0])
+            # print(pplist)
+            return JsonResponse(data={'success':True,'data':pplist},status = 200, safe = False)
+    except Exception as e:
+        return JsonResponse(data={'success':False,"message":str(e.args)},status=400,safe=False)
+
+
 
 def GetParentBackbone(request):
     if(request.method == 'GET'):
-        sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
-        pbResult = list(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidid).values('parentbackboneid'))
-        pblist = []
-        for each_id in pbResult:
-            pblist.append(list(Backbonetable.objects.filter(id = each_id['parentbackboneid']).values('name','alias'))[0])
-        return JsonResponse(data={'success':True, 'data':pblist},status = 200, safe = False)
+        try:
+            sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
+            pbResult = list(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidid).values('parentbackboneid'))
+            pblist = []
+            for each_id in pbResult:
+                pblist.append(list(Backbonetable.objects.filter(id = each_id['parentbackboneid']).values('name','alias','id'))[0])
+            return JsonResponse(data={'success':True, 'data':pblist},status = 200, safe = False)
+        except Exception as e:
+            return JsonResponse(data={'success':False,"message":"Error"}, status=400,safe=False)
+
 
 def GetParentPlasmid(request):
     if(request.method == 'GET'):
-        sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
-        ppResult = list(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidid).values('parentplasmidid'))
-        pplist = []
-        for each_id in ppResult:
-            pplist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['parentplasmidid']).values('name','alias'))[0])
-        return JsonResponse(data = {'success':True,'data':pplist},status = 200, safe = False)
+        try:
+            sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
+            ppResult = list(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidid).values('parentplasmidid'))
+            pplist = []
+            for each_id in ppResult:
+                pplist.append(list(Plasmidneed.objects.filter(plasmidid = each_id['parentplasmidid']).values('name','alias',"plasmidid"))[0])
+            return JsonResponse(data = {'success':True,'data':pplist},status = 200, safe = False)
+        except Exception as e:
+            return JsonResponse(data={"success":False,"message":"Error"},status=400,safe=False)
+
 
 def GetSonPlasmid(request):
     if(request.method == "GET"):
@@ -1976,6 +1989,7 @@ def GetBackboneSeqByID(request):
             return JsonResponse(data = {'success':False,'data':"Parameter is empty"},status=404, safe = False)
         else:
             BackboneSeq = list(Backbonetable.objects.filter(id=ID).values('sequence'))
+            print(BackboneSeq)
             if(len(BackboneSeq) > 0):
                 return JsonResponse(data = {'success':True, 'data':BackboneSeq[0]},status = 200, safe = False)
             else:
@@ -2339,17 +2353,17 @@ def AddBackboneFeature(request, BackboneName):
         return JsonResponse(data={'success':False,'message':"Just POST Method"}, status = 200, safe=False)
 
 def GetBackboneFeature(request, BackboneID):
+    print("BackboneID")
     if(request.method == "GET"):
         try:
             print(BackboneID)
             with transaction.atomic():
                 result = Backbonefeaturetable.objects.filter(backboneid=BackboneID).values()
-                print(result)
                 return JsonResponse(data={"success":True,"data":list(result)},status = 200, safe=False)
         except Backbonefeaturetable.DoesNotExist:
             return JsonResponse(data={"success":False,"message":"BackboneFeatureTable Does Not Exist"}, status=400, safe=False)
         except Exception as e:
-            print(e.args)
+            return JsonResponse(data={"success":False,"message":str(e.args)},status=400,safe=False)
     else:
         return JsonResponse(data={"successs":False,"message":"Just Get Method"},status=400,safe=False)
             

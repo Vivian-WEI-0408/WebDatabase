@@ -34,7 +34,20 @@ class SequenceAnnotator:
             'BsubAmy':'#cccccc',
             'sgRNA':'#FF9CCD',
         }
-        
+    def add_feature(self, new_feature):
+        try:
+            key = list(new_feature.keys())[0]
+            value = list(new_feature[key])
+            self.feature_list[key] = value
+        except Exception as e:
+            return
+    def add_features(self, new_feature_list):
+        try:
+            keys = new_feature_list.keys()
+            for key in keys:
+                self.feature_list[key] = new_feature_list[key]
+        except Exception as e:
+            return
     @staticmethod
     def GeneratorBackboneNoSa(name,sequence,file_address, feature_list):
         accession = "."
@@ -97,7 +110,8 @@ class SequenceAnnotator:
     def GenerateGBKFile(self, file_address, type="circular"):
         # print(file_address)
         # print(self.sequence)
-        # print(self.feature_list)
+        print("7777777")
+        print(self.feature_list)
         if(type == "circular"):
             definition = "synthetic circular DNA"
         else:
@@ -121,8 +135,7 @@ class SequenceAnnotator:
             file.write("SOURCE      {}\n".format(self.reference))
             file.write("FEATURES             Location/Qualifiers\n")
             for each_feature in self.feature_list.keys():
-                # print(each_feature)
-                if(self.feature_list[each_feature][2] == "Origin"):
+                if(self.feature_list[each_feature][2].lower() == "origin" or self.feature_list[each_feature][2].lower() == "rep_origin"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     rep_origin      join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -133,7 +146,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['ori']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['ori']}\n")
-                elif(self.feature_list[each_feature][2] == "CDS"):
+                elif(self.feature_list[each_feature][2].lower() == "cds"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     CDS             join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -144,7 +157,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['CDS']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['CDS']}\n")
-                elif(self.feature_list[each_feature][2] == "Promoter"):
+                elif(self.feature_list[each_feature][2].lower() == "promoter"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     promoter        join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -155,7 +168,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['promoter']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['promoter']}\n")
-                elif(self.feature_list[each_feature][2] == "Terminator"):
+                elif(self.feature_list[each_feature][2].lower() == "terminator"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     terminator      join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -166,7 +179,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['terminator']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['terminator']}\n")
-                elif(self.feature_list[each_feature][2] == "misc_feature"):
+                elif(self.feature_list[each_feature][2].lower() == "misc_feature"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature    join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -177,7 +190,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['restriction_site']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                elif(self.feature_list[each_feature][2] == "primer_bind"):
+                elif(self.feature_list[each_feature][2].lower() == "primer_bind"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     primer_bind     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -188,7 +201,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['binding']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
-                elif(self.feature_list[each_feature][2] == "spacer"):
+                elif(self.feature_list[each_feature][2].lower() == "spacer"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -199,7 +212,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['spacer']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['spacer']}\n")
-                elif(self.feature_list[each_feature][2] == "homo"):
+                elif(self.feature_list[each_feature][2].lower() == "homo"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -210,7 +223,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['homo']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['homo']}\n")
-                elif(self.feature_list[each_feature][2] == "attp"):
+                elif(self.feature_list[each_feature][2].lower() == "attp"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -221,7 +234,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['attp']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['attp']}\n")
-                elif(self.feature_list[each_feature][2] == "iceyydm"):
+                elif(self.feature_list[each_feature][2].lower() == "iceyydm"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -232,7 +245,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['iceyydm']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['iceyydm']}\n")
-                elif(self.feature_list[each_feature][2] == "BsubAmy"):
+                elif(self.feature_list[each_feature][2].lower() == "bsubamy"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -244,7 +257,7 @@ class SequenceAnnotator:
                         file.write(f"                     /color={self.colors['BsubAmy']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['BsubAmy']}\n")
             for each_feature in self.reverse_feature_list.keys():
-                if(self.reverse_feature_list[each_feature][2] == "Origin"):
+                if(self.reverse_feature_list[each_feature][2].lower() == "origin"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     rep_origin      complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -255,7 +268,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['ori']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['ori']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "CDS"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "cds"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     CDS             complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -266,7 +279,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['CDS']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['CDS']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "Promoter"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "promoter"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     promoter        complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -277,7 +290,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['promoter']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['promoter']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "Terminator"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "terminator"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     terminator      complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -288,7 +301,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['terminator']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['terminator']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "misc_feature"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "misc_feature"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     misc_feature    complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -299,7 +312,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['restriction_site']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "primer_bind"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "primer_bind"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     primer_bind     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -310,7 +323,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['binding']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "spacer"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "spacer"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -321,7 +334,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['spacer']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['spacer']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "spacer"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "spacer"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -332,7 +345,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['spacer']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['spacer']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "homo"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "homo"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -343,7 +356,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['homo']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['homo']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "attp"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "attp"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -354,7 +367,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['attp']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['attp']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "iceyydm"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "iceyydm"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -365,7 +378,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['iceyydm']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['iceyydm']}\n")
-                elif(self.reverse_feature_list[each_feature][2] == "BsubAmy"):
+                elif(self.reverse_feature_list[each_feature][2].lower() == "bsubamy"):
                     if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
                         file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
                         file.write(f"                     /label={each_feature}\n")
@@ -510,7 +523,7 @@ class SequenceAnnotator:
                         file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
                         file.write(f"                     /color={self.colors['scar']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
-
+                    NameIndex += 1
             file.write("ORIGIN\n")
             numOfline = (self.length // 60) + 1
             offset = 0
