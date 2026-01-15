@@ -110,8 +110,8 @@ class SequenceAnnotator:
     def GenerateGBKFile(self, file_address, type="circular"):
         # print(file_address)
         # print(self.sequence)
-        print("7777777")
-        print(self.feature_list)
+        # print("7777777")
+        # print(self.feature_list)
         if(type == "circular"):
             definition = "synthetic circular DNA"
         else:

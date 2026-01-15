@@ -28,25 +28,28 @@ from .logger import request_logger
 
 #----------------------------------------------------------
 #用户登录验证(中间件)
-"""
-除了login与register页面，其余页面在路由获取资源前都需要经过用户验证
-"""
-class User_auth(MiddlewareMixin):
 
+class User_auth(MiddlewareMixin):
+    """
+    除了login,register,AdminLogin,ResetPassword页面，其余页面在路由获取资源前都需要经过用户验证
+    """
+    
     def process_request(self,request):
         request.start_time = time.time()
         
-        
-        #排除不需要登录就能访问的页面
-        if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register" or request.path_info == "/WebDatabase/AdminRegister" or request.path_info == "/WebDatabase/reset":
-            return
-        info = request.session.get('info')
-        # print(f'User_auth{info}')
-        # print(request.user)
-        print(info)
-        if not info:
-            return redirect('/WebDatabase/login')
-        else:
+        try:
+            #排除不需要登录就能访问的页面
+            if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register" or request.path_info == "/WebDatabase/AdminRegister" or request.path_info == "/WebDatabase/reset":
+                return
+            info = request.session.get('info')
+            # print(f'User_auth{info}')
+            # print(request.user)
+            # print(info)
+            if not info:
+                return redirect('/WebDatabase/login')
+            else:
+                return
+        except Exception as e:
             return
 
     def process_response(self,request,response):
@@ -65,87 +68,147 @@ class User_auth(MiddlewareMixin):
 #-----------------------------------------------------------
 #Strain Table
 #新增数据方法
-"""
-通过菌株名称（Name）获取整体性信息
-Args:
-request: django request
-GET Args:
-name: 菌株名称
-Returns:
-JsonResponse: status_code = 200 list data
-JsonResponse: status_code = 400/404 string data
-"""
 def SearchByStrainName(request):
-    if(request.method == "GET"):
-        Name = request.GET.get('name')
-        if(Name == None or Name == ""):
-            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
-            # return JsonResponse({'status': 201, 'data': "Name cannot be empty"})
-        StrainList = Straintable.objects.filter(strainname=Name)
-        if(len(StrainList) > 0):
-            # return HttpResponse("成功",data = StrainList)
-            return JsonResponse(data=list(StrainList.values()), status=200,safe=False)
-            # return JsonResponse({'code':200,'status': 'success', 'data': list(StrainList.values())})
-        else:
-            return JsonResponse(data="No such strain", status=404,safe=False)
+    """
+    通过菌株名称（Name）获取整体性信息
+    Args:
+        request: django request
+    GET Args:
+        name: 菌株名称
+    Returns:
+        JsonResponse: 1. status_code = 200 list data if search successfully,
+        2. status_code = 400/404 string data, if search unsuccessfully
+    """
+    
+    try:
+        if(request.method == "GET"):
+            Name = request.GET.get('name')
+            if(Name == None or Name == ""):
+                return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+                # return JsonResponse({'status': 201, 'data': "Name cannot be empty"})
+            StrainList = Straintable.objects.filter(strainname=Name)
+            if(len(StrainList) > 0):
+                # return HttpResponse("成功",data = StrainList)
+                return JsonResponse(data=list(StrainList.values()), status=200,safe=False)
+                # return JsonResponse({'code':200,'status': 'success', 'data': list(StrainList.values())})
+            else:
+                return JsonResponse(data="No such strain", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Strain Not Found"})
-
+    except Exception as e:
+        return JsonResponse(data = str(e.args), status=400, safe=False)
 
 
 #-------------------------------------------------------------
 #Part Table
 #ALL
 def PartFields(request):
-    fields =[field.name for field in Parttable._meta.get_fields()]
-    fields.remove("parentparttable")
-    fields.remove("partrputable")
-    fields.remove("partscartable")
-    fields.remove("tbpartuserfileaddress")
-    return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
-def PartCount(request):
-    if(request.method == "GET"):
-        count = Parttable.objects.values().count()
-        return JsonResponse(data = {'success':True, "data":count}, status = 200, safe = False)
-    else:
-        return JsonResponse(data = {"success":False, "message":"Juset GET method"}, status = 200, safe=False)
+    """
+    获取Parttable所有相关筛选信息项，不包括parentparttable，partrputable，partscartable，tbpartuserfileaddress
     
-def PartDataALL(request):
-    print("PartDataAll")
-    if(request.method == "GET"):
-        page = int(request.GET.get('page',0))
-        if(page == 0):
-            PartData = Parttable.objects.all().order_by('name')
-            if(len(PartData) > 0):
-                return JsonResponse(data=list(PartData.values()), status=200,safe=False)
-                # return JsonResponse({'code':200,'data':list(PartData.values())})
-            else:
-                return JsonResponse(data="No such part", status=404,safe=False)
-                # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+    Args:
+        request: django request
+    
+    Returns:
+        JsonResponse: 1. JsonResponse.json()["success"] = True, JsonResponse.json()['data'] = data, JsonResponse.status_code=200 list if successfully search,
+        2. JsonResponse.json()["success"] = False, JsonResponse.json()["message"] = Error Information, JsonResponse.status_code = 400, if search unsuccessfully.
+    """
+    
+    try:
+        fields =[field.name for field in Parttable._meta.get_fields()]
+        fields.remove("parentparttable")
+        fields.remove("partrputable")
+        fields.remove("partscartable")
+        fields.remove("tbpartuserfileaddress")
+        return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
+    except Exception as e:
+        return JsonResponse(data={"success":False,"message":str(e.args)}, status=400, safe=False)
+    
+def PartCount(request):
+    """
+    获取Part table的数据条数
+    
+    Args:
+        request: django request
+    
+    Returns:
+        JsonResponse: 1.JsonResponse.json()["success"]=True, JsonResponse.json()["data"]=integer(数据条数),JsonResponse.status_code=200 if search successfully,
+        2.JsonResponse.json()['success'] = False,JsonResponse.json()["message"] = Error Information, JsonResponse.status_code=400/200 if search unsuccessfully.
+    """
+    
+    try:
+        if(request.method == "GET"):
+            count = Parttable.objects.values().count()
+            return JsonResponse(data = {'success':True, "data":count}, status = 200, safe = False)
         else:
-            page_size = int(request.GET.get('page_size',10))
-            offset = (page -1)*page_size
-            total_count = Parttable.objects.count()
-            total_pages = (total_count + page_size -1) // page_size
-            query_set = list(Parttable.objects.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag'))[offset:offset+page_size]
-            # query_set = Parttable.objects.only('partid','name','type','sourceorganism','reference').order_by('name')[offset:offset+page_size]
-            has_next = page < total_pages
-            has_previous = page > 1
-            return JsonResponse(data={'success':True,
-                                      'data':query_set,
-                                      'pagination':{
-                                          'current_page' : page,
-                                          'total_pages' : total_pages,
-                                          'total_count' : total_count,
-                                          'has_next':has_next,
-                                          'has_previous' : has_previous,
-                                          'page_size':page_size,
-                                          'offset':offset
-                                          }
+            return JsonResponse(data = {"success":False, "message":"Juset GET method"}, status = 200, safe=False)
+    except Exception as e:
+        return JsonResponse(data={"success":False, "message":str(e.args)}, status=400,safe=False)
+    
+
+def PartDataALL(request):
+    """
+    获取part table的所有数据条目，以name排序
+    
+    Args:
+        request: django request
+    
+    Returns:
+        JsonResponse: 1.JsonResponse.json()[0] = a data dict, JsonResponse.status_code = 200, if search successfully and Page = 0
+        2.JsonResponse.json() = "No such part", if search successfully
+        3.JsonResponse.json()["success"] = True, JsonResponse.json()['data'] = a part data dict in one page, JsonResponse.json()["pagination"] = page information, if search successfully and Page != 0
+    
+    """
+    
+    # print("PartDataAll")
+    try:
+        if(request.method == "GET"):
+            page = int(request.GET.get('page',0))
+            if(page == 0):
+                PartData = Parttable.objects.all().order_by('name')
+                if(len(PartData) > 0):
+                    return JsonResponse(data=list(PartData.values()), status=200,safe=False)
+                    # return JsonResponse({'code':200,'data':list(PartData.values())})
+                else:
+                    return JsonResponse(data="No such part", status=404,safe=False)
+                    # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+            else:
+                page_size = int(request.GET.get('page_size',10))
+                offset = (page -1)*page_size
+                total_count = Parttable.objects.count()
+                total_pages = (total_count + page_size -1) // page_size
+                query_set = list(Parttable.objects.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag'))[offset:offset+page_size]
+                # query_set = Parttable.objects.only('partid','name','type','sourceorganism','reference').order_by('name')[offset:offset+page_size]
+                has_next = page < total_pages
+                has_previous = page > 1
+                return JsonResponse(data={'success':True,
+                                            'data':query_set,
+                                            'pagination':{
+                                            'current_page' : page,
+                                            'total_pages' : total_pages,
+                                            'total_count' : total_count,
+                                            'has_next':has_next,
+                                            'has_previous' : has_previous,
+                                            'page_size':page_size,
+                                            'offset':offset
+                                            }
                                         },status = 200, safe=False
-                                )
+                                    )
+    except Exception as e:
+        return JsonResponse(data={"success":False,"message":str(e.args)}, status=400, safe=False)
 
 #PartFilter
 def PartFilter(request):
+    """
+    Part Table Filter Function, Filter selections are type, Enzyme, Scar, name
+    
+    Args:
+        request: django request
+    
+    Returns:
+        JsonResponse: 1.JsonResponse.json()["success"] = True, JsonResponse.json()["data"] = a list of data dict, JsonResponse.json()["pagination"] = a dict of page information, JsonResponse.status_code = 200, if search successfully
+        2.JsonResponse.json()["success"] = False, JsonResponse.json()["error"] = error information, if search unsuccessfully
+    """
+    
     if(request.method == "POST"):
         data = json.loads(request.body)
         type = data["type"]
@@ -249,32 +312,49 @@ def PartFilter(request):
 
 #Search
 def SearchByPartName(request):
-    if(request.method == "GET"):
-        Name = request.GET.get('name')
-        print(Name)
-        if(Name == None or Name == ""):
-            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
-        try:
+    """
+    GET方法进行part table name的精确搜索, 参数为name
+    
+    Args:
+        request: django request
+        
+    Returns:
+        JsonResponse: 1.JsonResponse.json()["success"] = True, JsonResponse.json()["data"] = A dict of data, JsonResponse.status = 200, if search successfully,
+        2. JsonResponse.json() = error information, JsonResponse.status_code = 400/404, if search unsuccessfully
+    """
+    
+    try:
+        if(request.method == "GET"):
+            Name = request.GET.get('name')
+            print(Name)
+            if(Name == None or Name == ""):
+                return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+                # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
             PartList = Parttable.objects.filter(name=Name)
             print(PartList)
             if(PartList != None):
-                print("7777777777")
                 return JsonResponse(data={"success":True, 'data':list(PartList.values())[0]}, status=200,safe=False)
                 # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
             else:
-                
                 return JsonResponse(data="No such part", status=404,safe=False)
-        except Exception as e:
-            print(e.args)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+    except Exception as e:
+        return JsonResponse(data=str(e.args),status=400,safe=False)
+
 
 def SearchByPartNameFilter(request):
+    """
+    通过名称name和type对Parttable的数据进行查询，名称为模糊查询
+    
+    Args:
+        request: django request
+    
+    Returns:
+        JsonResponse: 1. JsonResponse.json() = Part dict, JsonResponse.status_code = 200, if search successfully,
+        2. JsonResponse.json() = error information, JsonResponse.status_code = 400/404, if search unsuccessfully.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('keywords')
         Type = request.GET.get('Type')
-        print(Name)
-        print(Type)
         if(Name == None or Name == ""):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
