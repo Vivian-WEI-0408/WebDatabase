@@ -224,12 +224,15 @@ file_name: [filename, file_type]
 """
 def process_map_async(upload_map, file_name, upload_type, django_request, task_id, index, number_of_task):
     try:
-        Sequence = ""
         upload_map_temp = upload_map.read()
         upload_map.seek(0)
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         if(file_name[1] == "dna"):
-            result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
+            try:
+                file_obj = io.BytesIO(upload_map_temp)
+                result = process_map_file(file_obj, file_name, upload_type,django_request,Base_URL)
+            except Exception as e:
+                print(e.args)
         else:
             upload_map_temp = upload_map_temp.decode("utf-8")
             upload_map = io.StringIO(upload_map_temp)
@@ -731,6 +734,8 @@ def downloadPlasmidMap(request,plasmidid):
                 BackboneFeatureListResponse = (session.get(f"{Base_URL}GetBackboneFeature/{PlasmidParentBackbone}", cookies=request.COOKIES)).json()
                 if(BackboneFeatureListResponse['success']):
                     backbone_fetch_kmer = KmerIndex()
+                    print("999999999")
+                    print(BackboneFeatureListResponse["data"])
                     for each_feature in BackboneFeatureListResponse['data']:
                         if(each_feature['feature_start']<each_feature['feature_end']):
                             backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:each_feature["feature_end"]])
@@ -744,6 +749,7 @@ def downloadPlasmidMap(request,plasmidid):
                                 break
                         new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type]}
                         sa.add_feature(new_feature)
+                    print(sa.feature_list)
                 else:
                     fi = featureIdentify()
                     feature_list = fi.featureMatch(sequence)

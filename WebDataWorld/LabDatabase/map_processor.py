@@ -8,14 +8,16 @@ from ControllerModule import FittingLabels
 from CaculateModule.ScarIdentify import scarPosition,scarFunction
 def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL):
     FeatureList = []
-    print(type(upload_map))
+    print(file_name)
     if (file_name[1] == "fasta"):
         records = parse(upload_map, "fasta")
+        upload_map.seek(0)
         for record in records:
             Sequence = str(record.seq)
             break
     elif(file_name[1] == "gb" or file_name[1] == "gbk" or file_name[1] == "ape" or file_name[1] == "str"):
         records = parse(upload_map, "genbank")
+        upload_map.seek(0)
         for record in records:
             Sequence = str(record.seq)
             print(Sequence)
@@ -23,6 +25,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             print(Sequence)
             break
     elif(file_name[1] == "dna"):
+        print(upload_map)
         record = snapgene_reader.snapgene_to_dict(upload_map)
         print(record)
         FeatureList = record['features']
@@ -96,7 +99,6 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                     except Exception as e:
                         continue
             elif(file_name[1] == "dna"):
-                print(FeatureList)
                 for each_feature in FeatureList:
                     try:
                         start_position = each_feature['start']
@@ -107,7 +109,6 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                         ape_info = each_feature['color']
                         request_body = {"start_position":start_position,"end_position":end_position,"label":label,"feature_type":feature_type,"color":color,"ape_info":ape_info}
                         add_feature_response = session.post(f"{Base_URL}AddBackboneFeature/{name}",json=request_body,cookies = django_request.COOKIES)
-                        print(add_feature_response.json())
                     except Exception as e:
                         continue
             Culture_request_body = {"name":name,"ori" : Ori_list,"marker":Marker_list}
