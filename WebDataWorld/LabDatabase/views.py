@@ -33,7 +33,7 @@ import queue
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Base_URL = "http://10.30.76.2:8004/WebDatabase/"
 Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
@@ -340,10 +340,10 @@ def process_gg_assembly_async(upload_file, django_request, task_id):
         file_content = upload_file.read()
         excel_data = pd.read_excel(io.BytesIO(file_content))
         
-        result = GGAssembly.GGFileProcessor.createTemporaryRepo(django_request,excel_data,Base_URL)
-        # print(result)
+        result = GGAssembly.GGFileProcessor.createTemporaryRepo(django_request,excel_data,Base_URL,File_Address, Assembly_File_Address)
         if(result['success']):
             if("error_row" not in result):
+                #TODO:process assembly
                 task_status['progress'] = 100
                 task_status['status'] = 'completed'
                 task_status['result'] = {
@@ -525,11 +525,7 @@ def UploadMap(request):
     else:
         return JsonResponse({'success':False,'message':'Upload record is empty'})
 
-def UploadBackboneFile(request):
-    pass
 
-def UploadPlasmidFile(request):
-    pass
 
 def part_detail_show(request,partid):
     if(request.method == "GET"):
@@ -922,7 +918,7 @@ def exportuserdata(request,username):
 
 def exportuserdataprocess(request,session,task_id,username):
     excel_address = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')['file_address']
-            
+    
     excel_part_data = {}
     part_field = (session.get(f"{Base_URL}partfields",cookies=request.COOKIES)).json()['data']
     # print(part_field)
@@ -1118,7 +1114,7 @@ def AssemblyRepo(request):
     else:
         return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
 
-def process_assembly_repo(repositoryName, django_request, task_id):
+def process_assembly_repo(repositoryName, django_request):
     session = requests.Session()
     session.headers.update({
             'User-Agent':'Django-App/1.0',
@@ -1128,8 +1124,7 @@ def process_assembly_repo(repositoryName, django_request, task_id):
     try:
         repository_response = session.post(f"{Base_URL}getrepo",json=request_body,cookies=django_request.COOKIES)
     except Exception as e:
-        pass
-        # print(repository_response.json())
+        return render(django_request,'error.html',{'error':"获取层级信息错误"})
     if(repository_response.status_code == 200):
         repository_data = repository_response.json()['data']
         part = repository_data['parts']
@@ -1145,14 +1140,7 @@ def process_assembly_repo(repositoryName, django_request, task_id):
             partSource = (session.get(f"{Base_URL}partSource/{each_part}",cookies=django_request.COOKIES)).json()
             # print(partSource)
             if(partSource['success'] != True):
-                task_status = {
-                'status':'failed',
-                'progress':0,
-                'result':None,
-                'error':"组装Scar错误",
-                }
-                cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=100000)
-                return
+                return {"success":False}
             if(partSource['source'].lower() != "saccharomyces cerevisiae"):
                 if(partType == "promoter"):
                     sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
@@ -1171,17 +1159,15 @@ def process_assembly_repo(repositoryName, django_request, task_id):
                     sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                 elif(partType == "cds"):
                     sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
-            # print(sequence)
+            
             seq_obj = Seq(sequence)
             seq_reverse = str(seq_obj.reverse_complement())
             fi = featureIdentify()
             feature_list = fi.featureMatch(sequence)
             reverse_feature_list = fi.featureMatch(seq_reverse)
             scar_list = scarPosition(sequence)
-            
             sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{partName}')
-            file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile"
-            # print("123456789")
+            file_address = os.path.join(File_Address, "AssemblyFile")
             sa.GenerateGBKFile(file_address)
             file_address_list.append(os.path.join(f"{file_address}",f"part-{partType}-{partName}.gbk"))
             file_name_list.append(f'part-{partType}-{partName}')
@@ -1190,8 +1176,7 @@ def process_assembly_repo(repositoryName, django_request, task_id):
             backboneName = (session.get(f'{Base_URL}BackboneNameByID?ID={each_backbone}',cookies=django_request.COOKIES)).json()['BackboneName']
             # print(sequence)
             backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
-            file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile"
-
+            file_address = os.path.join(File_Address, "AssemblyFile")
             if(backboneFeature["success"] != True):
                 seq_obj = Seq(sequence)
                 seq_reverse = str(seq_obj.reverse_complement())
@@ -1219,49 +1204,29 @@ def process_assembly_repo(repositoryName, django_request, task_id):
                 reverse_feature_list = fi.featureMatch(seq_reverse)
                 scar_list = scarPosition(sequence)
                 sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidName}')
-                file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile"
+                file_address = os.path.join(File_Address, "AssemblyFile")
                 sa.GenerateGBKFile(file_address)
                 file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))
                 file_name_list.append(f"plasmid-{plasmidName}")
-        # print(file_address_list)
             
         GG = SupportGG.SupportGG(file_address_list,file_name_list)
         GG.assemblyPart(repositoryName)
         GG.show()
-        # print(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"))
         if(os.path.exists(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"))):
             records = parse(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"), "genbank")
             for record in records:
                 Sequence = str(record.seq)
-            response = AssemblyResultUpload(django_request,repositoryName,Sequence,part,backbone,plasmid)
+            response = AssemblyResultUpload(django_request, repositoryName, Sequence, part, backbone, plasmid)
             # print(response)
             if(response["success"]):
-                task_status =cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
-                task_status['status'] = "completed"
-                task_status['progress'] = 100
-                cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status, timeout=100000)
+                return {"success":True,"file_address":os.path.join(Assembly_File_Address,f"{repositoryName}.gb")}
             else:
-                task_status =cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
-                task_status['status'] = "completed"
-                task_status['progress'] = 100
-                task_status['result'] = {"message":"添加质粒到数据库失败"}
-                cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status, timeout=100000)
+                return {"success":False,"message":"添加质粒到数据库失败"}
         else:
-            task_status = {
-                'status':'failed',
-                'progress':0,
-                'result':None,
-                'error':"组装Scar错误",
-            }
-            cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=100000)
+            return {"success":False, "message":"组装scar错误"}
     else:
-        task_status = {
-            'status':'failed',
-            'progress':0,
-            'result':None,
-            'error':"没有获取到仓库信息",
-        }
-        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=100000)
+        return {"success":False,"message":"没有获取到仓库信息"}
+        
 
 
 def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, PlasmidList):
@@ -1272,7 +1237,7 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
         'Content-Type':'application/json',
         'X-CSRFToken':token,
     })
-    if(len(PlasmidList) == 0):
+    if(len(partList) != 0):
         level = 2
     else:
         level = 3
@@ -1351,6 +1316,8 @@ def modify_part(request,partid):
             return JsonResponse({"success":False,"message":part_update_response.json()},status = 400, safe=False)
         else:
             return JsonResponse({"success":True},status=200,safe=False)
+        
+        
 def modify_backbone(request,backboneid):
     session = requests.Session()
     token = request.COOKIES.get('csrftoken')
@@ -1553,3 +1520,6 @@ def GetParentInfo(request):
         else:
             return render(request,'error.html',{'error':"获取层级信息错误"})
         
+        
+# def get_plasmid_diagram(request, repository_name):
+    
