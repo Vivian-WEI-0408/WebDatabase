@@ -1511,7 +1511,10 @@ def GetParentBackbone(request):
             pblist = []
             for each_id in pbResult:
                 pblist.append(list(Backbonetable.objects.filter(id = each_id['parentbackboneid']).values('name','alias','id'))[0])
-            return JsonResponse(data={'success':True, 'data':pblist},status = 200, safe = False)
+            if len(pblist) > 0:
+                return JsonResponse(data={'success':True, 'data':pblist},status = 200, safe = False)
+            else:
+                return JsonResponse(data={"success":False,"message":"Empty"}, status=200, safe=False)
         except Exception as e:
             return JsonResponse(data={'success':False,"message":"Error"}, status=400,safe=False)
 

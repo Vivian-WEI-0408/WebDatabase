@@ -624,8 +624,8 @@ def plasmid_detail_show(request,plasmidid):
                         result['Backbone'].append(letter)
                     elif(component_type == "Plasmid"):
                         result['Plasmid'].append(letter)
-            return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'] if len(plasmidParentPart.json()['data']) >0 else [],'backboneparent':plasmidParentBackbone.json()['data'] if len(plasmidParentBackbone.json()['data']) > 0 else [],
-                                    'plasmidparent':plasmidParentPlasmid.json()['data'] if len(plasmidParentPlasmid.json()['data']) > 0 else [],'plasmidson':plasmidSonPlasmid.json()['data'] if len(plasmidSonPlasmid.json()['data']) > 0 else [], 'ParentPartInfo':result["Part"],
+            return render(request,'plasmid.html',{'plasmid':plasmid,'partparent':plasmidParentPart.json()['data'] if (plasmidParentPart.json()["success"] and len(plasmidParentPart.json()['data']) >0) else [],'backboneparent':plasmidParentBackbone.json()['data'] if (plasmidParentBackbone.json()["success"] and len(plasmidParentBackbone.json()['data']) > 0) else [],
+                                    'plasmidparent':plasmidParentPlasmid.json()['data'] if (plasmidParentPlasmid.json()["success"] and len(plasmidParentPlasmid.json()['data']) > 0) else [],'plasmidson':plasmidSonPlasmid.json()['data'] if (plasmidSonPlasmid.json()["success"] and len(plasmidSonPlasmid.json()['data']) > 0) else [], 'ParentPartInfo':result["Part"],
                                     'ParentBackboneInfo':result['Backbone'],'ParentPlasmidInfo':result['Plasmid'],"scar":scar_info})
         else:
             return render(request,'error.html',{'error':plasmidResponse.text})
@@ -725,8 +725,8 @@ def downloadPlasmidMap(request,plasmidid):
         scar_list = scarPosition(sequence)
         seq_reverse = str(seq_obj.reverse_complement())
         PlasmidParentBackboneResponse = (session.get(f"{Base_URL}GetBackboneParent?plasmidid={plasmidid}",cookies=request.COOKIES)).json()
+        sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{plasmidid}')
         if(PlasmidParentBackboneResponse['success']):
-            sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{plasmidid}')
             PlasmidParentBackbone = PlasmidParentBackboneResponse['data'][0]['id']
             ParentBackboneSequenceResponse = (session.get(f"{Base_URL}GetBackboneSeqByID?backboneid={PlasmidParentBackbone}", cookies=request.COOKIES)).json()
             if(ParentBackboneSequenceResponse['success']):
