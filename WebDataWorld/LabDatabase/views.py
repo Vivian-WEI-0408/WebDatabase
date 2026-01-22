@@ -734,14 +734,13 @@ def downloadPlasmidMap(request,plasmidid):
                 BackboneFeatureListResponse = (session.get(f"{Base_URL}GetBackboneFeature/{PlasmidParentBackbone}", cookies=request.COOKIES)).json()
                 if(BackboneFeatureListResponse['success']):
                     backbone_fetch_kmer = KmerIndex()
-                    print("999999999")
-                    print(BackboneFeatureListResponse["data"])
                     for each_feature in BackboneFeatureListResponse['data']:
                         if(each_feature['feature_start']<each_feature['feature_end']):
                             backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:each_feature["feature_end"]])
                         else:
                             backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:]+ParentBackboneSequence[:each_feature["feature_end"]])
                     fetch_result = backbone_fetch_kmer.query(sequence)
+                    # print(fetch_result)
                     for each_key in fetch_result.keys():
                         for each_feature in BackboneFeatureListResponse['data']:
                             if(each_feature["feature_label"] == fetch_result[each_key]["seq_id"]):
@@ -749,7 +748,7 @@ def downloadPlasmidMap(request,plasmidid):
                                 break
                         new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type]}
                         sa.add_feature(new_feature)
-                    print(sa.feature_list)
+                    # print(sa.feature_list)
                 else:
                     fi = featureIdentify()
                     feature_list = fi.featureMatch(sequence)
