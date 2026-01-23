@@ -753,9 +753,10 @@ def downloadPlasmidMap(request,plasmidid):
                     fi = featureIdentify()
                     feature_list = fi.featureMatch(sequence)
                     reverse_feature_list = fi.featureMatch(seq_reverse)
-                    # print(feature_list)
-                    # print(reverse_feature_list)
-                    sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidid}')
+                    print(reverse_feature_list)
+                    sa.add_features(feature_list)
+                    sa.add_reverse_features(reverse_feature_list)
+                    # sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidid}')
         PlasmidParentPartResponse = (session.get(f"{Base_URL}GetPartParent?plasmidid={plasmidid}",cookies=request.COOKIES)).json()
         Part_fetch_kmer = KmerIndex()
         if(PlasmidParentPartResponse['success']):
@@ -780,12 +781,24 @@ def downloadPlasmidMap(request,plasmidid):
             for each_part in ParentPartList.keys():
                 plasmid_fetch_kmer.add_sequence(each_part,ParentPartList[each_part])
             fetch_result = plasmid_fetch_kmer.query(sequence)
-            for each_key in fetch_result:
-                typeResponse = (session.get(f"{Base_URL}TypeByName?name={each_part}",cookies=request.COOKIES))
+            for each_key in fetch_result.keys():
+                typeResponse = (session.get(f"{Base_URL}TypeByName?name={each_key}",cookies=request.COOKIES))
                 if(typeResponse.status_code == 200):
                     type = typeResponse.json()['Type'].lower()
                     new_feature = {each_key:[fetch_result[each_key]["start"],fetch_result[each_key]["end"],type]}
                     sa.add_feature(new_feature)
+        
+        print(PlasmidParentBackboneResponse["success"])
+        print(PlasmidParentPartResponse["success"])
+        print(PlasmidParentPlasmidResponse["success"])
+        if(PlasmidParentBackboneResponse["success"] == False or PlasmidParentPartResponse["success"] == False or PlasmidParentPlasmidResponse["success"] == False):
+            fi = featureIdentify()
+            feature_list = fi.featureMatch(sequence)
+            reverse_feature_list = fi.featureMatch(seq_reverse)
+            sa.add_features(feature_list)
+            sa.add_reverse_features(reverse_feature_list)
+        
+        print(sa.feature_list)
         file_address = r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\'
         thread = threading.Thread(
             target = sa.GenerateGBKFile,
@@ -1213,12 +1226,72 @@ def process_assembly_repo(repositoryName, django_request, task_id):
             else:
                 sequence = (session.get(f'{Base_URL}PlasmidSeqByID?plasmidid={each_plasmid}',cookies = django_request.COOKIES)).json()['data']['sequenceconfirm'].lower()
                 seq_obj = Seq(sequence)
-                seq_reverse = str(seq_obj.reverse_complement())
-                fi = featureIdentify()
-                feature_list = fi.featureMatch(sequence)
-                reverse_feature_list = fi.featureMatch(seq_reverse)
                 scar_list = scarPosition(sequence)
+                seq_reverse = str(seq_obj.reverse_complement())
+                PlasmidParentBackboneResponse = (session.get(f"{Base_URL}GetBackboneParent?plasmidid={each_plasmid}",cookies=django_request.COOKIES)).json()
+                sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{plasmidName}')
+                if(PlasmidParentBackboneResponse['success']):
+                    PlasmidParentBackbone = PlasmidParentBackboneResponse['data'][0]['id']
+                    ParentBackboneSequenceResponse = (session.get(f"{Base_URL}GetBackboneSeqByID?backboneid={PlasmidParentBackbone}", cookies=django_request.COOKIES)).json()
+                    if(ParentBackboneSequenceResponse['success']):
+                        ParentBackboneSequence = ParentBackboneSequenceResponse['data']['sequence']
+                        BackboneFeatureListResponse = (session.get(f"{Base_URL}GetBackboneFeature/{PlasmidParentBackbone}", cookies=django_request.COOKIES)).json()
+                        if(BackboneFeatureListResponse['success']):
+                            backbone_fetch_kmer = KmerIndex()
+                            for each_feature in BackboneFeatureListResponse['data']:
+                                if(each_feature['feature_start']<each_feature['feature_end']):
+                                    backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:each_feature["feature_end"]])
+                                else:
+                                    backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:]+ParentBackboneSequence[:each_feature["feature_end"]])
+                            fetch_result = backbone_fetch_kmer.query(sequence)
+                            # print(fetch_result)
+                            for each_key in fetch_result.keys():
+                                for each_feature in BackboneFeatureListResponse['data']:
+                                    if(each_feature["feature_label"] == fetch_result[each_key]["seq_id"]):
+                                        type = each_feature["feature_type"]
+                                        break
+                                new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type]}
+                                sa.add_feature(new_feature)
+                            # print(sa.feature_list)
+                        else:
+                            fi = featureIdentify()
+                            feature_list = fi.featureMatch(sequence)
+                            reverse_feature_list = fi.featureMatch(seq_reverse)
+                            sa.add_features(feature_list)
+                            sa.add_reverse_features(reverse_feature_list)
+                PlasmidParentPartResponse = (session.get(f"{Base_URL}GetPartParent?plasmidid={each_plasmid}",cookies=django_request.COOKIES)).json()
+                Part_fetch_kmer = KmerIndex()
+                if(PlasmidParentPartResponse['success']):
+                    PlasmidParentPart = PlasmidParentPartResponse['data']
+                    for each_part in PlasmidParentPart:
+                        partSeqResponse = (session.get(f"{Base_URL}GetPartSeqByID?partid={each_part['partid']}",cookies=django_request.COOKIES)).json()
+                        if(partSeqResponse['success']):
+                            partSeq = partSeqResponse['data']['level0sequence']
+                            Part_fetch_kmer.add_sequence(each_part['name'],partSeq)
+                    fetch_result = Part_fetch_kmer.query(sequence)
+                    for each_key in fetch_result:
+                        typeResponse = (session.get(f"{Base_URL}TypeByName?name={each_key}",cookies=django_request.COOKIES))
+                        if(typeResponse.status_code == 200):
+                            type = typeResponse.json()['Type'].lower()
+                            new_feature = {each_key:[fetch_result[each_key]['start'],fetch_result[each_key]['end'],type]}
+                            sa.add_feature(new_feature)
+                PlasmidParentPlasmidResponse = (session.get(f"{Base_URL}GetPlasmidParent?plasmidid={each_plasmid}",cookies=django_request.COOKIES)).json()
+                plasmid_fetch_kmer = KmerIndex()
+                if(PlasmidParentPlasmidResponse['success']):
+                    PlasmidParentPlasmid = PlasmidParentPlasmidResponse['data']
+                    ParentPartList = getplasmidAllParentPart(django_request,session,PlasmidParentPlasmid)
+                    for each_part in ParentPartList.keys():
+                        plasmid_fetch_kmer.add_sequence(each_part,ParentPartList[each_part])
+                    fetch_result = plasmid_fetch_kmer.query(sequence)
+                    for each_key in fetch_result.keys():
+                        typeResponse = (session.get(f"{Base_URL}TypeByName?name={each_key}",cookies=django_request.COOKIES))
+                        if(typeResponse.status_code == 200):
+                            type = typeResponse.json()['Type'].lower()
+                            new_feature = {each_key:[fetch_result[each_key]["start"],fetch_result[each_key]["end"],type]}
+                            sa.add_feature(new_feature)
+                
                 sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidName}')
+                
                 file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile"
                 sa.GenerateGBKFile(file_address)
                 file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))

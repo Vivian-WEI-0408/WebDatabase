@@ -48,6 +48,22 @@ class SequenceAnnotator:
                 self.feature_list[key] = new_feature_list[key]
         except Exception as e:
             return
+        
+    def add_reverse_feature(self, new_feature):
+        try:
+            key = list(new_feature.keys())[0]
+            value = list(new_feature[key])
+            self.reverse_feature_list[key] = value
+        except Exception as e:
+            return
+        
+    def add_reverse_features(self, new_feature_list):
+        try:
+            keys = new_feature_list.keys()
+            for key in keys:
+                self.reverse_feature_list[key] = new_feature_list[key]
+        except Exception as e:
+            return
     @staticmethod
     def GeneratorBackboneNoSa(name,sequence,file_address, feature_list):
         accession = "."
@@ -111,7 +127,7 @@ class SequenceAnnotator:
         # print(file_address)
         # print(self.sequence)
         # print("7777777")
-        print(self.feature_list)
+        # print(self.feature_list)
         if(type == "circular"):
             definition = "synthetic circular DNA"
         else:

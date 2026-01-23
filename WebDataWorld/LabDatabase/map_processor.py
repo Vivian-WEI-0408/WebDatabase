@@ -11,19 +11,23 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
     print(file_name)
     if (file_name[1] == "fasta"):
         records = parse(upload_map, "fasta")
-        upload_map.seek(0)
+        # upload_map.seek(0)
         for record in records:
             Sequence = str(record.seq)
             break
     elif(file_name[1] == "gb" or file_name[1] == "gbk" or file_name[1] == "ape" or file_name[1] == "str"):
-        records = parse(upload_map, "genbank")
-        upload_map.seek(0)
-        for record in records:
-            Sequence = str(record.seq)
-            print(Sequence)
-            FeatureList = record.features
-            print(Sequence)
-            break
+        try:
+            records = parse(upload_map, "genbank")
+            # upload_map.seek(0)
+            for record in records:
+                print(record)
+                Sequence = str(record.seq)
+                print(Sequence)
+                FeatureList = record.features
+                print(Sequence)
+                break
+        except Exception as e:
+            print(e.args)
     elif(file_name[1] == "dna"):
         print(upload_map)
         record = snapgene_reader.snapgene_to_dict(upload_map)
@@ -88,7 +92,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             if(file_name[1] == "gb" or file_name[1] == "gbk" or file_name[1] == "ape" or file_name[1] == "str"):
                 for each_feature in FeatureList:
                     try:
-                        start_position = each_feature.location.start
+                        start_position = each_feature.location.start+1
                         end_position = each_feature.location.end
                         label = each_feature.qualifiers['label'][0] if "label" in each_feature.qualifiers else ""
                         feature_type = each_feature.type
