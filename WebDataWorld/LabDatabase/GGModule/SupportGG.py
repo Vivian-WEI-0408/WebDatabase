@@ -23,6 +23,7 @@ class SupportGG:
 
 
     def show(self):
+        print("Show!!!")
         report_writer = dnacauldron.AssemblyReportWriter(include_mix_graphs=True, include_assembly_plots=True)
         self.simulation.write_report("output", report_writer=report_writer)
 
@@ -31,16 +32,10 @@ class SupportGG:
         self.repository.add_records(records)
 
 if __name__ == '__main__':
-    AddressList = [r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-5747.gbk",
-    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-5723.gbk",
-    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-1241.gbk",
-    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-7272.gbk",
-    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\backbone-398.gbk",]
-    FileName = ["part-5747",
-                "part-5723",
-                "part-1241",
-                "part-7272",
-                "backbone-398",]
+    AddressList = [r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\backbone-YXP65.gbk",
+    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-promoter-XRHL1P002.gbk",]
+    FileName = ["backbone-YXP65",
+                "part-promoter-XRHL1P002",]
     test = SupportGG(AddressList,FileName)
     test.assemblyPart("webtest")
     test.show()

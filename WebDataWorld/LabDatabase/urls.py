@@ -2,6 +2,7 @@ from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 from LabDatabase.AdminManage import admin_views
 from LabDatabase import views,admin
+from .CaculateModule import DNADiagram
 urlpatterns = [
     #index
     path("index",views.index,name="index"),
@@ -61,4 +62,7 @@ urlpatterns = [
     path("user/<str:username>",views.user,name="user"),
     
     path("GetParent",views.GetParentInfo,name="GetParent"),
+    
+    path("RepositoryDiagram/<str:repositoryName>",DNADiagram.generate_plasmid_view,name="RepositoryDiagram"),
+    path("ShowRepository/<str:repositoryName>",views.showRepository,name="ShowRepository"),
 ]
