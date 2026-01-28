@@ -4603,6 +4603,7 @@ function setupMenuEvents() {
         }
 
         function DeleteBackbone(Backboneid){
+            console.log(Backboneid);
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             var confirmDelete = confirm("确定要删除吗？");
