@@ -156,11 +156,10 @@ class GGFileProcessor:
                                     plasmid_ids.append(plasmid_obj.json()["data"]['plasmidid'])
                                 else:
                                     raise ValueError
-                            # print(plasmid_ids)
                         request_part_body = {"RepoName":row["AssemblyName"],'part_ids':part_ids}
                         request_backbone_body = {"RepoName":row["AssemblyName"],"backbone_ids":backbone_ids}
                         request_plasmid_body = {"RepoName":row["AssemblyName"],"plasmid_ids":plasmid_ids}
-                        # print(request_part_body)
+                        
                         
                         add_part_response = session.post(f"{BASE_URL}addparts",json=request_part_body,cookies=django_request.COOKIES)
                         add_backbone_response = session.post(f"{BASE_URL}addbackbones",json=request_backbone_body,cookies=django_request.COOKIES)
@@ -174,120 +173,126 @@ class GGFileProcessor:
                         if(add_plasmid_response.status_code != 200):
                             error_rows.extend(f"第{index}行，加入元件失败")
                             continue
+            #             """
+            #             组装部分
+            #             """
                         
-                        """
-                        组装部分
-                        """
-                        
-                        file_address_list = []
-                        file_name_list = []
-                        for each_part in part_ids:
-                            sequence = (session.get(f'{BASE_URL}GetPartSeqByID?partid={each_part}',cookies = django_request.COOKIES)).json()['data']['level0sequence'].lower()
-                            partType = (session.get(f"{BASE_URL}TypeByID?ID={each_part}", cookies=django_request.COOKIES)).json()['Type'].lower()
-                            partName = (session.get(f"{BASE_URL}PartNameByID?ID={each_part}",cookies=django_request.COOKIES)).json()['PartName']
-                            # print(partType)
-                            partSource = (session.get(f"{BASE_URL}partSource/{each_part}",cookies=django_request.COOKIES)).json()
-                            # print(partSource)
-                            if(partSource['success'] != True):
-                                error_rows.extend(f"第{index}行，元件物种信息获取失败")
-                                continue
-                            if(partSource['source'].lower() != "saccharomyces cerevisiae"):
-                                if(partType == "promoter"):
-                                    sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
-                                elif(partType == "terminator"):
-                                    sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
-                                elif(partType == "cds"):
-                                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
-                                elif(partType == "rbs"):
-                                    sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
-                                elif(partType == "p+r"):
-                                    sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
-                            else:
-                                if(partType == "promoter"):
-                                    sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
-                                elif(partType == "terminator"):
-                                    sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
-                                elif(partType == "cds"):
-                                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+            #             file_address_list = []
+            #             file_name_list = []
+            #             for each_part in part_ids:
+            #                 sequence = (session.get(f'{BASE_URL}GetPartSeqByID?partid={each_part}',cookies = django_request.COOKIES)).json()['data']['level0sequence'].lower()
+            #                 partType = (session.get(f"{BASE_URL}TypeByID?ID={each_part}", cookies=django_request.COOKIES)).json()['Type'].lower()
+            #                 partName = (session.get(f"{BASE_URL}PartNameByID?ID={each_part}",cookies=django_request.COOKIES)).json()['PartName']
+            #                 # print(partType)
+            #                 partSource = (session.get(f"{BASE_URL}partSource/{each_part}",cookies=django_request.COOKIES)).json()
+            #                 # print(partSource)
+            #                 if(partSource['success'] != True):
+            #                     error_rows.extend(f"第{index}行，元件物种信息获取失败")
+            #                     continue
+            #                 if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+            #                     if(partType == "promoter"):
+            #                         sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
+            #                     elif(partType == "terminator"):
+            #                         sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+            #                     elif(partType == "cds"):
+            #                         sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+            #                     elif(partType == "rbs"):
+            #                         sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+            #                     elif(partType == "p+r"):
+            #                         sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+            #                 else:
+            #                     if(partType == "promoter"):
+            #                         sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+            #                     elif(partType == "terminator"):
+            #                         sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+            #                     elif(partType == "cds"):
+            #                         sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
             
-                            seq_obj = Seq(sequence)
-                            seq_reverse = str(seq_obj.reverse_complement())
-                            fi = featureIdentify()
-                            feature_list = fi.featureMatch(sequence)
-                            reverse_feature_list = fi.featureMatch(seq_reverse)
-                            scar_list = scarPosition(sequence)
-                            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{partName}')
-                            file_address = os.path.join(File_Address, "AssemblyFile")
-                            sa.GenerateGBKFile(file_address)
-                            file_address_list.append(os.path.join(f"{file_address}",f"part-{partType}-{partName}.gbk"))
-                            file_name_list.append(f'part-{partType}-{partName}')
-                        for each_backbone in backbone_ids:
-                            sequence = (session.get(f'{BASE_URL}GetBackboneSeqByID?backboneid={each_backbone}',cookies = django_request.COOKIES)).json()['data']['sequence'].lower()
-                            backboneName = (session.get(f'{BASE_URL}BackboneNameByID?ID={each_backbone}',cookies=django_request.COOKIES)).json()['BackboneName']
-                            # print(sequence)
-                            backboneFeature = (session.get(f"{BASE_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
-                            file_address = os.path.join(File_Address, "AssemblyFile")
-                            if(backboneFeature["success"] != True):
-                                seq_obj = Seq(sequence)
-                                seq_reverse = str(seq_obj.reverse_complement())
-                                fi = featureIdentify()
-                                feature_list = fi.featureMatch(sequence)
-                                reverse_feature_list = fi.featureMatch(seq_reverse)
-                                scar_list = scarPosition(sequence)
-                                sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneName}')
-                                sa.GenerateGBKFile(file_address)
-                            else:
-                                SequenceAnnotator.GeneratorBackboneNoSa(f'backbone-{backboneName}',sequence,file_address,backboneFeature['data'])
-                            file_address_list.append(os.path.join(f"{file_address}",f"backbone-{backboneName}.gbk"))
-                            file_name_list.append(f"backbone-{backboneName}")
-                        for each_plasmid in plasmid_ids:
-                            plasmidName = (session.get(f'{BASE_URL}PlasmidNameByID?ID={each_plasmid}',cookies=django_request.COOKIES)).json()['PlasmidName']
-                            if(os.path.exists(os.path.join(Assembly_File_Address,f"{plasmidName}.gb"))):
-                                file_address_list.append(os.path.join(Assembly_File_Address,f"{plasmidName}.gb"))
-                                file_name_list.append(plasmidName)
-                            else:
-                                sequence = (session.get(f'{Assembly_File_Address}PlasmidSeqByID?plasmidid={each_plasmid}',cookies = django_request.COOKIES)).json()['data']['sequenceconfirm'].lower()
-                                seq_obj = Seq(sequence)
-                                seq_reverse = str(seq_obj.reverse_complement())
-                                fi = featureIdentify()
-                                feature_list = fi.featureMatch(sequence)
-                                reverse_feature_list = fi.featureMatch(seq_reverse)
-                                scar_list = scarPosition(sequence)
-                                sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidName}')
-                                file_address = os.path.join(File_Address, "AssemblyFile")
-                                sa.GenerateGBKFile(file_address)
-                                file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))
-                                file_name_list.append(f"plasmid-{plasmidName}")
+            #                 seq_obj = Seq(sequence)
+            #                 seq_reverse = str(seq_obj.reverse_complement())
+            #                 fi = featureIdentify()
+            #                 feature_list = fi.featureMatch(sequence)
+            #                 reverse_feature_list = fi.featureMatch(seq_reverse)
+            #                 scar_list = scarPosition(sequence)
+            #                 sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{partName}')
+            #                 file_address = os.path.join(File_Address, "AssemblyFile")
+            #                 sa.GenerateGBKFile(file_address)
+            #                 file_address_list.append(os.path.join(f"{file_address}",f"part-{partType}-{partName}.gbk"))
+            #                 file_name_list.append(f'part-{partType}-{partName}')
+            #             for each_backbone in backbone_ids:
+            #                 sequence = (session.get(f'{BASE_URL}GetBackboneSeqByID?backboneid={each_backbone}',cookies = django_request.COOKIES)).json()['data']['sequence'].lower()
+            #                 backboneName = (session.get(f'{BASE_URL}BackboneNameByID?ID={each_backbone}',cookies=django_request.COOKIES)).json()['BackboneName']
+            #                 # print(sequence)
+            #                 backboneFeature = (session.get(f"{BASE_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
+            #                 file_address = os.path.join(File_Address, "AssemblyFile")
+            #                 if(backboneFeature["success"] != True):
+            #                     seq_obj = Seq(sequence)
+            #                     seq_reverse = str(seq_obj.reverse_complement())
+            #                     fi = featureIdentify()
+            #                     feature_list = fi.featureMatch(sequence)
+            #                     reverse_feature_list = fi.featureMatch(seq_reverse)
+            #                     scar_list = scarPosition(sequence)
+            #                     sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneName}')
+            #                     sa.GenerateGBKFile(file_address)
+            #                 else:
+            #                     SequenceAnnotator.GeneratorBackboneNoSa(f'backbone-{backboneName}',sequence,file_address,backboneFeature['data'])
+            #                 file_address_list.append(os.path.join(f"{file_address}",f"backbone-{backboneName}.gbk"))
+            #                 file_name_list.append(f"backbone-{backboneName}")
+            #             for each_plasmid in plasmid_ids:
+            #                 plasmidName = (session.get(f'{BASE_URL}PlasmidNameByID?ID={each_plasmid}',cookies=django_request.COOKIES)).json()['PlasmidName']
+            #                 if(os.path.exists(os.path.join(Assembly_File_Address,f"{plasmidName}.gb"))):
+            #                     file_address_list.append(os.path.join(Assembly_File_Address,f"{plasmidName}.gb"))
+            #                     file_name_list.append(plasmidName)
+            #                 else:
+            #                     sequence = (session.get(f'{Assembly_File_Address}PlasmidSeqByID?plasmidid={each_plasmid}',cookies = django_request.COOKIES)).json()['data']['sequenceconfirm'].lower()
+            #                     seq_obj = Seq(sequence)
+            #                     seq_reverse = str(seq_obj.reverse_complement())
+            #                     fi = featureIdentify()
+            #                     feature_list = fi.featureMatch(sequence)
+            #                     reverse_feature_list = fi.featureMatch(seq_reverse)
+            #                     scar_list = scarPosition(sequence)
+            #                     sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidName}')
+            #                     file_address = os.path.join(File_Address, "AssemblyFile")
+            #                     sa.GenerateGBKFile(file_address)
+            #                     file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))
+            #                     file_name_list.append(f"plasmid-{plasmidName}")
             
-                        GG = SupportGG.SupportGG(file_address_list,file_name_list)
-                        GG.assemblyPart(Assembly_Plan_Name)
-                        GG.show()
-                        if(os.path.exists(os.path.join(Assembly_File_Address,f"{Assembly_Plan_Name}.gb"))):
-                            records = parse(os.path.join(Assembly_File_Address,f"{Assembly_Plan_Name}.gb"), "genbank")
-                            for record in records:
-                                Sequence = str(record.seq)
-                            response = AssemblyResultUpload(django_request, Assembly_Plan_Name, Sequence, part_ids, backbone_ids, plasmid_ids, BASE_URL)
-                            if(response["success"]):
-                                continue
-                            else:
-                                error_rows.extend(f"第{index}行上传数据失败")
-                                continue
-                        else:
-                            error_rows.extend(f"第{index}行，组装文件不存在")
-                    except Exception as e:
-                        logger.error(f"创建仓库失败：{str(e.args)}")
-                        error_rows.append(f"第{index}行，创建仓库失败")
-            if(len(error_rows) == 0):
-                return {"success":True}
-            else:
-                return {"success":True,"error_row":error_rows}
+            #             GG = SupportGG.SupportGG(file_address_list,file_name_list)
+            #             GG.assemblyPart(Assembly_Plan_Name)
+            #             GG.show()
+            #             if(os.path.exists(os.path.join(Assembly_File_Address,f"{Assembly_Plan_Name}.gb"))):
+            #                 records = parse(os.path.join(Assembly_File_Address,f"{Assembly_Plan_Name}.gb"), "genbank")
+            #                 for record in records:
+            #                     Sequence = str(record.seq)
+            #                 response = AssemblyResultUpload(django_request, Assembly_Plan_Name, Sequence, part_ids, backbone_ids, plasmid_ids, BASE_URL)
+            #                 if(response["success"]):
+            #                     continue
+            #                 else:
+            #                     error_rows.extend(f"第{index}行上传数据失败")
+            #                     continue
+            #             else:
+            #                 error_rows.extend(f"第{index}行，组装文件不存在")
+            #         except Exception as e:
+            #             logger.error(f"创建仓库失败：{str(e.args)}")
+            #             error_rows.append(f"第{index}行，创建仓库失败")
+            # if(len(error_rows) == 0):
+            #     return {"success":True}
+            # else:
+            #     return {"success":True,"error_row":error_rows}
                 
+                    except Exception as e:
+                        logger.error(f"处理Excel文件失败: {str(e.args)}")
+                        return {
+                            'success':False,
+                            'error': str(e.args),
+                        }
         except Exception as e:
-            logger.error(f"处理Excel文件失败: {str(e.args)}")
             return {
                 'success':False,
                 'error': str(e.args),
-            }
+                }
+            
+            
             
 def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, PlasmidList, Base_URL):\
     

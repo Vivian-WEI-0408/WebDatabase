@@ -26,14 +26,15 @@ from .CaculateModule.ScarIdentify import scarPosition,scarFunction
 from .CaculateModule.snapgene_reader import snapgene_to_dict
 from .ControllerModule import FittingLabels
 from .CaculateModule.KmerIndex import KmerIndex
-from GGModule import SupportGG
+# from GGModule import SupportGG
+from .GGModule import SupportGG
 from Bio.SeqIO import parse
 import queue
 
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
 Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
@@ -443,7 +444,7 @@ def UploadFile(request):
     
 def task_status(request, task_id):
     task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
-    # print(task_status)
+    print(task_status)
     if(not task_status):
         return JsonResponse({'error':"任务不存在或已过期"},status=404)
     if(task_status['progress'] == 100 and task_status['status'] != "failed"):
@@ -455,7 +456,7 @@ def task_status(request, task_id):
     }
     if task_status['status'] == 'completed':
         if(task_status['result'] != None):
-            response_data.update(task_status['result'])
+            response_data['result']=task_status['result']
         if(task_status['error'] != None):
             response_data['error'] = task_status['error']
     elif task_status['status'] == 'failed':
@@ -794,7 +795,6 @@ def downloadPlasmidMap(request,plasmidid):
             sa.add_features(feature_list)
             sa.add_reverse_features(reverse_feature_list)
         
-        print(sa.feature_list)
         file_address = r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\'
         thread = threading.Thread(
             target = sa.GenerateGBKFile,
@@ -1127,17 +1127,19 @@ def AssemblyRepo(request):
     else:
         return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
 
-def process_assembly_repo(repositoryName, django_request):
+def process_assembly_repo(repositoryName, django_request,task_id):
     session = requests.Session()
     session.headers.update({
             'User-Agent':'Django-App/1.0',
             'Content-Type':'application/json',
     })
     request_body = {"Name":repositoryName}
+    print(repositoryName)
     try:
         repository_response = session.post(f"{Base_URL}getrepo",json=request_body,cookies=django_request.COOKIES)
+        print(repository_response.json())
     except Exception as e:
-        return render(django_request,'error.html',{'error':"获取层级信息错误"})
+        return render(django_request,'error.html',{'error':"获取仓库错误"})
     if(repository_response.status_code == 200):
         repository_data = repository_response.json()['data']
         part = repository_data['parts']
@@ -1190,6 +1192,7 @@ def process_assembly_repo(repositoryName, django_request):
             # print(sequence)
             backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
             file_address = os.path.join(File_Address, "AssemblyFile")
+            print(backboneFeature)
             if(backboneFeature["success"] != True):
                 seq_obj = Seq(sequence)
                 seq_reverse = str(seq_obj.reverse_complement())
@@ -1197,6 +1200,7 @@ def process_assembly_repo(repositoryName, django_request):
                 feature_list = fi.featureMatch(sequence)
                 reverse_feature_list = fi.featureMatch(seq_reverse)
                 scar_list = scarPosition(sequence)
+                print(feature_list)
                 sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneName}')
                 sa.GenerateGBKFile(file_address)
             else:
@@ -1223,6 +1227,7 @@ def process_assembly_repo(repositoryName, django_request):
                         BackboneFeatureListResponse = (session.get(f"{Base_URL}GetBackboneFeature/{PlasmidParentBackbone}", cookies=django_request.COOKIES)).json()
                         if(BackboneFeatureListResponse['success']):
                             backbone_fetch_kmer = KmerIndex()
+                            print(BackboneFeatureListResponse['data'])
                             for each_feature in BackboneFeatureListResponse['data']:
                                 if(each_feature['feature_start']<each_feature['feature_end']):
                                     backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:each_feature["feature_end"]])
@@ -1280,24 +1285,62 @@ def process_assembly_repo(repositoryName, django_request):
                 sa.GenerateGBKFile(file_address)
                 file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))
                 file_name_list.append(f"plasmid-{plasmidName}")
-            
-        GG = SupportGG.SupportGG(file_address_list,file_name_list)
-        GG.assemblyPart(repositoryName)
-        GG.show()
-        if(os.path.exists(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"))):
-            records = parse(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"), "genbank")
-            for record in records:
-                Sequence = str(record.seq)
-            response = AssemblyResultUpload(django_request, repositoryName, Sequence, part, backbone, plasmid)
-            # print(response)
-            if(response["success"]):
-                return {"success":True,"file_address":os.path.join(Assembly_File_Address,f"{repositoryName}.gb")}
+        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+        task_status["status"] = "progress"
+        task_status['progress'] = 50
+        cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+        try:
+            print("GO TO GG Part")
+            GG = SupportGG.SupportGG(file_address_list,file_name_list)
+            GG.assemblyPart(repositoryName)
+            print("GO TO Show")
+            GG.show()
+        except Exception as e:
+            print(e.args)
+            task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+            task_status["status"] = "failed"
+            task_status["error"] = str(e.args)
+            cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+        max_wait_time = 20
+        start_time = time.time()
+        while time.time() - start_time < max_wait_time:
+            if(os.path.exists(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"))):
+                records = parse(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"), "genbank")
+                for record in records:
+                    Sequence = str(record.seq)
+                response = AssemblyResultUpload(django_request, repositoryName, Sequence, part, backbone, plasmid)
+                if(response["success"]):
+                    task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+                    task_status["status"] = "completed"
+                    task_status['progress'] = 100
+                    task_status["result"] = os.path.join(Assembly_File_Address,f"{repositoryName}.gb")
+                    cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+                    return
+                else:
+                    task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+                    task_status["status"] = "failed"
+                    task_status['progress'] = 100
+                    task_status["result"] = None
+                    task_status["error"] = "组装失败"
+                    cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+                    return
             else:
-                return {"success":False,"message":"添加质粒到数据库失败"}
-        else:
-            return {"success":False, "message":"组装scar错误"}
+                time.sleep(0.5)
+                continue
+        print(os.path.exists(os.path.join(Assembly_File_Address,f"{repositoryName}.gb")))
+        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+        task_status["status"] = "failed"
+        task_status['progress'] = 100
+        task_status["result"] = None
+        task_status["error"] = "组装Scar错误"
+        cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
     else:
-        return {"success":False,"message":"没有获取到仓库信息"}
+        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+        task_status["status"] = "failed"
+        task_status['progress'] = 100
+        task_status["result"] = None
+        task_status["error"] = "获取仓库失败"
+        cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
         
 
 
@@ -1592,6 +1635,74 @@ def GetParentInfo(request):
         else:
             return render(request,'error.html',{'error':"获取层级信息错误"})
         
+
+
+def showRepository(request, repositoryName):
+    session = requests.Session()
+    token = request.COOKIES.get('csrftoken')
+    session.headers.update({
+        'User-Agent':'Django-App/1.0',
+        'Content-Type':'application/json',
+        'X-CSRFToken':token,
+    })
+    if(request.method == "GET"):
+        request_body = {"Name":repositoryName}
+        response = session.post(f"{Base_URL}getrepo",json=request_body,cookies=request.COOKIES)
+        print(response.json())
+        user = request.session['info']['uname']
+        if(response.status_code == 200):
+            part_id_list = response.json()["data"]["parts"]
+            backbone_id_list = response.json()["data"]["backbones"]
+            plasmid_id_list = response.json()["data"]["plasmids"]
+            part_info_list = []
+            for each_part in part_id_list:
+                part_name_response = session.get(f"{Base_URL}PartNameByID?ID={each_part}",cookies=request.COOKIES)
+                if(part_name_response.status_code == 200):
+                    part_name = part_name_response.json()["PartName"]
+                else:
+                    #返回一个预设的错误图像
+                    return HttpResponse("False",content_type="text")
+                part_type_response = session.get(f"{Base_URL}TypeByID?ID={each_part}",cookies=request.COOKIES)
+                if(part_type_response.status_code == 200):
+                    part_type = part_type_response.json()["Type"]
+                else:
+                    #返回一个预设的错误图像
+                    return HttpResponse("False",content_type="text")
+                part_scar_response = session.get(f"{Base_URL}getPartScar?id={each_part}",cookies=request.COOKIES).json()
+                print(part_scar_response)
+                if(part_scar_response["success"]):
+                    part_scar = f"BsmBI({part_scar_response['scar_info'][0]['bsmbi']})BsaI({part_scar_response['scar_info'][0]['bsai']})BbsI({part_scar_response['scar_info'][0]['bbsi']})"
+
+                else:
+                    return HttpResponse("False",content_type="text")
+                part_info_list.append({"name":part_name,"Type":part_type,"scar":part_scar})
+            backbone_info_list = []
+            for each_backbone in backbone_id_list:
+                backbone_response = session.get(f"{Base_URL}BackboneByID?ID={each_backbone}",cookies=request.COOKIES)
+                if(backbone_response.status_code == 200):
+                    backbone_scar_response = session.get(f"{Base_URL}getBackboneScar?id={each_backbone}",cookies=request.COOKIES).json()
+                    if(backbone_scar_response["success"]):
+                        backbone_scar = f"BsmBI({backbone_scar_response['scar_info'][0]['bsmbi']})BsaI({backbone_scar_response['scar_info'][0]['bsai']})BbsI({backbone_scar_response['scar_info'][0]['bbsi']})"
+                        backbone_info_list.append({"name":backbone_response.json()[0]["name"],"ori":", ".join(backbone_response.json()[0]["ori"]),"marker":", ".join(backbone_response.json()[0]["marker"]),"scar":backbone_scar})
+                    else:
+                        return HttpResponse("False",content_type="text")
+                else:
+                    return HttpResponse("False",content_type="text")
+            plasmid_info_list = []
+            for each_plasmid in plasmid_id_list:
+                plasmid_response = session.get(f"{Base_URL}PlasmidByID?ID={each_plasmid}",cookies=request.COOKIES)
+                if(plasmid_response.status_code == 200):
+                    plasmid_scar_response = session.get(f"{Base_URL}getPlasmidScar?plasmidid={each_plasmid}",cookies=request.COOKIES).json()
+                    if(plasmid_scar_response['success']):
+                        backbone_scar = f"BsmBI({plasmid_scar_response['scar_info'][0]['bsmbi']})BsaI({plasmid_scar_response['scar_info'][0]['bsai']})BbsI({plasmid_scar_response['scar_info'][0]['bbsi']})"
+                        plasmid_info_list.append({"name":plasmid_response.json()[0]["name"],"length":plasmid_response.json()[0]["length"],"scar":backbone_scar})
+                    else:
+                        return HttpResponse("False",content_type="text")
+                else:
+                    return HttpResponse("False",content_type="text")
+            repository_data = {"user":user,"name":repositoryName,"created_time":response.json()["created_time"],"expired_time":response.json()["expired_time"],"part_number":response.json()["data"]["total_parts"],"plasmid_number":response.json()["data"]["total_plasmids"],"parts":part_info_list,"backbones":backbone_info_list,"plasmids":plasmid_info_list}
+            print(repository_data)
+    return render(request, "repositoryPage.html",{"repository":repository_data})
         
-# def get_plasmid_diagram(request, repository_name):
+
     
