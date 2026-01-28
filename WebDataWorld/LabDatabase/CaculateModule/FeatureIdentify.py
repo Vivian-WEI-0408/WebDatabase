@@ -34,13 +34,11 @@ class featureIdentify:
         with open(r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\CaculateModule\BasicFeature.txt','r',encoding='utf-8') as file:
             lines = file.readlines()
             for line in lines:
-                # print(line)
                 line = line.strip('\n')
                 if(line.__contains__('#')):
                     type = "Origin" if line == "#Origin" else "CDS" if line == "#Protein" else "promoter" if line == "#Promoter" else "terminator" if line == "#terminator" else "primer_bind" if line == "#binding" else "spacer" if line=="#spacer" else "homo" if line=="#Homology Arm" else "attp" if line=="#Attp" else "iceyydm" if line=="#ICEyydm" else "Bsubamy" if line=="#B.subtilis amyE" else "misc_feature"
                 else:
                     line_content = line.split(":")
-                    # print(line_content)
                     if type == "Origin":
                         self.OriginFeatureDict[line_content[0]] = line_content[1]
                         self.OriginFeatureKmer.add_sequence(line_content[0],line_content[1])

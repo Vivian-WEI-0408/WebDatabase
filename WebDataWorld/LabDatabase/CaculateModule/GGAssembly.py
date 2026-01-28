@@ -111,16 +111,10 @@ class GGFileProcessor:
                     try:
                         Assembly_Plan_Name = row["AssemblyName"]
                         request_body = {"Name":Assembly_Plan_Name, "Note":row["Note"]}
-                        # print(request_body)
                         tempRepo_response = session.post(f"{BASE_URL}createRepo",json=request_body,cookies=django_request.COOKIES)
-                        # print(tempRepo_response.json())
                         if(tempRepo_response.status_code != 200):
-                            # print("false")
                             error_rows.append(f"第{index}行，创建仓库失败")
                         else:
-                            # print(tempRepo_response.json()["repository_id"])
-                            # print(tempRepo_response.json()["repository_name"])
-                            # print(tempRepo_response.json()["expires_at"])
                             Assembly_Part_List = row["Part"].split(",")
                             Assembly_Backbone_List = row["Backbone"].split(",")
                             Assembly_Plasmid_List = row["Plasmid"].split(",")
@@ -130,16 +124,13 @@ class GGFileProcessor:
                                 Assembly_Backbone_List = []
                             if(len(Assembly_Plasmid_List) == 1 and Assembly_Plasmid_List[0] == ''):
                                 Assembly_Plasmid_List = []
-                                # print(f"plasmid_list:{Assembly_Plasmid_List}")
                             part_ids = []
                             for each_part in Assembly_Part_List:
                                 part_obj = session.get(f"{BASE_URL}PartName?name={each_part.strip()}",cookies=django_request.COOKIES)
                                 if(part_obj.status_code == 200):
-                                    # print(part_obj.json()['data'])
                                     part_ids.append(part_obj.json()['data']['partid'])
                                 else:
                                     raise ValueError
-                            # print(part_ids)
                             backbone_ids = []
                             for each_backbone in Assembly_Backbone_List:
                                 backbone_obj = session.get(f"{BASE_URL}BackboneName?name={each_backbone.strip()}",cookies=django_request.COOKIES)
@@ -147,20 +138,16 @@ class GGFileProcessor:
                                     backbone_ids.append(backbone_obj.json()['data']['id'])
                                 else:
                                     raise ValueError
-                            # print(backbone_ids)
                             plasmid_ids = []
-                            # print(f"plasmid_list:{Assembly_Plasmid_List}")
                             for each_plasmid in Assembly_Plasmid_List:
                                 plasmid_obj = session.get(f"{BASE_URL}PlasmidName?name={each_plasmid.strip()}",cookies=django_request.COOKIES)
                                 if(plasmid_obj.status_code == 200):
                                     plasmid_ids.append(plasmid_obj.json()["data"]['plasmidid'])
                                 else:
                                     raise ValueError
-                            # print(plasmid_ids)
                         request_part_body = {"RepoName":row["AssemblyName"],'part_ids':part_ids}
                         request_backbone_body = {"RepoName":row["AssemblyName"],"backbone_ids":backbone_ids}
                         request_plasmid_body = {"RepoName":row["AssemblyName"],"plasmid_ids":plasmid_ids}
-                        # print(request_part_body)
                         
                         add_part_response = session.post(f"{BASE_URL}addparts",json=request_part_body,cookies=django_request.COOKIES)
                         add_backbone_response = session.post(f"{BASE_URL}addbackbones",json=request_backbone_body,cookies=django_request.COOKIES)
@@ -185,9 +172,7 @@ class GGFileProcessor:
                             sequence = (session.get(f'{BASE_URL}GetPartSeqByID?partid={each_part}',cookies = django_request.COOKIES)).json()['data']['level0sequence'].lower()
                             partType = (session.get(f"{BASE_URL}TypeByID?ID={each_part}", cookies=django_request.COOKIES)).json()['Type'].lower()
                             partName = (session.get(f"{BASE_URL}PartNameByID?ID={each_part}",cookies=django_request.COOKIES)).json()['PartName']
-                            # print(partType)
                             partSource = (session.get(f"{BASE_URL}partSource/{each_part}",cookies=django_request.COOKIES)).json()
-                            # print(partSource)
                             if(partSource['success'] != True):
                                 error_rows.extend(f"第{index}行，元件物种信息获取失败")
                                 continue
@@ -224,7 +209,6 @@ class GGFileProcessor:
                         for each_backbone in backbone_ids:
                             sequence = (session.get(f'{BASE_URL}GetBackboneSeqByID?backboneid={each_backbone}',cookies = django_request.COOKIES)).json()['data']['sequence'].lower()
                             backboneName = (session.get(f'{BASE_URL}BackboneNameByID?ID={each_backbone}',cookies=django_request.COOKIES)).json()['BackboneName']
-                            # print(sequence)
                             backboneFeature = (session.get(f"{BASE_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
                             file_address = os.path.join(File_Address, "AssemblyFile")
                             if(backboneFeature["success"] != True):
@@ -309,12 +293,10 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
     Ori_list = []
     Marker_list = []
     OriAndMarkerLabel = FittingLabels(Sequence)
-    # print(OriAndMarkerLabel)
     for each_ori in OriAndMarkerLabel['Origin']:
         Ori_list.append(each_ori['Name'])
     for each_marker in OriAndMarkerLabel['Marker']:
         Marker_list.append(each_marker['Name'])
-    # print(OriAndMarkerLabel)
     plasmid_culture_body = {"name":Name, "ori":Ori_list,"marker":Marker_list}
     plasmid_culture_response = session.post(f"{Base_URL}setPlasmidCulture",json = plasmid_culture_body, cookies=django_request.COOKIES)
     if(plasmid_culture_response.status_code != 200):

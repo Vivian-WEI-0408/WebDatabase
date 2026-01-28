@@ -34,17 +34,14 @@ class FileNameScanner:
 
     def NameForm(self):
         FileSpilt = []
-        print(self.fname)
         # m = FileNameScanner.FileNameRE.match(self.fname)
         res = FileNameScanner.FileNameRE.search(self.fname)
         if(res!=None):
             ControllerModule.setIsSuitRE(True)
-            print(True)
             ComponentList = split(r'[-_\|\.]',self.fname)
             for i in range(0,len(ComponentList)-1):
                 FileSpilt.append(ComponentList[i])
         else:
-            print(False)
             ControllerModule.setIsSuitRE(False)
         return FileSpilt
     

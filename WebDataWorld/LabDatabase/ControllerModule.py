@@ -2568,7 +2568,6 @@ def FittingLabels(sequence):
     MarkerLabel = []
     OriginLabel = []
     MarkerResult = MarkerKmer.query(sequence)
-    print(MarkerResult)
 
     for match in MarkerResult.keys():
         seq_Name = MarkerResult[match]['seq_id']
@@ -2588,7 +2587,7 @@ def FittingLabels(sequence):
                 MarkerLabel.append({"Name":seq_Name,"q_start":q_start,"q_end":q_end})
 
     OriginResult = OriKmer.query(sequence)
-    print(OriginResult)
+    # print(OriginResult)
     for match in OriginResult.keys():
         seq_Name = OriginResult[match]['seq_id']
         db_seq = OriginDict[seq_Name]
