@@ -433,6 +433,8 @@ def SearchByPartID(request):
         else:
             return JsonResponse(data="No such part", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+    else:
+        return JsonResponse(data="Just Get Method", status=400, safe=False)
 
 def SearchByPartAlterName(request):
     if(request.method == "GET"):
@@ -2440,9 +2442,8 @@ def GetBackboneFeature(request, BackboneID):
     if(request.method == "GET"):
         try:
             print(BackboneID)
-            with transaction.atomic():
-                result = Backbonefeaturetable.objects.filter(backboneid=BackboneID).values()
-                return JsonResponse(data={"success":True,"data":list(result)},status = 200, safe=False)
+            result = Backbonefeaturetable.objects.get(backboneid=BackboneID).values()
+            return JsonResponse(data={"success":True,"data":list(result)},status = 200, safe=False)
         except Backbonefeaturetable.DoesNotExist:
             return JsonResponse(data={"success":False,"message":"BackboneFeatureTable Does Not Exist"}, status=400, safe=False)
         except Exception as e:
@@ -3144,18 +3145,19 @@ def getPlasmidValueList(request,column):
 #======================================================================
 #Part Scar Operation      
 def getPartScar(request):
-    if(request.method == 'GET'):
-        name = request.GET.get('name')
-        if(name != None and name != ""):
-            part_object = Parttable.objects.filter(name = name).first()
-            scar_info = Partscartable.objects.filter(partid = part_object).first().values()
-            if(scar_info != None):
-                return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
+    try:
+        if(request.method == 'GET'):
+            id = request.GET.get('id')
+            if(id != None and id != ""):
+                scar_info = Partscartable.objects.filter(part_id = id).values()
+                if(scar_info != None):
+                    return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
+                else:
+                    return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
             else:
-                return JsonResponse(data = {'success': False,'error':"No such scar information"},status = 400, safe = False)
-        else:
-            return JsonResponse(data={'success':False, 'error':"Name cannot be empty"},status = 400,safe=False)
-
+                return JsonResponse(data={'success':False, 'error':"Name cannot be empty"},status = 400,safe=False)
+    except Exception as e:
+        return JsonResponse(data={"success":False,"message":str(e.args)},status=400,safe=False)
 
 def setPartScar(request):
     if(request.method == 'POST'):
@@ -3603,14 +3605,13 @@ def get_repository(request):
         data = json.loads(request.body)
         Name = data.get("Name")
         try:
-            user = CustomUser.objects.get(uid=request.session['info']['uid'])
+            user = request.session['info']['uid']
             repository = Temporaryrepository.objects.filter(userid=user,name=Name).first()
-            print(repository)
             if(repository != None):
                 if(repository.is_expired()):
                     repository.delete()
                     return JsonResponse({'success':False,'message':'Repository expired'},status = 410)
-                return JsonResponse(data={'success':True,'repository':repository.id,'data':repository.data}, status = 200, safe = False)
+                return JsonResponse(data={'success':True,'repository':repository.id,'data':repository.data,'name':repository.name,"created_time":repository.repositorycreate_time,"expired_time":repository.repositoryexpire_time}, status = 200, safe = False)
             else:
                 return JsonResponse(data={'error':'Repository not found'},status = 404,safe=False)
         except Temporaryrepository.DoesNotExist:
