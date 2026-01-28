@@ -34,7 +34,6 @@ def parse_dict(obj):
 
 
 def snapgene_to_dict(file_obj):
-    print(file_obj.read(1))
     if file_obj.read(1) != b"\t":
         raise ValueError("Wrong format for a SnapGene file!")
 
@@ -57,7 +56,6 @@ def snapgene_to_dict(file_obj):
 
     while True:
         if(file_obj.closed):
-            print(f"label:{ord(next_byte)}")
             raise ValueError("文件已关闭")
         try:
             next_byte = file_obj.read(1)
@@ -66,7 +64,6 @@ def snapgene_to_dict(file_obj):
             block_size = unpack(4, "I")
         
             temp = ord(next_byte)
-            print(temp)
             if ord(next_byte) == 0:
                 # READ THE SEQUENCE AND ITS PROPERTIES
                 props = unpack(1, "b")
@@ -156,8 +153,6 @@ def snapgene_to_dict(file_obj):
                 # WE IGNORE THE WHOLE BLOCK
                 file_obj.read(block_size)
         except Exception as e:
-            print("77777777777")
-            print(e.args)
             break
 
     return data

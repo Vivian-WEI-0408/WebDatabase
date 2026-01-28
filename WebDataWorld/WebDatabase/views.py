@@ -2441,7 +2441,6 @@ def GetBackboneFeature(request, BackboneID):
     print("BackboneID")
     if(request.method == "GET"):
         try:
-            print(BackboneID)
             result = Backbonefeaturetable.objects.get(backboneid=BackboneID).values()
             return JsonResponse(data={"success":True,"data":list(result)},status = 200, safe=False)
         except Backbonefeaturetable.DoesNotExist:

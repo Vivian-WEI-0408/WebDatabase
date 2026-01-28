@@ -737,7 +737,6 @@ def downloadPlasmidMap(request,plasmidid):
                         else:
                             backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:]+ParentBackboneSequence[:each_feature["feature_end"]])
                     fetch_result = backbone_fetch_kmer.query(sequence)
-                    # print(fetch_result)
                     for each_key in fetch_result.keys():
                         for each_feature in BackboneFeatureListResponse['data']:
                             if(each_feature["feature_label"] == fetch_result[each_key]["seq_id"]):
@@ -745,12 +744,10 @@ def downloadPlasmidMap(request,plasmidid):
                                 break
                         new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type]}
                         sa.add_feature(new_feature)
-                    # print(sa.feature_list)
                 else:
                     fi = featureIdentify()
                     feature_list = fi.featureMatch(sequence)
                     reverse_feature_list = fi.featureMatch(seq_reverse)
-                    print(reverse_feature_list)
                     sa.add_features(feature_list)
                     sa.add_reverse_features(reverse_feature_list)
                     # sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidid}')
@@ -785,9 +782,6 @@ def downloadPlasmidMap(request,plasmidid):
                     new_feature = {each_key:[fetch_result[each_key]["start"],fetch_result[each_key]["end"],type]}
                     sa.add_feature(new_feature)
         
-        print(PlasmidParentBackboneResponse["success"])
-        print(PlasmidParentPartResponse["success"])
-        print(PlasmidParentPlasmidResponse["success"])
         if(PlasmidParentBackboneResponse["success"] == False or PlasmidParentPartResponse["success"] == False or PlasmidParentPlasmidResponse["success"] == False):
             fi = featureIdentify()
             feature_list = fi.featureMatch(sequence)
@@ -879,9 +873,7 @@ def delete_plasmid(request):
             'Content-Type':'application/json',
         })
         plasmidid = json.loads(request.body)["Plasmidid"]
-        # print(plasmidid)
         delete_plasmid_response = session.get(f"{Base_URL}deletePlasmid?plasmidid={plasmidid}", cookies=request.COOKIES)
-        # print(delete_plasmid_response.json())
         if(delete_plasmid_response.status_code != 200):
             return JsonResponse(data = {"success":False, "message":delete_plasmid_response.json()["message"]},status = 400, safe = False)
         else:
@@ -934,7 +926,6 @@ def exportuserdataprocess(request,session,task_id,username):
     
     excel_part_data = {}
     part_field = (session.get(f"{Base_URL}partfields",cookies=request.COOKIES)).json()['data']
-    # print(part_field)
     for each_field in part_field:
         excel_part_data[each_field] = []
     part_result = session.get(f"{Base_URL}partlistbyuser/{username}", cookies=request.COOKIES)
@@ -947,7 +938,6 @@ def exportuserdataprocess(request,session,task_id,username):
 
     excel_backbone_data = {}
     backbone_field = (session.get(f"{Base_URL}backbonefields",cookies=request.COOKIES)).json()['data']
-    # print(backbone_field)
     for each_field in backbone_field:
         excel_backbone_data[each_field] = []
     backbone_result = session.get(f"{Base_URL}backbonelistbyuser/{username}", cookies=request.COOKIES)
@@ -961,7 +951,6 @@ def exportuserdataprocess(request,session,task_id,username):
             
     excel_plasmid_data = {}
     plasmid_field = (session.get(f"{Base_URL}plasmidfields",cookies=request.COOKIES)).json()['data']
-    # print(plasmid_field)
     for each_field in plasmid_field:
         excel_plasmid_data[each_field] = []
     plasmid_result = session.get(f"{Base_URL}plasmidlistbyuser/{username}", cookies=request.COOKIES)
@@ -1004,7 +993,6 @@ def ExportAllData(request):
                 'file_id':f"{excel_id}"
         }
         cache.set(f'{TASK_STATUS_PREFIX}{excel_id}',task_status,timeout=3600)
-        # print(cache.get(f'{TASK_STATUS_PREFIX}{excel_id}'))
         thread = threading.Thread(
             target = ExportAllDataProcess,
             args=(request, session, excel_id)
@@ -1017,14 +1005,11 @@ def ExportAllData(request):
         return JsonResponse(data={'success':False,'message':"Just GET method"}, status=400, safe=False)
 
 def ExportAllDataProcess(request, session, task_id):
-    # print(cache.get(f'{TASK_STATUS_PREFIX}{task_id}'))
     excel_address = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')['file_address']
     userlist = (session.get(f"{Base_URL}getuserlist",cookies=request.COOKIES)).json()['data']
     for each_user in userlist:
-        # print(each_user['uname'])
         excel_part_data = {}
         part_field = (session.get(f"{Base_URL}partfields",cookies=request.COOKIES)).json()['data']
-        # print(part_field)
         for each_field in part_field:
             excel_part_data[each_field] = []
         part_result = session.get(f"{Base_URL}partlistbyuser/{each_user['uname']}", cookies=request.COOKIES)
@@ -1038,7 +1023,6 @@ def ExportAllDataProcess(request, session, task_id):
             
         excel_backbone_data = {}
         backbone_field = (session.get(f"{Base_URL}backbonefields",cookies=request.COOKIES)).json()['data']
-        # print(backbone_field)
         for each_field in backbone_field:
             excel_backbone_data[each_field] = []
         backbone_result = session.get(f"{Base_URL}backbonelistbyuser/{each_user['uname']}", cookies=request.COOKIES)
@@ -1053,7 +1037,6 @@ def ExportAllDataProcess(request, session, task_id):
             
         excel_plasmid_data = {}
         plasmid_field = (session.get(f"{Base_URL}plasmidfields",cookies=request.COOKIES)).json()['data']
-        # print(plasmid_field)
         for each_field in plasmid_field:
             excel_plasmid_data[each_field] = []
         plasmid_result = session.get(f"{Base_URL}plasmidlistbyuser/{each_user['uname']}", cookies=request.COOKIES)
@@ -1065,7 +1048,7 @@ def ExportAllDataProcess(request, session, task_id):
         df_plasmid = pd.DataFrame(excel_plasmid_data)
         
         if(os.path.exists(excel_address) == False):
-            # print("qqqqq")
+
             with pd.ExcelWriter(excel_address, engine="openpyxl") as writer:
                 df_part.to_excel(writer, sheet_name=f"{each_user['uname']}(part)",index = False)
             
@@ -1087,7 +1070,6 @@ def ExportAllDataProcess(request, session, task_id):
 def getDocument(request, fileid):
     if(request.method == "GET"):
         file_address = rf"{File_Address}{fileid}.xlsx"
-        # print(file_address)
         if(os.path.exists(file_address)):
             response = FileResponse(open(file_address,'rb'),as_attachment=True)
             return response
@@ -1097,7 +1079,6 @@ def getDocument(request, fileid):
 def getAssemblyFile(request, fileName):
     if(request.method == "GET"):
         file_address = os.path.join(Assembly_File_Address,f"{fileName}.gb")
-        # print(file_address)
         if(os.path.exists(file_address)):
             response = FileResponse(open(file_address,'rb'),as_attachment=True)
             return response
@@ -1151,9 +1132,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
             sequence = (session.get(f'{Base_URL}GetPartSeqByID?partid={each_part}',cookies = django_request.COOKIES)).json()['data']['level0sequence'].lower()
             partType = (session.get(f"{Base_URL}TypeByID?ID={each_part}", cookies=django_request.COOKIES)).json()['Type'].lower()
             partName = (session.get(f"{Base_URL}PartNameByID?ID={each_part}",cookies=django_request.COOKIES)).json()['PartName']
-            # print(partType)
             partSource = (session.get(f"{Base_URL}partSource/{each_part}",cookies=django_request.COOKIES)).json()
-            # print(partSource)
             if(partSource['success'] != True):
                 return {"success":False}
             if(partSource['source'].lower() != "saccharomyces cerevisiae"):
@@ -1189,7 +1168,6 @@ def process_assembly_repo(repositoryName, django_request,task_id):
         for each_backbone in backbone:
             sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={each_backbone}',cookies = django_request.COOKIES)).json()['data']['sequence'].lower()
             backboneName = (session.get(f'{Base_URL}BackboneNameByID?ID={each_backbone}',cookies=django_request.COOKIES)).json()['BackboneName']
-            # print(sequence)
             backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
             file_address = os.path.join(File_Address, "AssemblyFile")
             print(backboneFeature)
@@ -1234,7 +1212,6 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                                 else:
                                     backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:]+ParentBackboneSequence[:each_feature["feature_end"]])
                             fetch_result = backbone_fetch_kmer.query(sequence)
-                            # print(fetch_result)
                             for each_key in fetch_result.keys():
                                 for each_feature in BackboneFeatureListResponse['data']:
                                     if(each_feature["feature_label"] == fetch_result[each_key]["seq_id"]):
@@ -1242,7 +1219,6 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                                         break
                                 new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type]}
                                 sa.add_feature(new_feature)
-                            # print(sa.feature_list)
                         else:
                             fi = featureIdentify()
                             feature_list = fi.featureMatch(sequence)
@@ -1363,12 +1339,10 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
     Ori_list = []
     Marker_list = []
     OriAndMarkerLabel = FittingLabels(Sequence)
-    # print(OriAndMarkerLabel)
     for each_ori in OriAndMarkerLabel['Origin']:
         Ori_list.append(each_ori['Name'])
     for each_marker in OriAndMarkerLabel['Marker']:
         Marker_list.append(each_marker['Name'])
-    # print(OriAndMarkerLabel)
     plasmid_culture_body = {"name":Name, "ori":Ori_list,"marker":Marker_list}
     plasmid_culture_response = session.post(f"{Base_URL}setPlasmidCulture",json = plasmid_culture_body, cookies=django_request.COOKIES)
     if(plasmid_culture_response.status_code != 200):
@@ -1427,7 +1401,6 @@ def modify_part(request,partid):
                         "note":data["notes"]}
         part_update_response = (session.post(f'{Base_URL}UpdatePart',json=request_body,cookies=request.COOKIES))
         if(part_update_response.status_code != 200):
-            # print(part_update_response)
             return JsonResponse({"success":False,"message":part_update_response.json()},status = 400, safe=False)
         else:
             return JsonResponse({"success":True},status=200,safe=False)
@@ -1447,13 +1420,10 @@ def modify_backbone(request,backboneid):
         Backbone_obj = (session.get(f"{Base_URL}BackboneByID?ID={backboneid}",cookies=request.COOKIES).json())[0]
         backbonescar = session.get(f"{Base_URL}getBackboneScar?id={backboneid}",cookies=request.COOKIES)
         if(backbonescar.json()['success']):
-            # print(backbonescar.json())
             Backbone_obj['scar_info'] = backbonescar.json()['scar_info'][0]
-        # print(Backbone_obj)
         return render(request,"BackboneEdit.html",{"backbone":Backbone_obj})
     else:
         data = json.loads(request.body)
-        # print(data)
         request_body = {"BackboneID":data['vectorId'],"newName":data['vectorName'],"sequence":data['sequence'],"species":data['host'],"copynumber":data['copyNumber'],"note":data['notes'],"alias":data['vectorAlias'],"tag":"abnormal" if (len(data['ori']) > 1 or len(data['marker']) > 1) else "normal"}
         
         update_backbone_response = session.post(f"{Base_URL}UpdateBackbone",json=request_body,cookies = request.COOKIES)
@@ -1479,7 +1449,6 @@ def modify_plasmid(request,plasmidid):
         Plasmid_obj = (session.get(f"{Base_URL}PlasmidByID?ID={plasmidid}",cookies=request.COOKIES).json())[0]
         plasmidscar = session.get(f"{Base_URL}getPlasmidScar?plasmidid={plasmidid}",cookies=request.COOKIES)
         if(plasmidscar.json()['success']):
-            # print(plasmidscar.json())
             Plasmid_obj['scar_info'] = plasmidscar.json()['scar_info'][0]
         
         plasmidParentPart = session.get(f'{Base_URL}GetPartParent?plasmidid={plasmidid}',cookies=request.COOKIES)
@@ -1506,7 +1475,6 @@ def modify_plasmid(request,plasmidid):
             plasmidParentInfo = Plasmid_obj['customparentinformation']
             pattern = r'(\w+)\(([ a-zA-z0-9]+)\)'
             matches = re.findall(pattern, plasmidParentInfo)
-            # print(result)
             for component_type, letter in matches:
                 if(component_type == "Part"):
                     result['Part'].append(letter)
@@ -1518,7 +1486,6 @@ def modify_plasmid(request,plasmidid):
                                     'plasmidparent':result['Plasmid']})
     else:
         data = json.loads(request.body)
-        # print(data)
         # UpdatePlasmid
         request_body = {"id":data['plasmidId'],"newName":data['plasmidName'],"newAlias":data["plasmidAlias"],"newLevel":data['level'],"newSequence":data['sequence'],"newOri":data['ori'],"newMarker":data['marker'],"newNote":data['notes'],"tag":"abnormal" if (len(data['ori']) > 1 or len(data['marker']) > 1) else "normal"}
         
@@ -1559,7 +1526,6 @@ def GetExperienceDetail(request, partName):
         'Content-Type':'application/json',
     })
     response = session.get(f"{Exp_URL}/api/part/view?filter=name={partName}")
-    # print(response.json())
     ID = response.json()['parts'][0]['ID']
     return redirect(f"{Exp_URL}/part/{ID}")
 
@@ -1596,7 +1562,6 @@ def GetParentInfo(request):
     })
     if(request.method == "GET"):
         plasmidName = request.GET.get("PlasmidName");
-        # print(plasmidName)
         plasmidID = session.get(f"{Base_URL}PlasmidID?name={plasmidName}",cookies=request.COOKIES).json()["PlasmidID"];
         
         plasmidParentPart = session.get(f'{Base_URL}GetPartParent?plasmidid={plasmidID}',cookies=request.COOKIES)
@@ -1620,7 +1585,6 @@ def GetParentInfo(request):
             if(CustomInfo != None and CustomInfo != 'None' and CustomInfo != 'NULL' and CustomInfo != "nan"):
                 pattern = r'(\w+)\(([ a-zA-z0-9]+)\)'
                 matches = re.findall(pattern, CustomInfo)
-                # print(result)
                 for component_type, letter in matches:
                     if(component_type == "Part"):
                         result['Part'].append(letter)

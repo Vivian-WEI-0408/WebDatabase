@@ -8,7 +8,6 @@ from ControllerModule import FittingLabels
 from CaculateModule.ScarIdentify import scarPosition,scarFunction
 def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL):
     FeatureList = []
-    print(file_name)
     if (file_name[1] == "fasta"):
         records = parse(upload_map, "fasta")
         # upload_map.seek(0)
@@ -20,21 +19,18 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             records = parse(upload_map, "genbank")
             # upload_map.seek(0)
             for record in records:
-                print(record)
                 Sequence = str(record.seq)
-                print(Sequence)
                 FeatureList = record.features
-                print(Sequence)
                 break
         except Exception as e:
-            print(e.args)
+            return False
     elif(file_name[1] == "dna"):
-        print(upload_map)
-        record = snapgene_reader.snapgene_to_dict(upload_map)
-        print(record)
-        FeatureList = record['features']
-        Sequence = record['seq']
-        print(Sequence)
+        try:
+            record = snapgene_reader.snapgene_to_dict(upload_map)
+            FeatureList = record['features']
+            Sequence = record['seq']
+        except Exception as e:
+            return False
     if(Sequence != ""):
         session = requests.Session()
         token = django_request.COOKIES.get('csrftoken')
@@ -55,11 +51,9 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             scar_data_body = scarFunction(Sequence)
             request_body = {"name":name, "sequence":Sequence}
             SequenceUpdateResponse = session.post(f"{Base_URL}UpdatePlasmidSequence",json=request_body,cookies=django_request.COOKIES)
-            print(SequenceUpdateResponse.json())
             if(SequenceUpdateResponse.json()['success'] == False and SequenceUpdateResponse.json()['message'] == "Plasmid Does Not Exist"):
                 add_request_body = {"name":name,"sequence":Sequence,"alias":""}
                 AddSequenceUpdateResponse = session.post(f"{Base_URL}AddPlasmidData",json=add_request_body,cookies=django_request.COOKIES)
-                print(AddSequenceUpdateResponse.json())
                 if(AddSequenceUpdateResponse.status_code!= 200):
                     return False
             Culture_request_body = {"name":name,"ori" : Ori_list,"marker":Marker_list}
@@ -81,12 +75,9 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             scar_data_body = scarFunction(Sequence)
             request_body = {"name":name, "sequence":Sequence}
             SequenceUpdateResponse = session.post(f"{Base_URL}UpdateBackboneSequence",json=request_body,cookies=django_request.COOKIES)
-            print(SequenceUpdateResponse.json())
             if(SequenceUpdateResponse.json()['success'] == False and SequenceUpdateResponse.json()['message'] == "Backbone Does Not Exist"):
                 add_request_body = {"name":name,"sequence":Sequence}
-                print(add_request_body)
                 AddBackboneResponse = session.post(f"{Base_URL}AddBackbone",json=add_request_body,cookies=django_request.COOKIES)
-                print(AddBackboneResponse.json())
                 if(AddBackboneResponse.status_code != 200):
                     return False
             if(file_name[1] == "gb" or file_name[1] == "gbk" or file_name[1] == "ape" or file_name[1] == "str"):
@@ -122,9 +113,6 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             if((SequenceUpdateResponse.status_code == 200 or AddBackboneResponse.status_code == 200) and CultureResponseResponse.status_code == 200 and ScarUpdateResponse.status_code == 200):
                 return True
             else:
-                print(SequenceUpdateResponse)
-                print(CultureResponseResponse)
-                print(ScarUpdateResponse)
                 return False
         elif(upload_type == "part"):
             request_body = {"name":name, "Level0Sequence":Sequence}
@@ -137,7 +125,6 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                 if(SequenceAddResponse.status_code != 200):
                     return False
             else:
-                print(SequenceUpdateResponse)
                 return False
             
             
@@ -188,19 +175,6 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
 #             except Exception as e:
 #                 continue
 
-
-def AnalysisFeatureTemp(file_obj):
-    print("process_map_file")
-    record = snapgene_to_dict(open(file_obj,'rb'))
-    FeatureList = record['features']
-    for each_feature in FeatureList:
-        start_position = each_feature['start']
-        end_position = each_feature['end']
-        label = each_feature['name']
-        feature_type = each_feature['type']
-        color = each_feature['color']
-        ape_info = each_feature['color']
-        print(each_feature)
     
 
 if __name__ == "__main__":
@@ -209,5 +183,4 @@ if __name__ == "__main__":
     # upload_map_temp = open(file_address)
     # upload_map_temp = upload_map_temp.decode("utf-8")
     # upload_map = io.StringIO(upload_map_temp)
-    AnalysisFeatureTemp(file_address)
     

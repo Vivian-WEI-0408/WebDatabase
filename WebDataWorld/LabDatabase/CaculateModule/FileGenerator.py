@@ -83,7 +83,6 @@ class SequenceAnnotator:
             file.write("SOURCE      {}\n".format(reference))
             file.write("FEATURES             Location/Qualifiers\n")
             for each_feature in feature_list:
-                # print(each_feature)
                 if(each_feature["feature_start"] > each_feature["feature_end"]):
                     file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
                     file.write(f"                     /label={each_feature['feature_label']}\n")
@@ -124,10 +123,6 @@ class SequenceAnnotator:
             file.close()
 
     def GenerateGBKFile(self, file_address, type="circular"):
-        # print(file_address)
-        # print(self.sequence)
-        # print("7777777")
-        # print(self.feature_list)
         if(type == "circular"):
             definition = "synthetic circular DNA"
         else:
