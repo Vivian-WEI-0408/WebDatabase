@@ -161,14 +161,11 @@ class GGFileProcessor:
                             continue
                         if(add_plasmid_response.status_code != 200):
                             error_rows.extend(f"第{index}行，加入元件失败")
-                            continue     
+                            continue
                     except Exception as e:
                         logger.error(f"处理Excel文件失败: {str(e.args)}")
-                        return {
-                            'success':False,
-                            'error': str(e.args),
-                        }
-            return {"success":True}   
+                        continue
+            return {"success":True}
         except Exception as e:
             return {
                 'success':False,

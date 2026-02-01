@@ -370,7 +370,7 @@ class SBOLGraphics:
         return head
     
     @staticmethod
-    def selectable_marker(ax, center, size=0.05, color='lightblue'):
+    def ori(ax, center, size=0.05, color='lightblue'):
         """绘制选择标记图标 - 圆角矩形（用于URA3）"""
         x, y = center
         width, height = size*1.2, size*0.8

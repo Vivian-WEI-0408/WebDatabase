@@ -3572,10 +3572,11 @@ def create_repository(request):
                 
                 expires_at = timezone.now()+timezone.timedelta(hours = ttl_hours)
                 user = CustomUser.objects.filter(uid=request.session['info']['uid']).first()
+                default_data = {"parts":[],"plasmids":[],"backbones":[],"total_parts":0,"total_plasmids":0,"total_backbones":0};
                 with transaction.atomic():
                     if(Temporaryrepository.objects.filter(userid = user,name=Name).exists()):
                         Temporaryrepository.objects.filter(userid=user, name=Name).delete()
-                    Temporaryrepository.objects.create(id=repository_id,name=Name,userid=user,repositorycreate_time = timezone.now(),repositoryupdate_time = timezone.now(),repositoryexpire_time = expires_at,note=Note)
+                    Temporaryrepository.objects.create(id=repository_id,name=Name,userid=user,repositorycreate_time = timezone.now(),repositoryupdate_time = timezone.now(),repositoryexpire_time = expires_at,note=Note,data=default_data)
                 return JsonResponse(data={'success':True,'repository_id':repository_id,'repository_name':Name,'url':f'/repository/{repository_id}','expires_at':expires_at},status=200,safe=False)
             except Exception as e:
                 print(e.args)
