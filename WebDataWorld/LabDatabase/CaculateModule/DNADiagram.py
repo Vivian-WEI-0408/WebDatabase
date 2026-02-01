@@ -12,6 +12,7 @@ class SBOLGraphics:
         """绘制启动子图标 - 直角箭头：垂直短直线 + 水平直线 + 箭头"""
         x, y = center
         
+        
         # 尺寸参数
         vertical_length = size * 0.8  # 垂直短线长度
         horizontal_length = size * 1.2  # 水平线长度
@@ -22,24 +23,24 @@ class SBOLGraphics:
             # 向右的启动子
             # 1. 垂直短直线（向上）
             ax.plot([x, x], 
-                   [y, y + vertical_length], 
+                   [y+0.02, y + vertical_length+0.02],
                    color='black', 
                    linewidth=line_width,
                    solid_capstyle='round')
             
             # 2. 水平直线（向右）
             ax.plot([x, x + horizontal_length], 
-                   [y + vertical_length, y + vertical_length], 
+                   [y + vertical_length+0.02, y + vertical_length+0.02], 
                    color='black', 
                    linewidth=line_width,
                    solid_capstyle='round')
             
             # 3. 箭头（向右）
             arrow_points = np.array([
-                [x + horizontal_length, y + vertical_length],  # 箭头尖端
-                [x + horizontal_length - arrow_size, y + vertical_length - arrow_size/2],  # 左下
-                [x + horizontal_length - arrow_size, y + vertical_length + arrow_size/2],  # 左上
-                [x + horizontal_length, y + vertical_length]   # 回到尖端
+                [x + horizontal_length, y + vertical_length + 0.02],  # 箭头尖端
+                [x + horizontal_length - arrow_size, 0.02+y + vertical_length - arrow_size/2],  # 左下
+                [x + horizontal_length - arrow_size, 0.02+y + vertical_length + arrow_size/2],  # 左上
+                [x + horizontal_length, 0.02 + y + vertical_length]   # 回到尖端
             ])
             
             arrow = patches.Polygon(
@@ -56,24 +57,24 @@ class SBOLGraphics:
             # 向左的启动子
             # 1. 垂直短直线（向上）
             ax.plot([x, x], 
-                   [y, y + vertical_length], 
+                   [y-0.02, y + vertical_length-0.02], 
                    color='black', 
                    linewidth=line_width,
                    solid_capstyle='round')
             
             # 2. 水平直线（向左）
             ax.plot([x, x - horizontal_length], 
-                   [y + vertical_length, y + vertical_length], 
+                   [y + vertical_length-0.02, y + vertical_length - 0.02], 
                    color='black', 
                    linewidth=line_width,
                    solid_capstyle='round')
             
             # 3. 箭头（向左）
             arrow_points = np.array([
-                [x - horizontal_length, y + vertical_length],  # 箭头尖端
-                [x - horizontal_length + arrow_size, y + vertical_length - arrow_size/2],  # 右下
-                [x - horizontal_length + arrow_size, y + vertical_length + arrow_size/2],  # 右上
-                [x - horizontal_length, y + vertical_length]   # 回到尖端
+                [x - horizontal_length, y + vertical_length - 0.02],  # 箭头尖端
+                [x - horizontal_length + arrow_size, y + vertical_length - 0.02 - arrow_size/2],  # 右下
+                [x - horizontal_length + arrow_size, y + vertical_length - 0.02 + arrow_size/2],  # 右上
+                [x - horizontal_length, y + vertical_length - 0.02]   # 回到尖端
             ])
             
             arrow = patches.Polygon(
@@ -123,14 +124,14 @@ class SBOLGraphics:
         else:  # orientation == 'down'
             # 向下的启动子
             # 1. 水平短直线（向左）
-            ax.plot([x, x - vertical_length], 
+            ax.plot([x+0.02, x - vertical_length+0.02], 
                    [y, y], 
                    color='black', 
                    linewidth=line_width,
                    solid_capstyle='round')
             
             # 2. 垂直直线（向下）
-            ax.plot([x - vertical_length, x - vertical_length], 
+            ax.plot([x - vertical_length+0.02, x - vertical_length+0.02], 
                    [y, y - horizontal_length], 
                    color='black', 
                    linewidth=line_width,
@@ -138,10 +139,10 @@ class SBOLGraphics:
             
             # 3. 箭头（向下）
             arrow_points = np.array([
-                [x - vertical_length, y - horizontal_length],  # 箭头尖端
-                [x - vertical_length - arrow_size/2, y - horizontal_length + arrow_size],  # 左上
-                [x - vertical_length + arrow_size/2, y - horizontal_length + arrow_size],  # 右上
-                [x - vertical_length, y - horizontal_length]   # 回到尖端
+                [x - vertical_length+0.02, y - horizontal_length],  # 箭头尖端
+                [x - vertical_length+0.02 - arrow_size/2, y - horizontal_length + arrow_size],  # 左上
+                [0.02+x - vertical_length + arrow_size/2, y - horizontal_length + arrow_size],  # 右上
+                [x - vertical_length+0.02, y - horizontal_length]   # 回到尖端
             ])
             
             arrow = patches.Polygon(
@@ -219,7 +220,7 @@ class SBOLGraphics:
             # 向右的CDS箭头
             # 绘制主体矩形
             body = patches.Rectangle(
-                (x - arrow_length/2, y - arrow_width/2),
+                (x - arrow_length/2, y),
                 arrow_length - head_length,
                 arrow_width,
                 facecolor=color,
@@ -231,9 +232,9 @@ class SBOLGraphics:
             
             # 绘制箭头头部
             head_points = [
-                (x + arrow_length/2 - head_length, y - arrow_width/2),
-                (x + arrow_length/2, y),
-                (x + arrow_length/2 - head_length, y + arrow_width/2)
+                (x + arrow_length/2 - head_length, y),
+                (x + arrow_length/2, y+arrow_width/2),
+                (x + arrow_length/2 - head_length, y + arrow_width)
             ]
             head = patches.Polygon(
                 head_points,
@@ -248,7 +249,7 @@ class SBOLGraphics:
         elif orientation == 'left':
             # 向左的CDS箭头
             body = patches.Rectangle(
-                (x - arrow_length/2 + head_length, y - arrow_width/2),
+                (x - arrow_length/2 + head_length, y - arrow_width - 0.005),
                 arrow_length - head_length,
                 arrow_width,
                 facecolor=color,
@@ -259,9 +260,9 @@ class SBOLGraphics:
             ax.add_patch(body)
             
             head_points = [
-                (x - arrow_length/2 + head_length, y - arrow_width/2),
-                (x - arrow_length/2, y),
-                (x - arrow_length/2 + head_length, y + arrow_width/2)
+                (x - arrow_length/2 + head_length, y - arrow_width - 0.005),
+                (x - arrow_length/2, y - 0.005 - arrow_width/2),
+                (x - arrow_length/2 + head_length, y- 0.005)
             ]
             head = patches.Polygon(
                 head_points,
@@ -304,7 +305,7 @@ class SBOLGraphics:
         else:  # down
             # 向下的CDS箭头
             body = patches.Rectangle(
-                (x - arrow_width/2, y - arrow_length/2),
+                (x + 0.005, y - arrow_length/2),
                 arrow_width,
                 arrow_length - head_length,
                 facecolor=color,
@@ -315,9 +316,9 @@ class SBOLGraphics:
             ax.add_patch(body)
             
             head_points = [
-                (x - arrow_width/2, y - arrow_length/2 + head_length),
-                (x, y - arrow_length/2),
-                (x + arrow_width/2, y - arrow_length/2 + head_length)
+                (x +0.005, y - arrow_length/2),
+                (x + 0.005+ arrow_width/2, y - arrow_length/2 - head_length),
+                (x + arrow_width + 0.005, y - arrow_length/2)
             ]
             head = patches.Polygon(
                 head_points,
@@ -370,17 +371,12 @@ class SBOLGraphics:
         return head
     
     @staticmethod
-    def ori(ax, center, size=0.05, color='lightblue'):
+    def rep_origin(ax, center, size=0.05, color='lightblue'):
         """绘制选择标记图标 - 圆角矩形（用于URA3）"""
         x, y = center
         width, height = size*1.2, size*0.8
-        
-        # 圆角矩形
-        print(size)
-        print(width)
-        print(height)
         rect = patches.FancyBboxPatch(
-            (x - width/2, y - height/2),
+            (x, y),
             width, height,
             boxstyle="round,pad=0.005, rounding_size=0.005",
             facecolor=color,
@@ -402,42 +398,42 @@ class SBOLGraphics:
         
         if orientation == 'horizontal':
             # 横线
-            ax.plot([x - t_width/2, x + t_width/2], 
+            ax.plot([x - t_width/2, x + t_width/2],
                    [y, y], 
                    color='black', 
                    linewidth=3,
                    solid_capstyle='butt')
             
             # 竖线
-            ax.plot([x, x], 
+            ax.plot([x+t_width/2, x+t_width/2], 
                    [y - t_height/4, y + t_height/4], 
                    color='black', 
                    linewidth=3,
                    solid_capstyle='butt')
             
-            # 填充竖线（加粗效果）
-            line_fill = patches.Rectangle(
-                (x - t_width/20, y - t_height/4),
-                t_width/10,
-                t_height/2,
-                facecolor=color,
-                edgecolor='black',
-                linewidth=1,
-                alpha=0.8
-            )
-            ax.add_patch(line_fill)
+            # # 填充竖线（加粗效果）
+            # line_fill = patches.Rectangle(
+            #     (x - t_width/20, y - t_height/4),
+            #     t_width/10,
+            #     t_height/2,
+            #     facecolor=color,
+            #     edgecolor='black',
+            #     linewidth=1,
+            #     alpha=0.8
+            # )
+            # ax.add_patch(line_fill)
             
-            # 填充横线
-            line_fill_h = patches.Rectangle(
-                (x - t_width/2, y - t_width/20),
-                t_width,
-                t_width/10,
-                facecolor=color,
-                edgecolor='black',
-                linewidth=1,
-                alpha=0.8
-            )
-            ax.add_patch(line_fill_h)
+            # # 填充横线
+            # line_fill_h = patches.Rectangle(
+            #     (x - t_width/2, y - t_width/20),
+            #     t_width,
+            #     t_width/10,
+            #     facecolor=color,
+            #     edgecolor='black',
+            #     linewidth=1,
+            #     alpha=0.8
+            # )
+            # ax.add_patch(line_fill_h)
             
         else:  # vertical
             # 横线（垂直方向时为竖线）
@@ -448,34 +444,34 @@ class SBOLGraphics:
                    solid_capstyle='butt')
             
             # 竖线（垂直方向时为横线）
-            ax.plot([x - t_width/4, x + t_width/4], 
-                   [y, y], 
-                   color='black', 
+            ax.plot([x - t_width/4, x + t_width/4],
+                   [y+t_width/2, y+t_width/2],
+                   color='black',
                    linewidth=3,
                    solid_capstyle='butt')
             
-            # 填充
-            line_fill = patches.Rectangle(
-                (x - t_width/20, y - t_height/2),
-                t_width/10,
-                t_height,
-                facecolor=color,
-                edgecolor='black',
-                linewidth=1,
-                alpha=0.8
-            )
-            ax.add_patch(line_fill)
+            # # 填充
+            # line_fill = patches.Rectangle(
+            #     (x - t_width/20, y - t_height/2),
+            #     t_width/10,
+            #     t_height,
+            #     facecolor=color,
+            #     edgecolor='black',
+            #     linewidth=1,
+            #     alpha=0.8
+            # )
+            # ax.add_patch(line_fill)
             
-            line_fill_h = patches.Rectangle(
-                (x - t_width/4, y - t_width/20),
-                t_width/2,
-                t_width/10,
-                facecolor=color,
-                edgecolor='black',
-                linewidth=1,
-                alpha=0.8
-            )
-            ax.add_patch(line_fill_h)
+            # line_fill_h = patches.Rectangle(
+            #     (x - t_width/4, y - t_width/20),
+            #     t_width/2,
+            #     t_width/10,
+            #     facecolor=color,
+            #     edgecolor='black',
+            #     linewidth=1,
+            #     alpha=0.8
+            # )
+            # ax.add_patch(line_fill_h)
         
         return None
 
@@ -579,37 +575,36 @@ class PlasmidGenerator:
                                   size=elem.get('size', 0.04),
                                   color=elem.get('color', 'lightgreen'),
                                   orientation=orientation)
-            elif elem_type == 'reporter':
-                self.sbol.reporter(self.ax, center,
-                                  size=elem.get('size', 0.05),
-                                  color=elem.get('color', 'red'))
-            elif elem_type == 'selectable_marker':
-                self.sbol.selectable_marker(self.ax, center,
+            elif elem_type == 'rep_origin' or elem_type == "origin":
+                self.sbol.rep_origin(self.ax, center,
                                            size=elem.get('size', 0.05),
                                            color=elem.get('color', 'orange'))
-            elif elem_type == 'origin':
-                self.sbol.origin(self.ax, center,
-                                size=elem.get('size', 0.05),
-                                color=elem.get('color', 'yellow'))
             elif elem_type == 'terminator':
+                if(orientation == "right"):
+                    x,y = center
+                    y = y+0.04
+                    center = (x,y)
+                    print(orientation)
+                    print(center)
                 self.sbol.terminator(self.ax, center,
                                     size=elem.get('size', 0.04),
-                                    color=elem.get('color', 'gray'))
+                                    color=elem.get('color', 'gray'),
+                                    orientation='vertical' if orientation in ['left', 'right'] else 'horizontal')
             else:  # 默认CDS
                 self.sbol.cds(self.ax, center,
-                             size=elem.get('size', 0.04),
-                             color=elem.get('color', 'lightblue'),
-                             orientation='horizontal' if orientation in ['left', 'right'] else 'vertical')
+                            size=elem.get('size', 0.04),
+                            color=elem.get('color', 'lightblue'),
+                            orientation=orientation)
             
             # 添加标签
-            self.ax.text(center[0], center[1], 
-                        elem.get('label', elem['name']),
-                        fontsize=10, ha='center', va='center',
+            self.ax.text(center[0], center[1]-0.05,
+                        elem.get('label', elem['name'][:10]),
+                        fontsize=4, ha='center', va='center',
                         fontweight='bold',
-                        bbox=dict(boxstyle="round,pad=0.3", 
-                                 facecolor="white", 
-                                 alpha=0.8,
-                                 edgecolor='none'))
+                        bbox=dict(boxstyle="round,pad=0.3",
+                                facecolor="white",
+                                alpha=0.8,
+                                edgecolor='none'))
     
     def draw_connection_lines(self, elements):
         """绘制元件连接线"""
@@ -678,7 +673,7 @@ class PlasmidGenerator:
                                  plasmid_info.get('size', 'Unknown'))
         
         # 添加图例
-        self.add_legend(elements)
+        # self.add_legend(elements)
         
         plt.tight_layout()
         return self.fig
@@ -695,16 +690,16 @@ class PlasmidGenerator:
             color = elem.get('color', 'lightblue')
             name = elem.get('name', 'Unknown')
             
-            if elem_type == 'promoter':
+            if elem_type.lower() == 'promoter':
                 patch = patches.Polygon([[0,0],[0,1],[1,1]], 
                                        facecolor=color, edgecolor='red')
-            elif elem_type == 'reporter':
+            elif elem_type.lower() == 'reporter':
                 patch = patches.Polygon([[0,0.5],[0.5,0],[1,0.5],[0.5,1]], 
                                        facecolor=color, edgecolor='black')
-            elif elem_type == 'selectable_marker':
-                patch = patches.RegularPolygon((0.5,0.5), 6, 
-                                              facecolor=color, edgecolor='black')
-            elif elem_type == 'origin':
+            elif elem_type.lower() == 'rep_origin':
+                patch = patches.Circle((0.5,0.5), 0.3, 
+                                      facecolor=color, edgecolor='black')
+            elif elem_type.lower() == 'origin':
                 patch = patches.Circle((0.5,0.5), 0.3, 
                                       facecolor=color, edgecolor='black')
             else:
@@ -731,60 +726,60 @@ class PlasmidGenerator:
         return buffer
 
 import json
+import os
+from Bio.SeqIO import parse
+
+feature_size = {"promoter":0.04,"cds":0.05,"terminator":0.04,"rep_origin":0.04,"rbs":0.04}
 def generate_plasmid_view(request, repositoryName):
     """生成质粒图谱的视图"""
     
-    # 定义元件（示例数据）
-    elements = [
-        {
-            'name': 'P_Van',
-            'type': 'promoter',
-            'label': 'P_{Van}',
-            'color': '#90EE90',
-            'size': 0.04
-        },
-        {
-            'name': 'RFP',
-            'type': 'reporter',
-            'label': 'RFP',
-            'color': '#FF6B6B',
-            'size': 0.05
-        },
-        {
-            'name': 'URA3',
-            'type': 'selectable_marker',
-            'label': 'URA3',
-            'color': '#87CEEB',
-            'size': 0.05
-        },
-        {
-            'name': 'P_Tet',
-            'type': 'promoter',
-            'label': 'P_{Tet}',
-            'color': '#FFD700',
-            'size': 0.04
-        },
-        {
-            'name': 'YFP',
-            'type': 'reporter',
-            'label': 'YFP',
-            'color': '#FFFF00',
-            'size': 0.05
+    Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\output"
+    file_address = os.path.join(Assembly_File_Address,f"{repositoryName}.gb")
+    if(os.path.exists(file_address)):
+        records = parse(file_address, "genbank")
+        for record in records:
+            length = len(str(record.seq))
+            FeatureList = record.features
+            break
+        elements = []
+        for each_feature in FeatureList:
+            feature_type = each_feature.type.lower()
+            if(feature_type.lower() == "promoter" or feature_type.lower() == "cds" or
+                feature_type.lower() == "terminator" or feature_type.lower() == "rep_origin" or 
+                feature_type.lower() == "rbs"):
+                
+                if("label" in each_feature.qualifiers and len(each_feature.qualifiers['label']) > 0):
+                    name = each_feature.qualifiers["label"][0]
+                    color = each_feature.qualifiers['color'][0] if 'color' in each_feature.qualifiers else "#999999"
+                    start_position = each_feature.location.start+1
+                    elements.append({'name':name,'type':feature_type,'label':name,'color':color,"size":feature_size[feature_type.lower()],"start_position":start_position})
+        elements = sort(elements)
+        print(elements)
+        
+        plasmid_info = {
+            'name': repositoryName,
+            'size': f"{length} bp"
         }
-    ]
     
-    plasmid_info = {
-        'name': 'pExample_Vector',
-        'size': '5321 bp'
-    }
+        # 生成质粒图
+        generator = PlasmidGenerator(width=12, height=10, dpi=150)
+        generator.generate_plasmid(elements, plasmid_info)
     
-    # 生成质粒图
-    generator = PlasmidGenerator(width=12, height=10, dpi=150)
-    generator.generate_plasmid(elements, plasmid_info)
+        # 获取图像字节流
+        buffer = generator.save_to_bytes()
     
-    # 获取图像字节流
-    buffer = generator.save_to_bytes()
+        # 返回HTTP响应
+        return HttpResponse(buffer.getvalue(), content_type='image/png')
+    else:
+        return HttpResponse("False", content_type="text")
     
-    # 返回HTTP响应
-    return HttpResponse(buffer.getvalue(), content_type='image/png')
-
+    
+    
+def sort(elements):
+    for i in range(0,len(elements)):
+        for j in range(i,len(elements)):
+            if elements[j]["start_position"] < elements[i]["start_position"]:
+                temp = elements[i]
+                elements[i] = elements[j]
+                elements[j] = temp
+    return elements
