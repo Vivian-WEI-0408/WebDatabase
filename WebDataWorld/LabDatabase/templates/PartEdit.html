@@ -47,18 +47,51 @@
                     <div class="form-group">
                         <label for="element-type">元件类型:</label>
                         <select id="element-type" class="form-control">
-                            <option value="Promoter" selected>Promoter (启动子)</option>
-                            <option value="Terminator">Terminator (终止子)</option>
-                            <option value="RBS">RBS (核糖体结合位点)</option>
-                            <option value="CDS">CDS (编码序列)</option>
-                            <option value="P+R">P+R (启动子+核糖体结合位点)</option>
+                            {% if part.type == 1 %}
+                                <option value="Promoter" selected>Promoter (启动子)</option>
+                                <option value="Terminator">Terminator (终止子)</option>
+                                <option value="RBS">RBS (核糖体结合位点)</option>
+                                <option value="CDS">CDS (编码序列)</option>
+                                <option value="P+R">P+R (启动子+核糖体结合位点)</option>
+                            {% endif %}
+                            {% if part.type == 2 %}
+                                <option value="Promoter">Promoter (启动子)</option>
+                                <option value="Terminator">Terminator (终止子)</option>
+                                <option value="RBS">RBS (核糖体结合位点)</option>
+                                <option value="CDS" selected>CDS (编码序列)</option>
+                                <option value="P+R">P+R (启动子+核糖体结合位点)</option>
+                            {% endif %}
+                            {% if part.type == 3 %}
+                                <option value="Promoter">Promoter (启动子)</option>
+                                <option value="Terminator" selected>Terminator (终止子)</option>
+                                <option value="RBS">RBS (核糖体结合位点)</option>
+                                <option value="CDS">CDS (编码序列)</option>
+                                <option value="P+R">P+R (启动子+核糖体结合位点)</option>
+                            {% endif %}
+                            {% if part.type == 4 %}
+                                <option value="Promoter" selected>Promoter (启动子)</option>
+                                <option value="Terminator">Terminator (终止子)</option>
+                                <option value="RBS" selected>RBS (核糖体结合位点)</option>
+                                <option value="CDS">CDS (编码序列)</option>
+                                <option value="P+R">P+R (启动子+核糖体结合位点)</option>
+                            {% endif %}
+                            {% if part.type == 5 %}
+                                <option value="Promoter" selected>Promoter (启动子)</option>
+                                <option value="Terminator">Terminator (终止子)</option>
+                                <option value="RBS">RBS (核糖体结合位点)</option>
+                                <option value="CDS">CDS (编码序列)</option>
+                                <option value="P+R" selected>P+R (启动子+核糖体结合位点)</option>
+                            {% endif %}
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="species-source">物种来源:</label>
-                        <input type="text" id="species-source" class="form-control" placeholder="例如: Escherichia coli, Homo sapiens">
-                        <div class="form-hint">原始数据: {{part.sourceorganism}}</div>
+                        {% if part.sourceorganism %}
+                            <input type="text" id="species-source" class="form-control" value={{part.sourceorganism}}>
+                        {% else %}
+                            <input type="text" id="species-source" class="form-control" placeholder="例如: Escherichia coli, Homo sapiens" >
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -70,8 +103,11 @@
                 <div class="section-content">
                     <div class="form-group">
                         <label for="notes">备注信息:</label>
-                        <textarea id="notes" class="form-control" placeholder="请输入关于此元件的备注信息..."></textarea>
-                        <div class="form-hint">原始数据: {{part.note}}</div>
+                        {% if part.note %}
+                            <textarea id="notes" class="form-control" value={{part.note}}></textarea>
+                        {% else %}
+                            <textarea id="notes" class="form-control" placeholder="请输入关于此元件的备注信息..."></textarea>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -104,8 +140,11 @@
                 <div class="section-content">
                     <div class="form-group">
                         <label for="references">参考文献:</label>
-                        <textarea id="references" class="form-control" placeholder="请输入相关参考文献，每行一个引用..."></textarea>
-                        <div class="form-hint">原始数据: {{part.reference}}</div>
+                        {% if part.reference %}
+                            <textarea id="references" class="form-control" value={{part.reference}}></textarea>
+                        {% else %}
+                            <textarea id="references" class="form-control" placeholder="请输入相关参考文献，每行一个引用..."></textarea>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -169,16 +169,12 @@
                         console.log(warehouseItem.innerHTML)
                         warehouseItem.addEventListener('click', function(e) {
                             e.stopPropagation();
-                    
                             // 更新选中状态
                             updateNavSelection(this, 'warehouse-subitem');
-                    
                             // 显示仓库详情
                             showWarehouseDetail(warehouse.name);
-                    
                             // 切换到仓库内容
                             showwarehouse();
-                    
                             // 滚动到仓库详情
                             currentWarehouseId = warehouse.id;
                         });
@@ -201,7 +197,7 @@
                         const warehouseCard = document.createElement('div');
                         warehouseCard.className = 'warehouse-card fade-in';
                         // warehouseCard.dataset.name = warehouse.name;
-                
+
                         warehouseCard.innerHTML = `
                             <div class="warehouse-card-header">
                                 <div class="warehouse-name">${warehouse.name}</div>
@@ -225,7 +221,7 @@
                             <div class="warehouse-tags">
                             </div>
                         `;
-                
+                        
                         warehouseCard.addEventListener('click', function() {
                             const warehouseName = this.querySelector('.warehouse-name').textContent;
                     
@@ -247,11 +243,10 @@
 
                     warehouseNav.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                         // 切换展开/折叠状态
                         warehouseList.classList.toggle('expanded');
                         this.querySelector('.nav-arrow').classList.toggle('rotated');
-                
+                        
                         // 如果展开并且没有选中仓库子项，选中第一个
                         if (warehouseList.classList.contains('expanded')) {
                             // 切换到仓库内容
@@ -260,17 +255,17 @@
                             // 更新导航选中状态
                             updateNavSelection(this, 'nav-item');
                     
-                            // 如果没有选中的仓库子项，选中第一个
-                            if (!currentWarehouseId) {
-                                setTimeout(() => {
-                                    const firstWarehouse = document.querySelector('.warehouse-subitem');
-                                    if (firstWarehouse) {
-                                        updateNavSelection(firstWarehouse, 'warehouse-subitem');
-                                        console.log(data.repo[0].name);
-                                        showWarehouseDetail(data.repo[0].name);
-                                    }
-                                }, 100);
-                            }
+                            // // 如果没有选中的仓库子项，选中第一个
+                            // if (!currentWarehouseId) {
+                            //     setTimeout(() => {
+                            //         const firstWarehouse = document.querySelector('.warehouse-subitem');
+                            //         if (firstWarehouse) {
+                            //             updateNavSelection(firstWarehouse, 'warehouse-subitem');
+                            //             console.log(data.repo[0].name);
+                            //             showWarehouseDetail(data.repo[0].name);
+                            //         }
+                            //     }, 100);
+                            // }
                         }
                     });
 

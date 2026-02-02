@@ -34,10 +34,10 @@ import queue
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
+Base_URL = "http://10.30.76.2:8000/WebDatabase/"
 Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
-Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\output"
+Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
 TASK_STATUS_PREFIX = 'file_task_'
 # class User_auth(MiddlewareMixin):
 
@@ -1167,9 +1167,13 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                             ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
                             scar_min_position = min(scar_position[0],scar_position[1])
                             scar_max_position = max(scar_position[0],scar_position[1])
-                            
+                            print(ccdb_min_position)
+                            print(ccdb_max_position)
+                            print(scar_min_position)
+                            print(scar_max_position)
                             if(scar_min_position < ccdb_start_position and scar_max_position > ccdb_end_position):
                                 if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                                    min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
                                     target_enzyme = scar_name
                         else:
                             ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
@@ -1179,7 +1183,9 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                             
                             if(scar_min_position > ccdb_start_position and scar_max_position < ccdb_end_position):
                                 if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                                    min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
                                     target_enzyme = scar_name
+                print(f"target_enzyme: {target_enzyme}")
                 sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneName}')
                 sa.GenerateGBKFile(file_address)
             else:
@@ -1333,12 +1339,12 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                             type = typeResponse.json()['Type'].lower()
                             new_feature = {each_key:[fetch_result[each_key]["start"],fetch_result[each_key]["end"],type]}
                             sa.add_feature(new_feature)
-                
                 sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidName}')
                 file_address = os.path.join(File_Address, "AssemblyFile")
                 sa.GenerateGBKFile(file_address)
                 file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))
                 file_name_list.append(f"plasmid-{plasmidName}")
+        print(file_address_list)
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         task_status["status"] = "processing"
         task_status['progress'] = 50
@@ -1350,7 +1356,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
             print("GO TO Show")
             GG.show()
         except Exception as e:
-            print(e.args)
+            print(e.type)
             task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
             task_status["status"] = "failed"
             task_status["error"] = str(e.args)
