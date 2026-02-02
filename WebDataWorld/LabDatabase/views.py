@@ -446,7 +446,13 @@ def task_status(request, task_id):
     task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
     print(task_status)
     if(not task_status):
-        return JsonResponse({'error':"任务不存在或已过期"},status=404)
+        response_data = {
+            'task_id':task_id,
+            'status':task_status['status'],
+            'progress':task_status['progress'],
+            'error':"任务不存在或已过期"
+        }
+        return JsonResponse(response_data,status=404)
     if(task_status['progress'] == 100 and task_status['status'] != "failed"):
         task_status['status'] = 'completed'
     response_data = {
@@ -1111,8 +1117,8 @@ def AssemblyRepo(request):
 def process_assembly_repo(repositoryName, django_request,task_id):
     session = requests.Session()
     session.headers.update({
-            'User-Agent':'Django-App/1.0',
-            'Content-Type':'application/json',
+        'User-Agent':'Django-App/1.0',
+        'Content-Type':'application/json',
     })
     request_body = {"Name":repositoryName}
     print(repositoryName)
@@ -1334,7 +1340,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                 file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))
                 file_name_list.append(f"plasmid-{plasmidName}")
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
-        task_status["status"] = "progress"
+        task_status["status"] = "processing"
         task_status['progress'] = 50
         cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
         try:
@@ -1706,7 +1712,7 @@ def showRepository(request, repositoryName):
                     return HttpResponse("False",content_type="text")
                 part_scar_response = session.get(f"{Base_URL}getPartScar?id={each_part}",cookies=request.COOKIES).json()
                 print(part_scar_response)
-                if(part_scar_response["success"]):
+                if(part_scar_response["success"] and len(part_scar_response["scar_info"])!=0):
                     part_scar = f"BsmBI({part_scar_response['scar_info'][0]['bsmbi']})BsaI({part_scar_response['scar_info'][0]['bsai']})BbsI({part_scar_response['scar_info'][0]['bbsi']})"
 
                 else:
