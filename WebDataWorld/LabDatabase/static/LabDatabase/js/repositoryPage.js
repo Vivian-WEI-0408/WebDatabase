@@ -14,6 +14,18 @@
             
             
             assembleBtn.addEventListener('click', assembleFunction);
+            
+            
+            fetch(`/LabDatabase/RepositoryDiagram/${document.getElementById("repositoryName").innerText}`)
+            .then(response => {
+                console.log(response);
+                if(response != "False"){
+                    diagramPlaceholder.style.display = 'none';
+                    diagramImage.src = response.url;
+                    diagramImage.alt = "质粒示意图";
+                    diagramImage.style.display = 'block';
+                }
+            })
 
 
                 // 模拟示意图点击放大功能
