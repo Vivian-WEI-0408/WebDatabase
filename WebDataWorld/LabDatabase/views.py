@@ -1644,7 +1644,7 @@ def showRepository(request, repositoryName):
                     part_scar = f"BsmBI({part_scar_response['scar_info'][0]['bsmbi']})BsaI({part_scar_response['scar_info'][0]['bsai']})BbsI({part_scar_response['scar_info'][0]['bbsi']})"
 
                 else:
-                    return HttpResponse("False",content_type="text")
+                    part_scar = f""
                 part_info_list.append({"name":part_name,"Type":part_type,"scar":part_scar})
             backbone_info_list = []
             for each_backbone in backbone_id_list:
