@@ -1,9 +1,9 @@
-document.addEventListener("DOMContentLoaded", function(){
+let chart;
             const plasmid_map_div = document.getElementById("plasmid-map-div");
             // '<div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{backbone.marker}}</div>'
             // '<div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">{{backbone.ori}}</div>'
-            ori_list = `{{plasmid.ori_info}}`.split(", ")
-            marker_list = `{{plasmid.marker_info}}`.split(", ")
+            ori_list =  document.getElementById("plasmid_marker_info").innerText.split(", ")
+            marker_list = document.getElementById("plasmid_ori_info").innerText.split(", ")
             ori_length = ori_list.length
             marker_length = marker_list.length
             total_num = ori_length + marker_length
@@ -49,7 +49,6 @@ document.addEventListener("DOMContentLoaded", function(){
 
             document.getElementById('collapseAll').addEventListener('click',collapseAllNodes);
 
-        })
         document.getElementById('downMapButton').addEventListener('click',function(){
             let pathname_list = window.location.pathname.split('/');
             let plasmidid = pathname_list[pathname_list.length -1];
@@ -68,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function(){
             });
         });
 
-        let chart;
         
         function initChart() {
             const chartDom = document.getElementById('plasmid_tree');
@@ -174,11 +172,14 @@ document.addEventListener("DOMContentLoaded", function(){
 
         async function parseTreeData(){
             try{
-                const response = await fetch(`/LabDatabase/GetParent?PlasmidName={{plasmid.name}}`);
+                const plasmidName = document.getElementById("plasmid_name").innerText;
+
+                const response = await fetch(`/LabDatabase/GetParent?PlasmidName=${plasmidName}`);
                 const data = await response.json();
+                console.log(data);
                     if(data.success) {
                         // console.log(data);
-                        let json_value = `{"name":"{{plasmid.name}}","children":[`;
+                        let json_value = `{"name":"${plasmidName}","children":[`;
                         // let json_obj = JSON.parse(json_value);
                         let sub_part_value = "";
                         data.parentPart.forEach(part =>{
@@ -206,14 +207,17 @@ document.addEventListener("DOMContentLoaded", function(){
                             sub_part_value = sub_part_value + `{"name":${plasmid}},`
                         })
 
+
                         sub_part_value = sub_part_value.substring(0,sub_part_value.length-1);
                         json_value = json_value + sub_part_value + "]}";
+
+                        console.log(json_value);
                         // let sub_list = [sub_part_obj, sub_backbone_obj, sub_plasmid_obj];
                         // json_obj.children = sub_list;
 
                         // let newJsonstr = JSON.stringify(json_obj);
                         // console.log(json_value);
-                        // console.log(JSON.parse(json_value));
+                        console.log(JSON.parse(json_value));
                         return JSON.parse(json_value);
                         // return JSON.parse(json_value);
                     }

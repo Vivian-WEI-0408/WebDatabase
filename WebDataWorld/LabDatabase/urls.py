@@ -57,6 +57,8 @@ urlpatterns = [
     path("createRepo",views.CreateTempRepository,name="createRepo"),
     path("AssemblyRepo",views.AssemblyRepo,name="AssemblyRepo"),
     
+    path("AssemblyWithoutRepo",views.AssemblyWithoutRepo,name="AssemblyWithoutRepo"),
+    
     path("FetchExperienceDetail/<str:partName>",views.GetExperienceDetail,name="FetchExperienceDetail"),
     
     path("user/<str:username>",views.user,name="user"),

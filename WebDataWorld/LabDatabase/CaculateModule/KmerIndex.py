@@ -49,11 +49,11 @@ class KmerIndex:
                     end_new = max(positions)+self.k
                     if(start_new == 0 and end == query_len):
                         significant_matches[seq_id] = {'seq_id':seq_id,
-                                                      'offset':min(offset_old, offset),
-                                                      'match_count':match_count+match_count_old,
-                                                      'density':max(density,density_old),
-                                                      'start':start,
-                                                      'end':end_new}
+                                                    'offset':min(offset_old, offset),
+                                                    'match_count':match_count+match_count_old,
+                                                    'density':max(density,density_old),
+                                                    'start':start,
+                                                    'end':end_new}
                     if(start == 0 and end_new == query_len):
                         significant_matches[seq_id] = {'seq_id':seq_id,
                                                       'offset':min(offset_old, offset),
@@ -76,5 +76,4 @@ class KmerIndex:
                                             'start':min(positions),
                                             'end':max(positions)+self.k}
         # significant_matches.sort(key=lambda x:x['match_count'],reverse=True)
-        # print(significant_matches)
         return significant_matches

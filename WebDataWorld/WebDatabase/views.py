@@ -36,19 +36,28 @@ class User_auth(MiddlewareMixin):
     
     def process_request(self,request):
         request.start_time = time.time()
-        
         try:
             #排除不需要登录就能访问的页面
             if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register" or request.path_info == "/WebDatabase/AdminRegister" or request.path_info == "/WebDatabase/reset":
                 return
             info = request.session.get('info')
-            # print(f'User_auth{info}')
-            # print(request.user)
-            # print(info)
-            if not info:
-                return redirect('/WebDatabase/login')
-            else:
+            #temp
+            if(info['uname'] == "wang5042"):
+                request.session["info"]["uname"] = "optimus_wang"
+            print("9999999")
+            print(info)
+            # print(request.session.get('info'))
+            # # print(f'User_auth{info}')
+            # # print(request.user)
+            user = request.user
+            if user:
                 return
+            else:
+                return redirect('/WebDatabase/login')
+            # if not info:
+            #     return redirect('/WebDatabase/login')
+            # else:
+            #     return
         except Exception as e:
             return
 
@@ -261,11 +270,11 @@ def PartFilter(request):
                 # 'partid','name','type','sourceorganism','reference'
                 result = result.filter(type = type)
             if(name != "" and result != None):
-                print(name)
+                # print(name)
                 result = result.filter(Q(name__icontains = name) | Q(alias__icontains = name))
             if(result != None):
                 PartResult = (list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag')))
-        print(PartResult)
+        # print(PartResult)
         if(len(PartResult) != 0):
             total_count = len(PartResult)
             total_pages = (total_count + page_size -1) // page_size
@@ -326,12 +335,12 @@ def SearchByPartName(request):
     try:
         if(request.method == "GET"):
             Name = request.GET.get('name')
-            print(Name)
+            # print(Name)
             if(Name == None or Name == ""):
                 return JsonResponse(data="Name cannot be empty", status=400,safe=False)
                 # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
             PartList = Parttable.objects.filter(name=Name)
-            print(PartList)
+            # print(PartList)
             if(PartList != None):
                 return JsonResponse(data={"success":True, 'data':list(PartList.values())[0]}, status=200,safe=False)
                 # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
@@ -638,7 +647,7 @@ def AddPartRPU(request):
 def AddPartData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
+        # print(data)
         name = data['name']
         alias = data['alias']
         if(data['Level0Sequence'] != ""):
@@ -691,7 +700,7 @@ def AddPartFileAddress(request):
     # if(request.method == "GET"):
         userid = request.session.get('info')['uid']
         # userid = 8
-        print(userid)
+        # print(userid)
         partName = request.POST.get('PartName')
         fileAddress = request.POST.get('fileAddress')
         # partName=request.GET.get('name')
@@ -714,7 +723,7 @@ def AddPartFileAddress(request):
 def UpdatePart(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
+        # print(data)
         if('OriginalName' in data):
             OriginalName = data['OriginalName']
             PartID = Parttable.objects.get(name=OriginalName).id
@@ -736,12 +745,12 @@ def UpdatePart(request):
         if(NewName == None or NewName == ""):
             return JsonResponse(data="Parameters Name cannot be empty", status=400,safe=False)
         updateDate = timezone.now()
-        print(updateDate)
+        # print(updateDate)
         Parttable.objects.filter(partid = PartID).update(name=NewName, alias=NewAlias,type=NewType,lengthinlevel0=NewLength,
                                                            level0sequence=NewLevel0Sequence,confirmedsequence=NewConfirmedSequence,
                                                            insertsequence=NewInsertSequence,sourceorganism = NewSourceOrganism,
                                                            reference=NewReference,note=NewNote, updatedate = updateDate,user=request.session.get('info')['uname'])
-        print("11111112222")
+        # print("11111112222")
         return JsonResponse(data="Updated part data", status=200,safe=False)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data updated'})
 
@@ -789,7 +798,7 @@ def deletePartData(request):
         #     return JsonResponse(data={"success":False, "messsage":"Name cannot be empty"}, status=400,safe=False)
         #     # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
         PartID = request.GET.get("partid")
-        username = request.session['info']['uname']
+        username = request.user.uname
         partuploaduser = Parttable.objects.get(partid = PartID).user
         if(partuploaduser == "" or partuploaduser == None or username != partuploaduser):
             return JsonResponse(data = {"success":False, "message" : "当前用户没有删除权限，请联系上传用户进行删除"},status = 400, safe=False)
@@ -847,7 +856,7 @@ def PlasmidCount(request):
         count = Plasmidneed.objects.values().count()
         return JsonResponse(data={"success":True, "data":count}, status = 200, safe=False)
     else:
-       return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
+        return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
 def getOriAndMarker(plasmid_id):
     # print("8888888888888888")
     ori_list = []
@@ -879,9 +888,9 @@ def PlasmidDataALL(request):
                     info_list = getOriAndMarker(each['plasmidid'])
                     each['ori_info'] = info_list[0]
                     each['marker_info'] = info_list[1]
-                    print(each['plasmidid'])
+                    # print(each['plasmidid'])
                     each['scar'] = getdefaultplasmidscar(each['plasmidid'])
-                    print(each)
+                    # print(each)
                 return JsonResponse(data=PlasmidData, status=200,safe=False)
                 # return JsonResponse({'code':200,'data':list(PartData.values())})
             else:
@@ -899,7 +908,7 @@ def PlasmidDataALL(request):
                 each_plasmid['ori_info'] = info_list[0]
                 each_plasmid['marker_info'] = info_list[1]
                 each_plasmid['scar'] = getdefaultplasmidscar(each_plasmid['plasmidid'])
-                print(each_plasmid)
+                # print(each_plasmid)
             # print(query_set)
             has_next = page < total_pages
             has_previous = page > 1
@@ -1031,14 +1040,12 @@ def PlasmidFilter(request):
                     if(Name != "" and result != None):
                         result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                     if(len(result) != 0):
-                        print(result)
                         temp_result = (list(result.values('plasmidid','name','alias','level','tag')))[0]
                         info_list = getOriAndMarker(temp_result['plasmidid'])
                         temp_result['ori_info'] = info_list[0]
                         temp_result['marker_info'] = info_list[1]
                         each['scar'] = getdefaultplasmidscar(each['plasmidid'])
                         PlasmidResult.append(temp_result)
-        # print(PlasmidResult)
         if(len(PlasmidResult) != 0):
             total_count = len(PlasmidResult)
             total_pages = (total_count + page_size -1) // page_size
@@ -1085,13 +1092,16 @@ def PlasmidFilter(request):
 def SearchByPlasmidName(request):
     if(request.method == "GET"):
         Name = request.GET.get('name')
-        print(Name)
         if(Name == None or Name == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name can not be empty'})
         PlasmidList = Plasmidneed.objects.filter(name=Name)
         if(PlasmidList != None):
-            return JsonResponse(data={"success":True, "data":list(PlasmidList.values())[0]}, status=200,safe=False)
+            PlasmidResultList = list(PlasmidList.values())[0]
+            culture_function = getOriAndMarker(PlasmidResultList['plasmidid'])
+            PlasmidResultList['ori_info'] = culture_function[0]
+            PlasmidResultList['marker_info'] = culture_function[1]
+            return JsonResponse(data={"success":True, "data":PlasmidResultList}, status=200,safe=False)
             # return JsonResponse({'code':200,'status':'success','data':list(PlasmidList.values())})
         else:
             return JsonResponse(data="No such Plasmid", status=404,safe=False)
@@ -1371,7 +1381,6 @@ def AddPlasmidFileAddress(request):
 def AddPlasmidData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
         name = data['name']
         # oriclone = data['oriclone']
         # orihost = data['orihost']
@@ -1392,7 +1401,6 @@ def AddPlasmidData(request):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
         if(Plasmidneed.objects.filter(name = name).first() == None):
-            print("IN Database")
             try:
                 Plasmidneed.objects.create(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,customparentinformation = ParentInfo,
@@ -1401,7 +1409,6 @@ def AddPlasmidData(request):
             except Exception as e:
                 return JsonResponse(data="fail upload",status = 400, safe=False)
         else:
-            print("Not in Database")
             try:
                 with transaction.atomic():
                     plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
@@ -1420,7 +1427,6 @@ def AddPlasmidData(request):
                     plasmid_obj.save()
                 return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
             except Exception as e:
-                print(e.args)
                 return JsonResponse(data = str(e), status = 400, safe = False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Added'})
 
@@ -1495,10 +1501,8 @@ def GetParentPart(request):
             sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
             ppResult = Parentparttable.objects.filter(sonplasmidid = sonPlasmidid).values('parentpartid')
             pplist = []
-            # print(ppResult)
             for each_id in ppResult:
                 pplist.append(list(Parttable.objects.filter(partid = each_id['parentpartid']).values('name','alias','partid'))[0])
-            # print(pplist)
             return JsonResponse(data={'success':True,'data':pplist},status = 200, safe = False)
     except Exception as e:
         return JsonResponse(data={'success':False,"message":str(e.args)},status=400,safe=False)
@@ -1625,17 +1629,12 @@ def deletePlasmidData(request):
         #     return JsonResponse(data={"success":False, "message":"Name cannot be empty"}, status=400,safe=False)
         #     # return JsonResponse({'code':204,'status':'failed', 'data': 'Plasmid Name can not be empty'})
         PlasmidID = request.GET.get("plasmidid")
-        # print("balabala")
-        # print(PlasmidID)
         if(PlasmidID == None):
             return JsonResponse(data={"success":False, "message":"No such Plasmid"}, status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Not Found'})
         plasmid_user = Plasmidneed.objects.get(plasmidid = PlasmidID).user
-        # print("balabala")
-        print(plasmid_user)
         
-        if(plasmid_user != request.session['info']['uname']):
-            print("no user")
+        if(plasmid_user != request.user.uname):
             return JsonResponse(data = {"success":False, "message":"当前用户没有删除权限，请联系上传用户进行删除"}, status = 400, safe=False)
         try:
             Parentplasmidtable.objects.filter(sonplasmidid=PlasmidID).delete()
@@ -1688,7 +1687,6 @@ def setPlasmidCulture(request):
         plasmidName = data["name"]
         Ori_list = data["ori"]
         Marker_list = data["marker"]
-        print(data)
         start_time = time.time()
         max_wait_time = 5
         while time.time() - start_time < max_wait_time:
@@ -1696,15 +1694,13 @@ def setPlasmidCulture(request):
                 with transaction.atomic():
                     # plasmidid = Plasmidneed.objects.filter(name=plasmidName).first()
                     plasmidid = Plasmidneed.objects.select_for_update().get(name = plasmidName)
-                    # print(plasmidid)
+                   
                     Plasmid_culture_exist = Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmidid).values()
                     if(len(Plasmid_culture_exist) != 0):
                         Plasmid_Culture_Functions.objects.filter(plasmid_id = plasmidid).delete()
                     for each_ori in Ori_list:
-                        print(each_ori)
                         Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidid,function_content = each_ori, function_type = "ori")
                     for each_marker in Marker_list:
-                        print(each_marker)
                         Plasmid_Culture_Functions.objects.create(plasmid_id = plasmidid,function_content = each_marker, function_type="marker")
                     plasmidid.updatedate = timezone.now()
                     plasmidid.tag = "abnormal" if len(Ori_list) > 1 or len(Marker_list) > 1 or len(Ori_list) == 0 or len(Marker_list) == 0 else "normal"
@@ -1718,7 +1714,6 @@ def setPlasmidCulture(request):
                     time.sleep(0.5)
                     continue
                 raise
-        print("timeout")
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 def getPlasmidCulture(request):
@@ -1767,8 +1762,9 @@ def BackboneCount(request):
         count = Backbonetable.objects.values().count()
         return JsonResponse(data={"success":True, "data":count}, status = 200, safe=False)
     else:
-       return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
-   
+        return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
+    
+    
 def getdefaultbackbonescar(backboneid):
     backbone_obj = Backbonescartable.objects.filter(backboneid = backboneid).first()
     if backbone_obj != None:
@@ -1849,11 +1845,10 @@ def BackboneFilter(request):
             scarBackboneid = list(Backbonescartable.objects.filter(sapi = Scar).values('backboneid'))
         if(Enzyme != "" and len(scarBackboneid) == 0):
             return JsonResponse(data={'success':False,'error':'No data'}, status = 404, safe = False)
-        print(f"scarBackboneid:{scarBackboneid}")
+
         BackboneResult = []
         if(len(scarBackboneid) != 0):
             for each_id in scarBackboneid:
-                # print(each_id)
                 result = Backbonetable.objects
                 result = result.filter(id = each_id['backboneid'])
                 if(ori != ""):
@@ -1864,17 +1859,17 @@ def BackboneFilter(request):
                     marker_result = Backbone_Culture_Functions.objects.filter(backbone_id = each_id['backboneid'].values())
                     if(len(marker_result) == 0):
                         continue
-                # print(result)
+                
                 # if(ori != "" and result != None):
                 #     # 'partid','name','type','sourceorganism','reference'
                 #     result = result.filter(ori = ori)
-                #     # print(result.values())
+                #    
                 # if(marker != "" and result != None):
                 #     result = result.filter(marker = marker)
                 if(Name != "" and result != None):
                     result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                 if(len(result) != 0):
-                    # print(result.order_by('name').values('id','name','marker','ori','species'))
+                    
                     # PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
                     temp_result = list(result.order_by('name').values('id','name','alias','species','tag'))[0]
                     info_list = getBackboneOriAndMarker(temp_result['id'])
@@ -1898,9 +1893,6 @@ def BackboneFilter(request):
                 final_backbone_id_list = Ori_backbone_id_list & Marker_backbone_id_list
             else:
                 final_backbone_id_list = Ori_backbone_id_list | Marker_backbone_id_list
-            # print(Ori_plasmid_id_list)
-            # print(Marker_plasmid_id_list)
-            # print(final_plasmid_id_list)
             if(len(final_backbone_id_list) == 0):
                 # if(Name != "" and result != None):
                 #     result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
@@ -1944,14 +1936,13 @@ def BackboneFilter(request):
                     if(Name != "" and result != None):
                         result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
                     if(len(result) != 0):
-                        print(result)
                         temp_result = (list(result.values('id','name','alias','species','tag')))[0]
                         info_list = getBackboneOriAndMarker(temp_result['id'])
                         temp_result['ori'] = info_list[0]
                         temp_result['marker'] = info_list[1]
                         each['scar'] = getdefaultbackbonescar(each['id'])
                         BackboneResult.append(temp_result)
-        print(BackboneResult)
+        
         if(len(BackboneResult) != 0):
             total_count = len(BackboneResult)
             total_pages = (total_count + page_size -1) // page_size
@@ -2018,10 +2009,8 @@ def SearchByBackboneName(request):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Name can not be empty'})
         BackboneList = Backbonetable.objects.filter(name=Name)
-        print(BackboneList)
         if(BackboneList != None):
             BackboneList = list(BackboneList.values())[0]
-            print(BackboneList)
             info_list = getBackboneOriAndMarker(BackboneList["id"])
             BackboneList['ori'] = info_list[0]
             BackboneList['marker'] = info_list[1]
@@ -2183,7 +2172,6 @@ def SearchBackboneFileAddress(request):
 def AddBackboneData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
         name = data['name']
         length = len(data['sequence']) if data['sequence'] != "" else 0
         sequence = data['sequence']
@@ -2244,7 +2232,6 @@ def AddBackboneFileAddress(request):
 def UpdateBackboneData(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
         if("OriginalName" in data):
             OriginalName = data['OriginalName']
             if(OriginalName == None or OriginalName == ""):
@@ -2285,7 +2272,6 @@ def UpdateBackboneData(request):
             backbone_obj.tag = newTag
             backbone_obj.updatedate = timezone.now()
             backbone_obj.save()
-            print("aaaaaaaaaaaaaaaaaaaaaaa")
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Updated'})
 
@@ -2315,14 +2301,19 @@ def DeleteBackboneData(request):
         # if(Name == None or Name == ""):
         #     return JsonResponse(data={"success":False, "message":"Name cannot be empty"}, status=400,safe=False)
         #     # return JsonResponse({'code':204,'status':'failed','data':'name can not be empty'})
-        username = request.session.get('info')['uname']
+        username = request.user.uname
+        print(username)
         BackboneID = request.GET.get('backboneid')
-        if(BackboneID.user == "" or BackboneID.user == None or BackboneID.user != username):
+        Backbone_obj = Backbonetable.objects.get(id=BackboneID)
+        print(Backbone_obj.user == username)
+        print(Backbone_obj.user)
+        if(Backbone_obj.user == None or Backbone_obj.user == "" or Backbone_obj.user != username):
             return JsonResponse(data ={"success" : False, "message":"当前用户没有删除权限，请联系上传用户进行删除"} , status = 400, safe = False)
         if(BackboneID == None):
             return JsonResponse(data={"success":False, "message":"No such BackboneID"}, status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Backbone Not Found'})
         try:
+            Backbonefeaturetable.objects.filter(backboneid=BackboneID).delete()
             TbBackboneUserfileaddress.objects.filter(backboneid=BackboneID).delete()
             Parentbackbonetable.objects.filter(parentbackboneid = BackboneID).delete()
             Backbonescartable.objects.filter(backboneid = BackboneID).delete()
@@ -2371,10 +2362,8 @@ def setBackboneCulture(request):
                         Backbone_Culture_Functions.objects.filter(backbone_id = backboneid).delete()
                     backbone_id_obj = Backbonetable.objects.get(id = backboneid)
                     for each_ori in Ori_list:
-                        print(each_ori)
                         Backbone_Culture_Functions.objects.create(backbone_id = backbone_id_obj,function_content = each_ori, function_type = "ori")
                     for each_marker in Marker_list:
-                        print(each_marker)
                         Backbone_Culture_Functions.objects.create(backbone_id = backbone_id_obj,function_content = each_marker, function_type="marker")
                     backbone_obj = Backbonetable.objects.select_for_update().get(id=backboneid)
                     backbone_obj.tag = "abnormal" if len(Ori_list) > 1 or len(Marker_list) > 1 or len(Ori_list) == 0 or len(Marker_list) == 0 else "normal"
@@ -2389,7 +2378,6 @@ def setBackboneCulture(request):
                     time.sleep(0.5)
                     continue
                 raise
-        print("timeout")
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 
@@ -2399,7 +2387,6 @@ def BackboneFields(request):
     fields.remove("backbonescartable")
     fields.remove("tbbackboneuserfileaddress")
     fields.remove("parentbackbonetable")
-    print(fields)
     return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
 
 def BackboneListByUser(request,username):
@@ -2411,7 +2398,22 @@ def BackboneListByUser(request,username):
             return JsonResponse(data={"success":True, "data":result}, status = 200, safe= False)
     else:
         return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
-
+def deleteBackboneFeature(request):
+    if request.method == "GET":
+        try:
+            name = request.GET.get("name")
+            bid=Backbonetable.objects.filter(name=name).first().id
+            with transaction.atomic():
+                Backbonefeaturetable.objects.select_for_update().filter(backboneid=bid).delete()
+            return JsonResponse(data={"success":True},status=200,safe=False)
+        except Exception as e:
+            print(str(e.args))
+            return JsonResponse(data={"success":False,"message":str(e.args)},status=400,safe=False)
+                
+                
+                
+                
+                
 def AddBackboneFeature(request, BackboneName):
     if(request.method == "POST"):
         data = json.loads(request.body)
@@ -2426,7 +2428,6 @@ def AddBackboneFeature(request, BackboneName):
         while time.time() - start_time < max_wait_time:
             try:
                 with transaction.atomic():
-                    # print("99999999999999999999")
                     backbone_obj = Backbonetable.objects.get(name = BackboneName)
                     Backbonefeaturetable.objects.create(backboneid = backbone_obj, feature_start = start_position, feature_end  = end_position,
                                                     feature_type = type, feature_label = label, feature_color = color, feature_apeinfo = ape_info)
@@ -2438,10 +2439,9 @@ def AddBackboneFeature(request, BackboneName):
         return JsonResponse(data={'success':False,'message':"Just POST Method"}, status = 200, safe=False)
 
 def GetBackboneFeature(request, BackboneID):
-    print("BackboneID")
     if(request.method == "GET"):
         try:
-            result = Backbonefeaturetable.objects.get(backboneid=BackboneID).values()
+            result = Backbonefeaturetable.objects.filter(backboneid=BackboneID).values()
             return JsonResponse(data={"success":True,"data":list(result)},status = 200, safe=False)
         except Backbonefeaturetable.DoesNotExist:
             return JsonResponse(data={"success":False,"message":"BackboneFeatureTable Does Not Exist"}, status=400, safe=False)
@@ -2660,7 +2660,6 @@ def GetLBDDimerNameList(request):
         if(len(LBDDimerList) > 0):
             for obj in LBDDimerList:
                 NameList.append(obj.name)
-            print(NameList)
             return JsonResponse(data=NameList, status=200, safe=False)
             # return JsonResponse({'code':200,'status':'success','data':NameList})
         else:
@@ -2879,6 +2878,7 @@ def GetPlasmidIDByName(request):
         
         
 def GetPlasmidNameByID(request):
+    
     if(request.method=='GET'):
         ID = request.GET.get('ID')
         if(ID != None and ID != ""):
@@ -2900,9 +2900,7 @@ def AddPlasmidParentInfo(request):
         if("PlasmidID" in data):
             plasmidID = data['PlasmidID']
         ParentInfo = data["PlasmidParentInfo"]
-        print(data)
         if(plasmidID == 0 or ParentInfo == ""):
-            print("empty")
             return JsonResponse(data = {"success":False,"data":"Parameter is empty"},status = 400, safe=False)
         start_time = time.time()
         max_wait_time = 5
@@ -2919,7 +2917,6 @@ def AddPlasmidParentInfo(request):
                     time.sleep(0.5)
                     continue
                 raise
-        print("timeout")
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 
@@ -2928,14 +2925,11 @@ def AddPlasmidParentInfo(request):
 def AddParentPart(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
         if('SonPlasmidName' in data):
             sonPlasmidid = Plasmidneed.objects.filter(name = data['SonPlasmidName']).first().plasmidid
         if('SonPlasmidId' in data):
             sonPlasmidid = data['SonPlasmidId']
         ParentPartName = data['ParentPartName']
-        # print(sonPlasmidName)
-        # print(ParentPartName)
         if(sonPlasmidid == None or sonPlasmidid == 0 or ParentPartName == None or ParentPartName == ""):
             return JsonResponse(data="PlasmidName or PartName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
@@ -2967,12 +2961,8 @@ def AddParentPart(request):
 def AddParentPartByID(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
-        print(data)
         sonPlasmidName = data['SonPlasmidName']
         ParentPartID = data['ParentPartID']
-        print(sonPlasmidName)
-        # print(sonPlasmidName)
-        # print(ParentPartName)
         if(sonPlasmidName == None or sonPlasmidName == "" or ParentPartID == None or ParentPartID == ""):
             return JsonResponse(data="PlasmidName or PartName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
@@ -2984,7 +2974,7 @@ def AddParentPartByID(request):
                     sonPlasmidObj = Plasmidneed.objects.get(name = sonPlasmidName)
                     parentPartObj = Parttable.objects.filter(partid = ParentPartID).first()
                     if(parentPartObj == None):
-                        return JsonResponse(data={"success":False},status=404,safe=False)
+                        return JsonResponse(data={"success":False,"message":"No Such Part Data"},status=404,safe=False)
                     if(Parentparttable.objects.filter(sonplasmidid = sonPlasmidObj,parentpartid = parentPartObj).count() == 0):
                         Parentparttable.objects.create(sonplasmidid=sonPlasmidObj,parentpartid = parentPartObj)
                     return JsonResponse(data={"success":True},status=200,safe=False)
@@ -3009,7 +2999,6 @@ def AddParentBackbone(request):
         if('SonPlasmidId' in data):
             sonPlasmidid = data['SonPlasmidId']
         ParentBackboneName = data['ParentBackboneName']
-        print(data)
         if(sonPlasmidid == None or sonPlasmidid == 0 or ParentBackboneName == None or ParentBackboneName == ""):
             return JsonResponse(data="PlasmidName or BackboneName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
@@ -3020,10 +3009,9 @@ def AddParentBackbone(request):
                 with transaction.atomic():
                     sonPlasmidObj = Plasmidneed.objects.get(plasmidid = sonPlasmidid)
                     parentBackboneObj = Backbonetable.objects.filter(name = ParentBackboneName).first()
-                    # print(parentBackboneObj)
+                    
                     if(parentBackboneObj == None):
                         return JsonResponse(data={"success":False},status=404,safe=False)
-                    print(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count())
                     if(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count() == 0):
                         Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidObj,parentbackboneid = parentBackboneObj)
                     return JsonResponse(data={"success":True},status=200,safe=False)
@@ -3046,7 +3034,6 @@ def AddBackboneParentByID(request):
         data = json.loads(request.body)
         sonPlasmidName = data['SonPlasmidName']
         ParentBackboneID = data['ParentBackboneID']
-        print(data)
         if(sonPlasmidName == None or sonPlasmidName == "" or ParentBackboneID == None or ParentBackboneID == ""):
             return JsonResponse(data="PlasmidName or BackboneName cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Plasmid Name can not be empty'})
@@ -3057,10 +3044,8 @@ def AddBackboneParentByID(request):
                 with transaction.atomic():
                     sonPlasmidObj = Plasmidneed.objects.get(name = sonPlasmidName)
                     parentBackboneObj = Backbonetable.objects.filter(id = ParentBackboneID).first()
-                    # print(parentBackboneObj)
                     if(parentBackboneObj == None):
                         return JsonResponse(data={"success":False},status=404,safe=False)
-                    print(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count())
                     if(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count() == 0):
                         Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidObj,parentbackboneid = parentBackboneObj)
                     return JsonResponse(data={"success":True},status=200,safe=False)
@@ -3081,7 +3066,7 @@ def AddBackboneParentByID(request):
 def DeletePlasmidParent(request):
     if(request.method == "GET"):
         plasmidID = request.GET.get("plasmidid")
-        print(plasmidID)
+        
         try:
             Parentparttable.objects.filter(sonplasmidid = plasmidID).delete()
             Parentbackbonetable.objects.filter(sonplasmidid = plasmidID).delete()
@@ -3129,7 +3114,6 @@ def getPlasmidValueList(request,column):
                 categories_list = []
                 for each_cate in categories:
                     categories_list.append(each_cate['function_content'])
-                print(categories_list)
                 return JsonResponse(data={'success':True,'data':categories_list}, status = 200, safe=False)
             else:
                 categories = Plasmidneed.objects.values_list(column,flat=True).distinct()
@@ -3142,7 +3126,7 @@ def getPlasmidValueList(request,column):
             return JsonResponse(data="column cannot be empty",status=400, safe=False)
 
 #======================================================================
-#Part Scar Operation      
+#Part Scar Operation
 def getPartScar(request):
     try:
         if(request.method == 'GET'):
@@ -3161,7 +3145,6 @@ def getPartScar(request):
 def setPartScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
-        print(data)
         name = data['name']
         bsmbi = data['bsmbi']
         bsai = data['bsai']
@@ -3261,7 +3244,6 @@ def setBackboneScar(request):
                         return JsonResponse(data = {'success':True}, status = 200, safe = False)
                 except Backbonetable.DoesNotExist:
                     time.sleep(0.5)
-                    # print("7777777")
                     continue
                 except OperationalError as e:
                     if 'lock' in str(e).lower():
@@ -3283,7 +3265,6 @@ def getPlasmidScar(request):
         plasmidid = request.GET.get('plasmidid')
         if(plasmidid != None and plasmidid != ""):
             scar_info = Plasmidscartable.objects.filter(plasmidid = plasmidid).values()
-            print(scar_info)
             if(len(scar_info) != 0):
                 return JsonResponse(data = {'success':True,'scar_info':list(scar_info)},status = 200, safe = False)
             else:
@@ -3294,7 +3275,6 @@ def getPlasmidScar(request):
 def setPlasmidScar(request):
     if(request.method == 'POST'):
         data = json.loads(request.body)
-        print(data)
         if("name" in data):
             name = data['name']
         elif("plasmidid" in data):
@@ -3499,7 +3479,6 @@ def UpdatePlasmidSequence(request):
 def getuserlist(request):
     if(request.method == "GET"):
         userlist = list(CustomUser.objects.values('uname').distinct())
-        print(userlist)
         return JsonResponse(data = {'success':True, "data":userlist}, status = 200, safe = False)
     else:
         return JsonResponse(data = {"success":False, "message":"Just GET method"}, status = 400, safe=False)
@@ -3519,7 +3498,6 @@ def getAllUserUploadList(request):
 
 def getUserPartCount(request,uname):
     if(request.method == "GET"):
-        print(uname)
         count = Parttable.objects.filter(user = uname).count()
         return JsonResponse({"success":True,"count":count},status=200, safe=False)
     else:
@@ -3541,11 +3519,9 @@ def getUserPlasmidCount(request,uname):
 
 def getUserrepositoryCount(request,uid):
     if(request.method == "GET"):
-        print(uid)
         count = 0
         repositoryList = Temporaryrepository.objects.filter(userid = uid)
         for each in repositoryList:
-            print(each)
             if(each.is_expired() == False):
                 count +=1
         return JsonResponse(data={"success":True,"count":count},status=200,safe=False)
@@ -3554,17 +3530,11 @@ def getUserrepositoryCount(request,uid):
     
 @csrf_exempt
 def create_repository(request):
-    print(request.method)
     if(request.method == "POST"):
-        # print(request.POST)
-        # Name = request.POST.get('Name')
-        # Note = request.POST.get('Note')
-        # print(Name)
-        # print(Note)
+        
         data = json.loads(request.body)
         Name = data.get("Name")
         Note = data.get("Note")
-        print(Name)
         if(Name != None and Name != ""):
             try:
                 repository_id = str(uuid.uuid1())
@@ -3579,7 +3549,7 @@ def create_repository(request):
                     Temporaryrepository.objects.create(id=repository_id,name=Name,userid=user,repositorycreate_time = timezone.now(),repositoryupdate_time = timezone.now(),repositoryexpire_time = expires_at,note=Note,data=default_data)
                 return JsonResponse(data={'success':True,'repository_id':repository_id,'repository_name':Name,'url':f'/repository/{repository_id}','expires_at':expires_at},status=200,safe=False)
             except Exception as e:
-                print(e.args)
+                return JsonResponse(data=str(e.args),status = 400, safe=False)
         else:
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
 @csrf_exempt
@@ -3625,15 +3595,12 @@ def add_part_to_repository(request):
     将元件ID添加到用户的临时仓库中
     支持单个元件ID或元件ID列表
     """
-    print("add_part_to_repository")
-    print(request.method)
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
     
     try:
         # 检查用户是否已登录
         if 'info' not in request.session or 'uid' not in request.session['info']:
-            print("aaaaa")
             return JsonResponse({'error': 'User not logged in'}, status=401)
         
         user_id = request.session['info']['uid']
@@ -3641,14 +3608,12 @@ def add_part_to_repository(request):
 
         try:
             request_data = json.loads(request.body)
-            print(request_data)
             repositoryName = request_data.get('RepoName')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         # 获取或创建用户的临时仓库
         try:
             repository = Temporaryrepository.objects.get(userid=user,name=repositoryName)
-            print(repository)
         except Temporaryrepository.DoesNotExist:
             # 创建新的临时仓库,询问名称
             repository_id = uuid.uuid4()
@@ -3670,28 +3635,18 @@ def add_part_to_repository(request):
             )
         
         # 检查仓库是否过期
-        print(" 检查仓库是否过期")
-        try:
-            print("6666666")
-            print(repository.is_expired())
-        except Exception as e:
-            print("aaaaaaa")
-            print(e.args)
         if repository.is_expired():
             repositoryID = repository.id
             repository.delete()
-            print(request_data)
             return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
         
         # 获取请求数据
         
         # 验证必需字段
-        print("验证必需字段")
         if 'part_ids' not in request_data:
             return JsonResponse({'error': 'part_ids field is required'}, status=400)
         
         part_ids = request_data['part_ids']
-        print(part_ids)
         
         # 确保part_ids是列表格式
         if not isinstance(part_ids, list):
@@ -3723,7 +3678,6 @@ def add_part_to_repository(request):
         current_data['parts'].extend(new_parts)
         # current_data['last_updated'] = timezone.now().isoformat()
         current_data['total_parts'] = len(current_data['parts'])
-        print(f"current data: {current_data}")
         # 保存到数据库
         repository.data = current_data
         repository.repositoryupdate_time = timezone.now()
@@ -3790,7 +3744,6 @@ def add_backbone_to_repository(request):
         if repository.is_expired():
             repositoryID = repository.id
             repository.delete()
-            print(request_data)
             return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
         
         # 获取请求数据
@@ -3800,7 +3753,6 @@ def add_backbone_to_repository(request):
             return JsonResponse({'error': 'backbone_ids field is required'}, status=400)
         
         backbone_ids = request_data['backbone_ids']
-        print(backbone_ids)
         
         # 确保part_ids是列表格式
         if not isinstance(backbone_ids, list):
@@ -3899,7 +3851,6 @@ def add_plasmid_to_repository(request):
         if repository.is_expired():
             repositoryID = repository.id
             repository.delete()
-            print(request_data)
             return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
         
         # 获取请求数据
@@ -3909,7 +3860,6 @@ def add_plasmid_to_repository(request):
             return JsonResponse({'error': 'plasmid_ids field is required'}, status=400)
         
         plasmid_ids = request_data['plasmid_ids']
-        print(plasmid_ids)
         
         # 确保part_ids是列表格式
         if not isinstance(plasmid_ids, list):

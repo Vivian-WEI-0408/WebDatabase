@@ -62,7 +62,7 @@
                         <div class="feature-item">
                             <h4><i class="fas fa-copy"></i> 拷贝数</h4>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <input type="text" id="copy-number" class="form-control" placeholder="例如: 高拷贝、低拷贝">
+                                <input type="text" id="copy-number" class="form-control" placeholder="例如: 高拷贝、低拷贝" value="{{backbone.copynumber}}">
                                 <div class="form-hint">原始数据: {{backbone.copynumber}}</div>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                         <div class="feature-item">
                             <h4><i class="fas fa-microscope"></i> 宿主</h4>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <input type="text" id="host" class="form-control" placeholder="例如: E. coli, Yeast">
+                                <input type="text" id="host" class="form-control" placeholder="例如: E. coli, Yeast" value="{{backbone.species}}">
                                 <div class="form-hint">原始数据: {{backbone.species}}</div>
                             </div>
                         </div>

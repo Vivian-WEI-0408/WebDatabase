@@ -54,12 +54,62 @@ def scarPosition(seq):
     scar_list = []
     for enzyme in type2s_enzymes:
         scar = SI.enzyme_position_fit(enzyme)
+        
         scar_name_list = []
         for each_position in scar:
             each_str = scarName(seq[each_position-1:each_position+3])
             scar_name_list.append(each_str)
         scar_list.append({enzyme:{"index":scar,"name":scar_name_list}})
+    print(scar_list)
     return scar_list
+
+def scarIdentSitePosition(seq):
+    
+    SI = ScarIdentify(seq)
+    scar_list = []
+    for enzyme in type2s_enzymes:
+        scar = SI.enzyme_position_fit(enzyme)
+        scar_position_list = []
+        scar_name_list = []
+        for each_position in scar:
+            each_str = scarName(seq[each_position-1:each_position+3])
+            before_index = 0
+            print(enzyme)
+            if(str(enzyme) == "BsaI"):
+                
+                if(seq[each_position-8:each_position-2].upper() == "GGTCTC"):
+                    before_index = each_position - 8
+                if(seq[each_position+4:each_position+10].upper() == "GAGACC"):
+                    before_index = each_position +4
+            elif(enzyme == "BbsI"):
+                print(seq[each_position-9:each_position-3].upper() )
+                if(seq[each_position-9:each_position-3].upper() == "GAAGAC"):
+                    before_index = each_position -9
+                if(seq[each_position+5:each_position+11].upper() == "GTCTTC"):
+                    before_index = each_position + 4
+            elif(enzyme == "BsmBI"):
+                if(seq[each_position-8:each_position-2].upper() == "CGTCTC"):
+                    before_index = each_position -8
+                if(seq[each_position+4:each_position+10].upper() == "GAGACG"):
+                    before_index = each_position + 4
+            elif(enzyme == "AarI"):
+                if(seq[each_position-12:each_position-5].upper() == "CACCTGC"):
+                    before_index = each_position -8
+                if(seq[each_position+7:each_position+14].upper() == "GCAGGTG"):
+                    before_index = each_position + 4
+            elif(enzyme == "SapI"):
+                if(seq[each_position-9:each_position-2].upper() == "GCTCTTC"):
+                    before_index = each_position -8
+                if(seq[each_position+3:each_position+10].upper() == "GAAGAGC"):
+                    before_index = each_position + 4
+            if(before_index != 0):
+                scar_name_list.append(each_str)
+                scar_position_list.append(before_index)
+        scar_list.append({enzyme:{"index":scar_position_list,"name":scar_name_list}})
+    return scar_list
+
+    
+    
 
 def scarName(seq):
     scar_str = ""

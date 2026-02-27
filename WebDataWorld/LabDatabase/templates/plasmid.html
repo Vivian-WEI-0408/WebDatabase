@@ -21,7 +21,7 @@
             <div class="info-section">
                 <h2><i>📋</i> 基本信息</h2>
                 <h3><i class="fa-solid fa-user-secret"></i>  {{plasmid.user}}</h3>
-                <div class="plasmid-name">{{plasmid.name}}({{plasmid.alias}})</div>
+                <div class="plasmid-name"><span id="plasmid_name">{{plasmid.name}}</span>({{plasmid.alias}})</div>
                 
                 
                 <div class="info-grid">
@@ -35,11 +35,11 @@
                     </div>
                     <div class="info-card">
                         <h3>抗性标记</h3>
-                        <p>{{plasmid.marker_info}}</p>
+                        <p id="plasmid_marker_info">{{plasmid.marker_info}}</p>
                     </div>
                     <div class="info-card">
                         <h3>复制起点</h3>
-                        <p>{{plasmid.ori_info}}</p>
+                        <p id="plasmid_ori_info">{{plasmid.ori_info}}</p>
                     </div>
                     <div class = "info-card">
                         <h3>备注</h3>

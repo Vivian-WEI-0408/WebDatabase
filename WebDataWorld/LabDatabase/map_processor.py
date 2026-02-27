@@ -8,6 +8,7 @@ from ControllerModule import FittingLabels
 from CaculateModule.ScarIdentify import scarPosition,scarFunction
 def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL):
     FeatureList = []
+    print(file_name)
     if (file_name[1] == "fasta"):
         records = parse(upload_map, "fasta")
         # upload_map.seek(0)
@@ -18,11 +19,14 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
         try:
             records = parse(upload_map, "genbank")
             # upload_map.seek(0)
+            print(records)
             for record in records:
+                print(record.seq)
                 Sequence = str(record.seq)
                 FeatureList = record.features
                 break
         except Exception as e:
+            print(e.__class__)
             return False
     elif(file_name[1] == "dna"):
         try:
@@ -80,6 +84,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                 AddBackboneResponse = session.post(f"{Base_URL}AddBackbone",json=add_request_body,cookies=django_request.COOKIES)
                 if(AddBackboneResponse.status_code != 200):
                     return False
+            session.get(f"{Base_URL}deleteBackboneFeature?name={name}",cookies=django_request.COOKIES)
             if(file_name[1] == "gb" or file_name[1] == "gbk" or file_name[1] == "ape" or file_name[1] == "str"):
                 for each_feature in FeatureList:
                     try:

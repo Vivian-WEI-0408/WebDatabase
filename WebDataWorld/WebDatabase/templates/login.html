@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="next_url" content="{{next_url}}">
     <title>登录</title>
     <style>
         * {
@@ -130,7 +131,7 @@
             <div id="login-form">
                 <h2>用户登录</h2>
                 <div id="login-message" class="message"></div>
-                <form id="loginForm" method="POST" action = "/WebDatabase/login">
+                <form id="loginForm" method="POST" action = '/WebDatabase/login?next={{next_url}}'>
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="{{form.username.id_for_label}}">{{form.username.label}}</label>

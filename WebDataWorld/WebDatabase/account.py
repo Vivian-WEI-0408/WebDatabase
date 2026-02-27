@@ -318,10 +318,14 @@ class CustomLoginForm(AuthenticationForm):
             return user
 @csrf_protect
 def login_view(request):
+    print("aaaaaaa")
     if request.user.is_authenticated:
-        print(request.user.is_authenticated)
-        return redirect('/LabDatabase/index')
+        next_url = request.GET.get("next","/LabDatabase/index")
+        print("next_url: "+next_url)
+        return redirect(next_url)
     if request.method == 'POST':
+        next_url = request.GET.get("next","/LabDatabase/index")
+        print("next_url: "+next_url)
         form = CustomLoginForm(request=request, data = request.POST)
         # print(form.errors)
         if(form.is_valid()):
@@ -333,21 +337,17 @@ def login_view(request):
             print(form.cleaned_data['user'])
             request.session['info'] = {'uid':form.cleaned_data['uid'],'uname':form.cleaned_data['username']}
             print(form.cleaned_data)
-            return redirect("/LabDatabase/index")
+            return redirect(next_url)
         else:
             # print(form.cleaned_data)
             form.add_error('username',"用户名或邮箱错误")
             form.add_error('password',"密码错误")
-            return render(request, 'Login.html', {"form":form})
+            return render(request, 'Login.html', {"form":form,"next_url":next_url})
     else:
         form = CustomLoginForm(request=request)
-        return render(request, 'Login.html', {"form":form})
+        next_url = request.GET.get("next","/LabDatabase/index")
+        return render(request, 'Login.html', {"form":form,"next_url":next_url})
     
-
-        
-    
-            
-            
     
         
 

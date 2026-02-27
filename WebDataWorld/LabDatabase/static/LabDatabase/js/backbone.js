@@ -1,9 +1,10 @@
-document.addEventListener('DOMContentLoaded', function(){
+
             const plasmid_map_div = document.getElementById("plasmid-map-div");
+            
             // '<div class="plasmid-label" style="transform: rotate(0deg) translate(220px) rotate(0deg);">{{backbone.marker}}</div>'
             // '<div class="plasmid-label" style="transform: rotate(90deg) translate(220px) rotate(-90deg);">{{backbone.ori}}</div>'
-            ori_list = `{{backbone.ori}}`.split(", ")
-            marker_list = `{{backbone.marker}}`.split(", ")
+            ori_list = document.getElementById('ori_detail_content').innerText.split(',');
+            marker_list = document.getElementById('marker_detail_content').innerText.split(',');
             ori_length = ori_list.length
             marker_length = marker_list.length
             total_num = ori_length + marker_length
@@ -44,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function(){
                 this.style.zIndex = '1';
             });
         });
-        })
         document.getElementById('downPartMapButton').addEventListener('click',function(){
             let pathname_list = window.location.pathname.split('/');
             let backboneid = pathname_list[pathname_list.length -1];

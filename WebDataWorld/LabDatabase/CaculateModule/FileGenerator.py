@@ -71,8 +71,8 @@ class SequenceAnnotator:
         Keywords = "."
         definition = "synthetic circular DNA"
         reference = "synthetic"
-        if os.path.exists(os.path.join(f'{file_address}',f'{name}.gbk')):
-            return
+        # if os.path.exists(os.path.join(f'{file_address}',f'{name}.gbk')):
+        #     return
         with open(os.path.join(f'{file_address}',f'{name}.gbk'),'w') as file:
             file.write(("LOCUS       Exported              {0:>6} bp    DNA     {1:>8} CST \
                 {2}\n").format(len(sequence),"circular",datetime.datetime.now().strftime(DATE_FORMAT)))
@@ -82,18 +82,27 @@ class SequenceAnnotator:
             file.write("KEYWODS     {}\n".format(Keywords))
             file.write("SOURCE      {}\n".format(reference))
             file.write("FEATURES             Location/Qualifiers\n")
+            
             for each_feature in feature_list:
+                
                 if(each_feature["feature_start"] > each_feature["feature_end"]):
                     file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
                     file.write(f"                     /label={each_feature['feature_label']}\n")
-                    file.write(f"                     /color={each_feature['feature_color']}\n")
-                    file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
+                    if(each_feature["feature_apeinfo"] != None):
+                        file.write(f"                     /color={each_feature['feature_apeinfo']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
+                    else:
+                        file.write(f"                     /color=#ffff80\n")
+                        file.write(f"                     /ApEinfo_fwdcolor=#ffff80\n")
                 else:
-                    file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{each_feature['feature_end']})\n")
+                    file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}{each_feature['feature_start']}..{each_feature['feature_end']}\n")
                     file.write(f"                     /label={each_feature['feature_label']}\n")
-                    file.write(f"                     /color={each_feature['feature_color']}\n")
-                    file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
-                
+                    if(each_feature["feature_apeinfo"] != None):
+                        file.write(f"                     /color={each_feature['feature_apeinfo']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
+                    else:
+                        file.write(f"                     /color=#ffff80\n")
+                        file.write(f"                     /ApEinfo_fwdcolor=#ffff80\n")
 
             file.write("ORIGIN\n")
             numOfline = (len(sequence) // 60) + 1
@@ -130,8 +139,8 @@ class SequenceAnnotator:
         accession = "."
         version = "1.0"
         Keywords = "."
-        if os.path.exists(os.path.join(f'{file_address}',f'{self.name}.gbk')):
-            return
+        # if os.path.exists(os.path.join(f'{file_address}',f'{self.name}.gbk')):
+        #     return
         with open(os.path.join(f'{file_address}',f'{self.name}.gbk'),'w') as file:
             if(type == "circular"):
                 file.write(("LOCUS       Exported              {0:>6} bp    DNA     {1:>8} CST \
@@ -150,134 +159,230 @@ class SequenceAnnotator:
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     rep_origin      join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['ori']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['ori']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['ori']}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['ori']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
                     else:
                         file.write(f"     rep_origin      {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['ori']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['ori']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['ori']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['ori']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "cds"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     CDS             join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['CDS']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['CDS']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['CDS']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['CDS']}\n")
                     else:
                         file.write(f"     CDS             {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['CDS']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['CDS']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['CDS']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['CDS']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "promoter"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     promoter        join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['promoter']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['promoter']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['promoter']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['promoter']}\n")
                     else:
                         file.write(f"     promoter        {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['promoter']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['promoter']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['promoter']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['promoter']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "terminator"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     terminator      join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['terminator']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['terminator']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['terminator']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['terminator']}\n")
                     else:
                         file.write(f"     terminator      {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['terminator']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['terminator']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['terminator']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['terminator']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "misc_feature"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature    join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
                     else:
                         file.write(f"     misc_feature    {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "scar"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     scar            join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
                     else:
                         file.write(f"     scar            {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "primer_bind"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     primer_bind     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['binding']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['binding']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
                     else:
                         file.write(f"     primer_bind     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['binding']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['binding']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "spacer"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['spacer']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['spacer']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['spacer']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['spacer']}\n")
                     else:
                         file.write(f"     misc_feature     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['spacer']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['spacer']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['spacer']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['spacer']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "homo"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['homo']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['homo']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['homo']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['homo']}\n")
                     else:
                         file.write(f"     misc_feature     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['homo']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['homo']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['homo']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['homo']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "attp"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['attp']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['attp']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['attp']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['attp']}\n")
                     else:
                         file.write(f"     misc_feature     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['attp']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['attp']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['attp']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['attp']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "iceyydm"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['iceyydm']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['iceyydm']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['iceyydm']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['iceyydm']}\n")
                     else:
                         file.write(f"     misc_feature     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['iceyydm']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['iceyydm']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['iceyydm']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['iceyydm']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "bsubamy"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
                         file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['BsubAmy']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['BsubAmy']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['BsubAmy']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['BsubAmy']}\n")
                     else:
                         file.write(f"     misc_feature     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
                         file.write(f"                     /label={each_feature}\n")
-                        file.write(f"                     /color={self.colors['BsubAmy']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['BsubAmy']}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['BsubAmy']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['BsubAmy']}\n")
                 
             for each_feature in self.reverse_feature_list.keys():
                 if(self.reverse_feature_list[each_feature][2].lower() == "origin"):
@@ -440,112 +545,113 @@ class SequenceAnnotator:
                 NameIndex = 0
                 # 通过scar位置判断酶切位点位置
                 for each_index in EnzymeInfo['index']:
+                    if(EnzymeScarName[NameIndex]!= "undefine"):
                     #BsmBI forward
-                    if(self.sequence[each_index-8:each_index-2].upper() == "CGTCTC"):
-                        file.write(f"     misc_feature    {each_index-7}..{each_index-2}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
-                    #BsmBI reverse
-                    elif(self.sequence[each_index+4:each_index+10].upper() == "GAGACG"):
-                        file.write(f"     misc_feature    {each_index+5}..{each_index+10}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        if(self.sequence[each_index-8:each_index-2].upper() == "CGTCTC"):
+                            file.write(f"     misc_feature    {each_index-7}..{each_index-2}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #BsmBI reverse
+                        elif(self.sequence[each_index+4:each_index+10].upper() == "GAGACG"):
+                            file.write(f"     misc_feature    {each_index+5}..{each_index+10}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
                     
-                    #BsaI forward
-                    elif(self.sequence[each_index-8:each_index-2].upper() == "GGTCTC"):
-                        file.write(f"     misc_feature    {each_index-7}..{each_index-2}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
-                    #BsaI reverse
-                    elif(self.sequence[each_index+4:each_index+10].upper() == "GAGACC"):
-                        file.write(f"     misc_feature    {each_index+5}..{each_index+10}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #BsaI forward
+                        elif(self.sequence[each_index-8:each_index-2].upper() == "GGTCTC"):
+                            file.write(f"     misc_feature    {each_index-7}..{each_index-2}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #BsaI reverse
+                        elif(self.sequence[each_index+4:each_index+10].upper() == "GAGACC"):
+                            file.write(f"     misc_feature    {each_index+5}..{each_index+10}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
                     
-                    #BbsI forward
-                    elif(self.sequence[each_index-9:each_index-3].upper() == "GAAGAC"):
-                        file.write(f"     misc_feature    {each_index-8}..{each_index-3}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
-                    #BbsI reverse
-                    elif(self.sequence[each_index+5:each_index+11].upper() == "GTCTTC"):
-                        file.write(f"     misc_feature    {each_index+6}..{each_index+11}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #BbsI forward
+                        elif(self.sequence[each_index-9:each_index-3].upper() == "GAAGAC"):
+                            file.write(f"     misc_feature    {each_index-8}..{each_index-3}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #BbsI reverse
+                        elif(self.sequence[each_index+5:each_index+11].upper() == "GTCTTC"):
+                            file.write(f"     misc_feature    {each_index+6}..{each_index+11}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
                     
-                    #AarI forward
-                    elif(self.sequence[each_index-12:each_index-5].upper() == "CACCTGC"):
-                        file.write(f"     misc_feature    {each_index-13}..{each_index-5}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #AarI forward
+                        elif(self.sequence[each_index-12:each_index-5].upper() == "CACCTGC"):
+                            file.write(f"     misc_feature    {each_index-13}..{each_index-5}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
 
-                    #AarI reverse
-                    elif(self.sequence[each_index+7:each_index+14].upper() == "GCAGGTG"):
-                        file.write(f"     misc_feature    {each_index+8}..{each_index+14}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+3}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #AarI reverse
+                        elif(self.sequence[each_index+7:each_index+14].upper() == "GCAGGTG"):
+                            file.write(f"     misc_feature    {each_index+8}..{each_index+14}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+3}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
                     
-                    #SapI forward
-                    elif(self.sequence[each_index-9:each_index-2].upper() == "GCTCTTC"):
-                        file.write(f"     misc_feature    {each_index-8}..{each_index-2}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+2}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #SapI forward
+                        elif(self.sequence[each_index-9:each_index-2].upper() == "GCTCTTC"):
+                            file.write(f"     misc_feature    {each_index-8}..{each_index-2}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+2}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
 
-                    #SapI reverse
-                    elif(self.sequence[each_index+3:each_index+10].upper() == "GAAGAGC"):
-                        file.write(f"     misc_feature    {each_index+4}..{each_index+10}\n")
-                        file.write(f"                     /label={EnzymeName} Site\n")
-                        file.write(f"                     /color={self.colors['restriction_site']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
-                        file.write(f"     misc_feature    {each_index}..{each_index+2}\n")
-                        file.write(f"                     /label={EnzymeScarName[NameIndex]} Scar\n")
-                        file.write(f"                     /color={self.colors['scar']}\n")
-                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
+                        #SapI reverse
+                        elif(self.sequence[each_index+3:each_index+10].upper() == "GAAGAGC"):
+                            file.write(f"     misc_feature    {each_index+4}..{each_index+10}\n")
+                            file.write(f"                     /label={EnzymeName}\n")
+                            file.write(f"                     /color={self.colors['restriction_site']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['restriction_site']}\n")
+                            file.write(f"     Scar            {each_index}..{each_index+2}\n")
+                            file.write(f"                     /label=Scar {EnzymeScarName[NameIndex]}\n")                            
+                            file.write(f"                     /color={self.colors['scar']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['scar']}\n")
                     NameIndex += 1
             file.write("ORIGIN\n")
             numOfline = (self.length // 60) + 1

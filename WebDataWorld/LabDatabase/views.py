@@ -22,7 +22,7 @@ from Bio.Seq import Seq
 import re
 from .CaculateModule.FeatureIdentify import featureIdentify
 from .CaculateModule.FileGenerator import SequenceAnnotator
-from .CaculateModule.ScarIdentify import scarPosition,scarFunction
+from .CaculateModule.ScarIdentify import scarPosition,scarFunction,scarIdentSitePosition
 from .CaculateModule.snapgene_reader import snapgene_to_dict
 from .ControllerModule import FittingLabels
 from .CaculateModule.KmerIndex import KmerIndex
@@ -34,7 +34,7 @@ import queue
 
 import uuid
 
-Base_URL = "http://10.30.76.2:8000/WebDatabase/"
+Base_URL = "http://10.30.76.2:8080/WebDatabase/"
 Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
@@ -64,19 +64,23 @@ def index(request):
             'User-Agent':'Django-App/1.0',
             'Content-Type':'application/json',
         })
-        username = request.user.uname
-        userid = request.user.uid
-        user_repository_count = session.get(f"{Base_URL}getrepocountbyuser/{userid}",cookies=request.COOKIES).json()['count']
-        user_part_count = session.get(f"{Base_URL}getuserpartcount/{username}",cookies=request.COOKIES).json()['count']
-        user_backbone_count = session.get(f"{Base_URL}getuserbackbonecount/{username}",cookies=request.COOKIES).json()['count']
-        user_plasmid_count = session.get(f"{Base_URL}getuserplasmidcount/{username}",cookies=request.COOKIES).json()['count']
-        user_info = {}
-        user_info['repoCount'] = user_repository_count
-        user_info['partCount'] = user_part_count
-        user_info['backboneCount'] = user_backbone_count
-        user_info['plasmidCount'] = user_plasmid_count
-        return render(request,'index.html',{"user":request.user,"user_info":user_info})
-
+        print(request.session.get('info'))
+        print(request.user)
+        try:
+            username = request.user.uname
+            userid = request.user.uid
+            user_repository_count = session.get(f"{Base_URL}getrepocountbyuser/{userid}",cookies=request.COOKIES).json()['count']
+            user_part_count = session.get(f"{Base_URL}getuserpartcount/{username}",cookies=request.COOKIES).json()['count']
+            user_backbone_count = session.get(f"{Base_URL}getuserbackbonecount/{username}",cookies=request.COOKIES).json()['count']
+            user_plasmid_count = session.get(f"{Base_URL}getuserplasmidcount/{username}",cookies=request.COOKIES).json()['count']
+            user_info = {}
+            user_info['repoCount'] = user_repository_count
+            user_info['partCount'] = user_part_count
+            user_info['backboneCount'] = user_backbone_count
+            user_info['plasmidCount'] = user_plasmid_count
+            return render(request,'index.html',{"user":request.user,"user_info":user_info})
+        except AttributeError as e:
+            return redirect("/WebDatabase/login")
 def getData(request):
     # print(request.session['info']['uname'])
     session = requests.Session()
@@ -679,6 +683,7 @@ def downloadBackboneMap(request,backboneid):
         })
         sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={backboneid}',cookies = request.COOKIES)).json()['data']['sequence'].lower()
         backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{backboneid}",cookies=request.COOKIES)).json()
+        
         file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 
         if(backboneFeature["success"] != True):
@@ -747,8 +752,10 @@ def downloadPlasmidMap(request,plasmidid):
                         for each_feature in BackboneFeatureListResponse['data']:
                             if(each_feature["feature_label"] == fetch_result[each_key]["seq_id"]):
                                 type = each_feature["feature_type"]
+                                color = each_feature["feature_color"] if each_feature["feature_color"] != "" else each_feature["feature_apeinfo"]
+                                print(color)
                                 break
-                        new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type]}
+                        new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type,color]}
                         sa.add_feature(new_feature)
                 else:
                     fi = featureIdentify()
@@ -796,6 +803,7 @@ def downloadPlasmidMap(request,plasmidid):
             sa.add_reverse_features(reverse_feature_list)
         
         file_address = r'C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\'
+        print(sa.feature_list)
         thread = threading.Thread(
             target = sa.GenerateGBKFile,
             args= (file_address,)
@@ -863,6 +871,7 @@ def delete_backbone(request):
         })
         backboneid = json.loads(request.body)["backboneid"]
         delete_backbone_response = session.get(f"{Base_URL}deleteBackbone?backboneid={backboneid}", cookies = request.COOKIES)
+        print(delete_backbone_response.json())
         if(delete_backbone_response.status_code != 200):
             return JsonResponse(data = {"success":False, "message":delete_backbone_response.json()["message"]},status = 400, safe = False)
         else:
@@ -1084,6 +1093,7 @@ def getDocument(request, fileid):
 
 def getAssemblyFile(request, fileName):
     if(request.method == "GET"):
+        print(fileName)
         file_address = os.path.join(Assembly_File_Address,f"{fileName}.gb")
         if(os.path.exists(file_address)):
             response = FileResponse(open(file_address,'rb'),as_attachment=True)
@@ -1113,7 +1123,7 @@ def AssemblyRepo(request):
         return JsonResponse({"task_id":task_id,'status':'processing','message':"任务已创建，正在组装中"},status=200,safe=False)
     else:
         return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
-
+    
 def process_assembly_repo(repositoryName, django_request,task_id):
     session = requests.Session()
     session.headers.update({
@@ -1140,52 +1150,56 @@ def process_assembly_repo(repositoryName, django_request,task_id):
             backboneName = (session.get(f'{Base_URL}BackboneNameByID?ID={each_backbone}',cookies=django_request.COOKIES)).json()['BackboneName']
             backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{each_backbone}",cookies=django_request.COOKIES)).json()
             file_address = os.path.join(File_Address, "AssemblyFile")
-            print(backboneFeature)
+            
+            
+            ccdb_sequence = "ggcttactaaaagccagataacagtatgcatatttgcgcgctgatttttgcggtataagaatatatactgatatgtatacccgaagtatgtcaaaaagaggtatgctatgaagcagcgtattacagtgacagttgacagcgacagctatcagttgctcaaggcatatatgatgtcaatatctccggtctggtaagcacaaccatgcagaatgaagcccgtcgtctgcgtgccgaacgctggaaagcggaaaatcaggaagggatggctgaggtcgcccggtttattgaaatgaacggctcttttgctgacgagaacaggggctggtgaaatgcagtttaaggtttacacctataaaagagagagccgttatcgtctgtttgtggatgtacagagtgatattattgacacgcccgggcgacggatggtgatccccctggccagtgcacgtctgctgtcagataaagtctcccgtgaactttacccggtggtgcatatcggggatgaaagctggcgcatgatgaccaccgatatggccagtgtgccggtttccgttatcggggaagaagtggctgatctcagccaccgcgaaaatgacatcaaaaacgccattaacctgatgttctggggaatataa"
+            ccdb_reverse_sequence = "ttatattccccagaacatcaggttaatggcgtttttgatgtcattttcgcggtggctgagatcagccacttcttccccgataacggaaaccggcacactggccatatcggtggtcatcatgcgccagctttcatccccgatatgcaccaccgggtaaagttcacgggagactttatctgacagcagacgtgcactggccagggggatcaccatccgtcgcccgggcgtgtcaataatatcactctgtacatccacaaacagacgataacggctctctcttttataggtgtaaaccttaaactgcatttcaccagcccctgttctcgtcagcaaaagagccgttcatttcaataaaccgggcgacctcagccatcccttcctgattttccgctttccagcgttcggcacgcagacgacgggcttcattctgcatggttgtgcttaccagaccggagatattgacatcatatatgccttgagcaactgatagctgtcgctgtcaactgtcactgtaatacgctgcttcatagcatacctctttttgacatacttcgggtatacatatcagtatatattcttataccgcaaaaatcagcgcgcaaatatgcatactgttatctggcttttagtaagcc"
+            ccdb_fi =  KmerIndex()
+            ccdb_fi.add_sequence("ccdb",ccdb_sequence)
+            ccdb_fi.add_sequence("ccdb1",ccdb_reverse_sequence)
+            ccdb_position = ccdb_fi.query(sequence)
+            
+            scar_ident_list = scarIdentSitePosition(sequence)
+            #根据scar_list选择酶
+            if "ccdb" in ccdb_position.keys():
+                ccdb_start_position = ccdb_position["ccdb"]["start"]
+                ccdb_end_position = ccdb_position["ccdb"]["end"]
+            elif "ccdb1" in ccdb_position.keys():
+                ccdb_start_position = ccdb_position["ccdb1"]["start"]
+                ccdb_end_position = ccdb_position["ccdb1"]["end"]
+            min_difference = 222222
+            for each_scar in scar_ident_list:
+                scar_name = list(each_scar.keys())[0]
+                scar_position = each_scar[scar_name]["index"]
+                if(len(scar_position) >= 2):
+                    if(ccdb_start_position < ccdb_end_position):
+                        ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
+                        ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
+                        print(ccdb_min_position)
+                        print(ccdb_max_position)
+                        scar_min_position = min(scar_position[0],scar_position[1])
+                        scar_max_position = max(scar_position[0],scar_position[1])
+                        if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                            min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
+                            target_enzyme = scar_name
+                            print(min_difference)
+                    else:
+                        ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
+                        ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
+                        scar_min_position = min(scar_position[0],scar_position[1])
+                        scar_max_position = max(scar_position[0],scar_position[1])
+                        
+                        if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                            min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
+                            target_enzyme = scar_name
+            print(f"target:{target_enzyme}")
             if(backboneFeature["success"] != True):
-                #获取ccdb位置
-                ccdb_sequence = "ggcttactaaaagccagataacagtatgcatatttgcgcgctgatttttgcggtataagaatatatactgatatgtatacccgaagtatgtcaaaaagaggtatgctatgaagcagcgtattacagtgacagttgacagcgacagctatcagttgctcaaggcatatatgatgtcaatatctccggtctggtaagcacaaccatgcagaatgaagcccgtcgtctgcgtgccgaacgctggaaagcggaaaatcaggaagggatggctgaggtcgcccggtttattgaaatgaacggctcttttgctgacgagaacaggggctggtgaaatgcagtttaaggtttacacctataaaagagagagccgttatcgtctgtttgtggatgtacagagtgatattattgacacgcccgggcgacggatggtgatccccctggccagtgcacgtctgctgtcagataaagtctcccgtgaactttacccggtggtgcatatcggggatgaaagctggcgcatgatgaccaccgatatggccagtgtgccggtttccgttatcggggaagaagtggctgatctcagccaccgcgaaaatgacatcaaaaacgccattaacctgatgttctggggaatataa"
-                ccdb_fi =  KmerIndex()
-                ccdb_fi.add_sequence("ccdb",ccdb_sequence)
-                ccdb_position = ccdb_fi.query(sequence)
-
                 seq_obj = Seq(sequence)
                 seq_reverse = str(seq_obj.reverse_complement())
                 fi = featureIdentify()
                 feature_list = fi.featureMatch(sequence)
                 reverse_feature_list = fi.featureMatch(seq_reverse)
                 scar_list = scarPosition(sequence)
-                #根据scar_list选择酶
-                ccdb_start_position = ccdb_position["ccdb"]["start"]
-                ccdb_end_position = ccdb_position["ccdb"]["end"]
-                min_difference = 222222
-                for each_scar in scar_list:
-                    scar_name = list(each_scar.keys())[0]
-                    scar_position = each_scar[scar_name]["index"]
-                    if(len(scar_position) >= 2):
-                        if(ccdb_start_position < ccdb_end_position):
-                            ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
-                            ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
-                            scar_min_position = min(scar_position[0],scar_position[1])
-                            scar_max_position = max(scar_position[0],scar_position[1])
-                            print(ccdb_min_position)
-                            print(ccdb_max_position)
-                            print(scar_min_position)
-                            print(scar_max_position)
-                            if(scar_min_position < ccdb_start_position and scar_max_position > ccdb_end_position):
-                                if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
-                                    min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
-                                    target_enzyme = scar_name
-                        else:
-                            ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
-                            ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
-                            scar_min_position = min(scar_position[0],scar_position[1])
-                            scar_max_position = max(scar_position[0],scar_position[1])
-                            
-                            if(scar_min_position > ccdb_start_position and scar_max_position < ccdb_end_position):
-                                if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
-                                    min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
-                                    target_enzyme = scar_name
-                print(f"target_enzyme: {target_enzyme}")
                 sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneName}')
                 sa.GenerateGBKFile(file_address)
             else:
@@ -1201,7 +1215,8 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                 return {"success":False}
             if(target_enzyme != ""):
                 if(target_enzyme == "BbsI"):
-                    if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                    if("saccharomyces" in partSource['source'].lower() == False):
+                    # if(partSource['source'].lower() != "saccharomyces cerevisiae"):
                         if(partType == "promoter"):
                             sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
                         elif(partType == "terminator"):
@@ -1220,7 +1235,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                         elif(partType == "cds"):
                             sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
                 elif(target_enzyme == "BsaI"):
-                    if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                    if("saccharomyces" in partSource['source'].lower() == False):
                         if(partType == "promoter"):
                             sequence = "GGTCTCAGTGC" + sequence + "ATCAAGAGACC"
                         elif(partType == "terminator"):
@@ -1238,9 +1253,8 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                             sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
                         elif(partType == "cds"):
                             sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
-                    
             else:
-                if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                if("saccharomyces" in partSource['source'].lower() == False):
                     if(partType == "promoter"):
                         sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
                     elif(partType == "terminator"):
@@ -1260,9 +1274,11 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                         sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
             seq_obj = Seq(sequence)
             seq_reverse = str(seq_obj.reverse_complement())
-            fi = featureIdentify()
-            feature_list = fi.featureMatch(sequence)
-            reverse_feature_list = fi.featureMatch(seq_reverse)
+            # fi = featureIdentify()
+            # feature_list = fi.featureMatch(sequence)
+            # reverse_feature_list = fi.featureMatch(seq_reverse)
+            feature_list = {}
+            reverse_feature_list = {}
             scar_list = scarPosition(sequence)
             sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{partName}')
             file_address = os.path.join(File_Address, "AssemblyFile")
@@ -1356,7 +1372,6 @@ def process_assembly_repo(repositoryName, django_request,task_id):
             print("GO TO Show")
             GG.show()
         except Exception as e:
-            print(e.type)
             task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
             task_status["status"] = "failed"
             task_status["error"] = str(e.args)
@@ -1401,6 +1416,287 @@ def process_assembly_repo(repositoryName, django_request,task_id):
         task_status["result"] = None
         task_status["error"] = "获取仓库失败"
         cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+                        
+def AssemblyWithoutRepo(request):
+    if(request.method == "POST"):
+        data = json.loads(request.body)
+        plan_name = data.get('uuid')
+        partList = data.get('part')
+        backboneList = data.get('backbone')
+        plasmidList = data.get('plasmid')
+        task_id = str(uuid.uuid4())
+        task_status = {
+            'status':'processing',
+            'progress':0,
+            'result':None,
+            'error':None,
+        }
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=100000)
+        thread = threading.Thread(
+            target=process_assembly_without_repo,
+            args=(partList, backboneList, plasmidList,request,task_id,plan_name)
+        )
+        thread.daemon = True
+        thread.start()
+        return JsonResponse({"task_id":task_id,'status':'processing','message':"任务已创建，正在组装中"},status=200,safe=False)
+    else:
+        return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
+
+def process_assembly_without_repo(partList, backboneList, plasmidList, django_request,task_id,plan_name):
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent':'Django-App/1.0',
+        'Content-Type':'application/json',
+    })
+    file_address_list = []
+    file_name_list = []
+    part = []
+    backbone = []
+    plasmid = []
+    target_enzyme = ""
+    for each_backbone in backboneList:
+        backbone_id = (session.get(f'{Base_URL}BackboneID?name={each_backbone}',cookies=django_request.COOKIES)).json()["BackboneID"]
+        backbone.append(backbone_id)
+        sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={backbone_id}',cookies = django_request.COOKIES)).json()['data']['sequence'].lower()
+        backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{backbone_id}",cookies=django_request.COOKIES)).json()
+        file_address = os.path.join(File_Address, "AssemblyFile")
+        ccdb_sequence = "ggcttactaaaagccagataacagtatgcatatttgcgcgctgatttttgcggtataagaatatatactgatatgtatacccgaagtatgtcaaaaagaggtatgctatgaagcagcgtattacagtgacagttgacagcgacagctatcagttgctcaaggcatatatgatgtcaatatctccggtctggtaagcacaaccatgcagaatgaagcccgtcgtctgcgtgccgaacgctggaaagcggaaaatcaggaagggatggctgaggtcgcccggtttattgaaatgaacggctcttttgctgacgagaacaggggctggtgaaatgcagtttaaggtttacacctataaaagagagagccgttatcgtctgtttgtggatgtacagagtgatattattgacacgcccgggcgacggatggtgatccccctggccagtgcacgtctgctgtcagataaagtctcccgtgaactttacccggtggtgcatatcggggatgaaagctggcgcatgatgaccaccgatatggccagtgtgccggtttccgttatcggggaagaagtggctgatctcagccaccgcgaaaatgacatcaaaaacgccattaacctgatgttctggggaatataa"
+        ccdb_fi =  KmerIndex()
+        ccdb_fi.add_sequence("ccdb",ccdb_sequence)
+        ccdb_position = ccdb_fi.query(sequence)
+        scar_ident_list = scarIdentSitePosition(sequence)
+        #根据scar_list选择酶
+        ccdb_start_position = ccdb_position["ccdb"]["start"]
+        ccdb_end_position = ccdb_position["ccdb"]["end"]
+        min_difference = 222222
+        for each_scar in scar_ident_list:
+            scar_name = list(each_scar.keys())[0]
+            scar_position = each_scar[scar_name]["index"]
+            if(len(scar_position) >= 2):
+                if(ccdb_start_position < ccdb_end_position):
+                    ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
+                    ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
+                    scar_min_position = min(scar_position[0],scar_position[1])
+                    scar_max_position = max(scar_position[0],scar_position[1])
+                            
+                    if(scar_min_position < ccdb_start_position and scar_max_position > ccdb_end_position):
+                        if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                            min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
+                            target_enzyme = scar_name
+                else:
+                    ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
+                    ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
+                    scar_min_position = min(scar_position[0],scar_position[1])
+                    scar_max_position = max(scar_position[0],scar_position[1])
+                        
+                    if(scar_min_position > ccdb_start_position and scar_max_position < ccdb_end_position):
+                        if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                            min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
+                            target_enzyme = scar_name
+        if(backboneFeature["success"] != True):
+            #获取ccdb位置
+            seq_obj = Seq(sequence)
+            seq_reverse = str(seq_obj.reverse_complement())
+            fi = featureIdentify()
+            feature_list = fi.featureMatch(sequence)
+            reverse_feature_list = fi.featureMatch(seq_reverse)
+            scar_list = scarPosition(sequence)
+            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{each_backbone}')
+            sa.GenerateGBKFile(file_address)
+        else:
+            SequenceAnnotator.GeneratorBackboneNoSa(f'backbone-{each_backbone}',sequence,file_address,backboneFeature['data'])
+        file_address_list.append(os.path.join(f"{file_address}",f"backbone-{each_backbone}.gbk"))
+        file_name_list.append(f"backbone-{each_backbone}")
+    for each_part in partList:
+        part_id = (session.get(f"{Base_URL}PartID?name={each_part}",cookies=django_request.COOKIES)).json()['PartID']
+        part.append(part_id)
+        sequence = (session.get(f'{Base_URL}GetPartSeqByID?partid={part_id}',cookies = django_request.COOKIES)).json()['data']['level0sequence'].lower()
+        partType = (session.get(f"{Base_URL}TypeByID?ID={part_id}", cookies=django_request.COOKIES)).json()['Type'].lower()
+        partSource = (session.get(f"{Base_URL}partSource/{part_id}",cookies=django_request.COOKIES)).json()
+        if(partSource['success'] != True):
+            return {"success":False}
+        if(target_enzyme != ""):
+            if(target_enzyme == "BbsI"):
+                if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                    if(partType == "promoter"):
+                        sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
+                    elif(partType == "terminator"):
+                        sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+                    elif(partType == "cds"):
+                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                    elif(partType == "rbs"):
+                        sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+                    elif(partType == "p+r"):
+                        sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+                else:
+                    if(partType == "promoter"):
+                        sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+                    elif(partType == "terminator"):
+                        sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+                    elif(partType == "cds"):
+                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+            elif(target_enzyme == "BsaI"):
+                if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                    if(partType == "promoter"):
+                        sequence = "GGTCTCAGTGC" + sequence + "ATCAAGAGACC"
+                    elif(partType == "terminator"):
+                        sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
+                    elif(partType == "cds"):
+                        sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
+                    elif(partType == "rbs"):
+                        sequence = "GGTCTCAATCA" + sequence + "AATGAGAGACC"
+                    elif(partType == "p+r"):
+                        sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
+                else:
+                    if(partType == "promoter"):
+                        sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
+                    elif(partType == "terminator"):
+                        sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
+                    elif(partType == "cds"):
+                        sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
+                    
+        else:
+            if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                if(partType == "promoter"):
+                    sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
+                elif(partType == "terminator"):
+                    sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+                elif(partType == "cds"):
+                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                elif(partType == "rbs"):
+                    sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+                elif(partType == "p+r"):
+                    sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+            else:
+                if(partType == "promoter"):
+                    sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
+                elif(partType == "terminator"):
+                    sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
+                elif(partType == "cds"):
+                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+        seq_obj = Seq(sequence)
+        seq_reverse = str(seq_obj.reverse_complement())
+        fi = featureIdentify()
+        feature_list = fi.featureMatch(sequence)
+        reverse_feature_list = fi.featureMatch(seq_reverse)
+        scar_list = scarPosition(sequence)
+        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{each_part}')
+        file_address = os.path.join(File_Address, "AssemblyFile")
+        sa.GenerateGBKFile(file_address)
+        file_address_list.append(os.path.join(f"{file_address}",f"part-{partType}-{each_part}.gbk"))
+        file_name_list.append(f'part-{partType}-{each_part}')
+    for each_plasmid in plasmidList:
+        plasmidID = (session.get(f"{Base_URL}PlasmidID?name={each_plasmid}",cookies=django_request.COOKIES)).json()['PlasmidID']
+        plasmid.append(plasmidID)
+        if(os.path.exists(os.path.join(Assembly_File_Address,f"{each_plasmid}.gb"))):
+            file_address_list.append(os.path.join(Assembly_File_Address,f"{each_plasmid}.gb"))
+            file_name_list.append(each_plasmid)
+        else:
+            sequence = (session.get(f'{Base_URL}PlasmidSeqByID?plasmidid={plasmidID}',cookies = django_request.COOKIES)).json()['data']['sequenceconfirm'].lower()
+            seq_obj = Seq(sequence)
+            scar_list = scarPosition(sequence)
+            seq_reverse = str(seq_obj.reverse_complement())
+            PlasmidParentBackboneResponse = (session.get(f"{Base_URL}GetBackboneParent?plasmidid={plasmidID}",cookies=django_request.COOKIES)).json()
+            sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{each_plasmid}')
+            if(PlasmidParentBackboneResponse['success']):
+                PlasmidParentBackbone = PlasmidParentBackboneResponse['data'][0]['id']
+                ParentBackboneSequenceResponse = (session.get(f"{Base_URL}GetBackboneSeqByID?backboneid={PlasmidParentBackbone}", cookies=django_request.COOKIES)).json()
+                if(ParentBackboneSequenceResponse['success']):
+                    ParentBackboneSequence = ParentBackboneSequenceResponse['data']['sequence']
+                    BackboneFeatureListResponse = (session.get(f"{Base_URL}GetBackboneFeature/{PlasmidParentBackbone}", cookies=django_request.COOKIES)).json()
+                    if(BackboneFeatureListResponse['success']):
+                        backbone_fetch_kmer = KmerIndex()
+                        for each_feature in BackboneFeatureListResponse['data']:
+                            if(each_feature['feature_start']<each_feature['feature_end']):
+                                backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:each_feature["feature_end"]])
+                            else:
+                                backbone_fetch_kmer.add_sequence(each_feature["feature_label"],ParentBackboneSequence[each_feature["feature_start"]:]+ParentBackboneSequence[:each_feature["feature_end"]])
+                        fetch_result = backbone_fetch_kmer.query(sequence)
+                        for each_key in fetch_result.keys():
+                            for each_feature in BackboneFeatureListResponse['data']:
+                                if(each_feature["feature_label"] == fetch_result[each_key]["seq_id"]):
+                                    type = each_feature["feature_type"]
+                                    break
+                            new_feature = {fetch_result[each_key]["seq_id"]:[fetch_result[each_key]["start"],fetch_result[each_key]['end'],type]}
+                            sa.add_feature(new_feature)
+                    else:
+                        fi = featureIdentify()
+                        feature_list = fi.featureMatch(sequence)
+                        reverse_feature_list = fi.featureMatch(seq_reverse)
+                        sa.add_features(feature_list)
+                        sa.add_reverse_features(reverse_feature_list)
+            PlasmidParentPartResponse = (session.get(f"{Base_URL}GetPartParent?plasmidid={plasmidID}",cookies=django_request.COOKIES)).json()
+            Part_fetch_kmer = KmerIndex()
+            if(PlasmidParentPartResponse['success']):
+                PlasmidParentPart = PlasmidParentPartResponse['data']
+                for each_part in PlasmidParentPart:
+                    partSeqResponse = (session.get(f"{Base_URL}GetPartSeqByID?partid={each_part['partid']}",cookies=django_request.COOKIES)).json()
+                    if(partSeqResponse['success']):
+                        partSeq = partSeqResponse['data']['level0sequence']
+                        Part_fetch_kmer.add_sequence(each_part['name'],partSeq)
+                fetch_result = Part_fetch_kmer.query(sequence)
+                for each_key in fetch_result:
+                    typeResponse = (session.get(f"{Base_URL}TypeByName?name={each_key}",cookies=django_request.COOKIES))
+                    if(typeResponse.status_code == 200):
+                        type = typeResponse.json()['Type'].lower()
+                        new_feature = {each_key:[fetch_result[each_key]['start'],fetch_result[each_key]['end'],type]}
+                        sa.add_feature(new_feature)
+            PlasmidParentPlasmidResponse = (session.get(f"{Base_URL}GetPlasmidParent?plasmidid={plasmidID}",cookies=django_request.COOKIES)).json()
+            plasmid_fetch_kmer = KmerIndex()
+            if(PlasmidParentPlasmidResponse['success']):
+                PlasmidParentPlasmid = PlasmidParentPlasmidResponse['data']
+                ParentPartList = getplasmidAllParentPart(django_request,session,PlasmidParentPlasmid)
+                for each_part in ParentPartList.keys():
+                    plasmid_fetch_kmer.add_sequence(each_part,ParentPartList[each_part])
+                fetch_result = plasmid_fetch_kmer.query(sequence)
+                for each_key in fetch_result.keys():
+                    typeResponse = (session.get(f"{Base_URL}TypeByName?name={each_key}",cookies=django_request.COOKIES))
+                    if(typeResponse.status_code == 200):
+                        type = typeResponse.json()['Type'].lower()
+                        new_feature = {each_key:[fetch_result[each_key]["start"],fetch_result[each_key]["end"],type]}
+                        sa.add_feature(new_feature)
+            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{each_plasmid}')
+            file_address = os.path.join(File_Address, "AssemblyFile")
+            sa.GenerateGBKFile(file_address)
+            file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{each_plasmid}.gbk"))
+            file_name_list.append(f"plasmid-{each_plasmid}")
+    print(file_address_list)
+    task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+    task_status["status"] = "processing"
+    task_status['progress'] = 50
+    cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+    try:
+        GG = SupportGG.SupportGG(file_address_list,file_name_list)
+        GG.assemblyPart(plan_name)
+        GG.show()
+    except Exception as e:
+        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+        task_status["status"] = "failed"
+        task_status["error"] = str(e.args)
+        cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+    max_wait_time = 20
+    start_time = time.time()
+    while time.time() - start_time < max_wait_time:
+        if(os.path.exists(os.path.join(Assembly_File_Address,f"{plan_name}.gb"))):
+            task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+            task_status["status"] = "completed"
+            task_status['progress'] = 100
+            task_status["result"] = os.path.join(Assembly_File_Address,f"{plan_name}.gb")
+            cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+            print(task_id)
+            return
+        else:
+            time.sleep(0.5)
+            continue
+    task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+    task_status["status"] = "failed"
+    task_status['progress'] = 100
+    task_status["result"] = None
+    task_status["error"] = "组装Scar错误"
+    cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+
+
+
         
 
 
@@ -1418,6 +1714,8 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
         level = 3
     data_body = {'name':Name,'alias':Name,'level':level,'sequence':Sequence,'note':"",'ParentInfo':""}
     response = session.post(f'{Base_URL}AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
+    plasmidid = session.get(f'{Base_URL}PlasmidID?name={Name}',cookies=django_request.COOKIES)
+    
     if(response.status_code != 200):
         return {"success":False, "message":"添加质粒错误"}
     Ori_list = []
@@ -1436,22 +1734,46 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
     scar_response = session.post(f'{Base_URL}setPlasmidScar',json=scar_data_body,cookies=django_request.COOKIES)
     if(scar_response.status_code != 200):
         return {"success":False, "message":"质粒scar信息添加错误"}
+    #清空当前plasmid对应的层级信息
+    delete_parent_info_thread = threading.Thread(target=delete_parent_info, args=(session,plasmidid.json()["PlasmidID"],django_request))
+    add_parent_info_thread = threading.Thread(target=add_parent_info,args=(session,django_request,Name,partList,BackboneList,PlasmidList))
+    
+    delete_parent_info_thread.start()
+    delete_parent_info_thread.join()
+    
+    add_parent_info_thread.start()
+    add_parent_info_thread.join()
+    # delete_parent_info_response = session.get(f"{Base_URL}DeletePlasmidParent")
+    # for each_part in partList:
+    #     request_body = {"SonPlasmidName":Name,"ParentPartID":each_part}
+    #     part_response = session.post(f"{Base_URL}AddPartParentByID",json=request_body,cookies=django_request.COOKIES)
+    #     if(part_response.status_code != 200):
+    #         return {"success":False,"message":"Parent Part 添加失败"}
+    # for each_backbone in BackboneList:
+    #     request_body = {"SonPlasmidName":Name,"ParentBackboneID":each_backbone}
+    #     backbone_response = session.post(f"{Base_URL}AddBackboneParentByID",json=request_body,cookies=django_request.COOKIES)
+    #     if(backbone_response.status_code != 200):
+    #         return {"success":False,"message":"Parent Backbone 添加失败"}
+    # for each_plasmid in PlasmidList:
+    #     request_body = {"SonPlasmidName":Name,"ParentPlasmidID":each_plasmid}
+    #     plasmid_response = session.post(f"{Base_URL}AddPlasmidParentByID",json=request_body,cookies=django_request.COOKIES)
+    #     if(plasmid_response.status_code != 200):
+    #         return {"success":False,"message":"Parent Plasmid 添加失败"}
+    return {"success":True}
+
+def delete_parent_info(session,plasmidid,django_request):
+    delete_parent_info_response = session.get(f"{Base_URL}DeletePlasmidParent?plasmidid={plasmidid}",cookies=django_request.COOKIES)
+
+def add_parent_info(session,django_request,Name,partList,BackboneList,PlasmidList):
     for each_part in partList:
         request_body = {"SonPlasmidName":Name,"ParentPartID":each_part}
         part_response = session.post(f"{Base_URL}AddPartParentByID",json=request_body,cookies=django_request.COOKIES)
-        if(part_response.status_code != 200):
-            return {"success":False,"message":"Parent Part 添加失败"}
     for each_backbone in BackboneList:
         request_body = {"SonPlasmidName":Name,"ParentBackboneID":each_backbone}
         backbone_response = session.post(f"{Base_URL}AddBackboneParentByID",json=request_body,cookies=django_request.COOKIES)
-        if(backbone_response.status_code != 200):
-            return {"success":False,"message":"Parent Backbone 添加失败"}
     for each_plasmid in PlasmidList:
         request_body = {"SonPlasmidName":Name,"ParentPlasmidID":each_plasmid}
         plasmid_response = session.post(f"{Base_URL}AddPlasmidParentByID",json=request_body,cookies=django_request.COOKIES)
-        if(plasmid_response.status_code != 200):
-            return {"success":False,"message":"Parent Plasmid 添加失败"}
-    return {"success":True}
 
 
 def modify_part(request,partid):
@@ -1678,8 +2000,9 @@ def GetParentInfo(request):
                         result['Plasmid'].append(letter)
             # print({"parentPart":plasmidParentPart.json()['data'],"parentBackbone":plasmidParentBackbone.json()['data'],
                                         # "parentPlasmid":plasmidParentPlasmid.json()['data'],"parentInfo":result})
-            return JsonResponse(data = {"success":True,"parentPart":plasmidParentPart.json()['data'],"parentBackbone":plasmidParentBackbone.json()['data'],
-                                        "parentPlasmid":plasmidParentPlasmid.json()['data'],"parentInfo":result},status=200,safe=False)
+            print(f"parentPart:{plasmidParentBackbone.json()}")
+            return JsonResponse(data = {"success":True,"parentPart":plasmidParentPart.json()['data'] if 'data' in plasmidParentPart.json() else [],"parentBackbone":plasmidParentBackbone.json()['data'] if 'data' in plasmidParentBackbone.json() else [],
+                                        "parentPlasmid":plasmidParentPlasmid.json()['data'] if 'data' in plasmidParentPlasmid else [],"parentInfo":result},status=200,safe=False)
         else:
             return render(request,'error.html',{'error':"获取层级信息错误"})
         

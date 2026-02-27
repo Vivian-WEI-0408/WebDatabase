@@ -32,10 +32,9 @@ class SupportGG:
         self.repository.add_records(records)
 
 if __name__ == '__main__':
-    AddressList = [r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\backbone-YXP65.gbk",
-    r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\AssemblyFile\part-promoter-XRHL1P002.gbk",]
-    FileName = ["backbone-YXP65",
-                "part-promoter-XRHL1P002",]
+    AddressList = ['C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\backbone-pCQM005-Level0-A1A2.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-promoter-Pspank(c).gbk']
+    FileName = ["backbone-pCQM005-Level0-A1A2",
+                "part-promoter-Pspank(c)",]
     test = SupportGG(AddressList,FileName)
     test.assemblyPart("webtest")
     test.show()

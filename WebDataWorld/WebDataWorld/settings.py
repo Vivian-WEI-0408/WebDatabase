@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,9 +72,17 @@ TEMPLATES = [
         },
     },
 ]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = False   # 开发环境可设为 False
+CSRF_COOKIE_SECURE = False 
+
+
+
 
 WSGI_APPLICATION = 'WebDataWorld.wsgi.application'
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://subcalibre-adsorptively-landry.ngrok-free.dev',
+]
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -141,6 +150,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIR =[
     os.path.join(BASE_DIR, 'static'),
 ]
+# STATICFILES_STORAGE='whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
