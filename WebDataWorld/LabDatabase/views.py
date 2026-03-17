@@ -39,6 +39,20 @@ Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
 TASK_STATUS_PREFIX = 'file_task_'
+
+
+def _get_task_output_dir(task_id):
+    return os.path.join(Assembly_File_Address, str(task_id))
+
+
+def _ensure_task_output_dir(task_id):
+    task_output_dir = _get_task_output_dir(task_id)
+    os.makedirs(task_output_dir, exist_ok=True)
+    return task_output_dir
+
+
+def _get_task_assembly_file(task_id, file_name):
+    return os.path.join(_get_task_output_dir(task_id), f"{file_name}.gb")
 # class User_auth(MiddlewareMixin):
 
 #     def process_request(self,request):
@@ -1093,8 +1107,11 @@ def getDocument(request, fileid):
 
 def getAssemblyFile(request, fileName):
     if(request.method == "GET"):
-        print(fileName)
-        file_address = os.path.join(Assembly_File_Address,f"{fileName}.gb")
+        task_id = request.GET.get("task_id")
+        if task_id:
+            file_address = _get_task_assembly_file(task_id, fileName)
+        else:
+            file_address = os.path.join(Assembly_File_Address,f"{fileName}.gb")
         if(os.path.exists(file_address)):
             response = FileResponse(open(file_address,'rb'),as_attachment=True)
             return response
@@ -1130,6 +1147,8 @@ def process_assembly_repo(repositoryName, django_request,task_id):
         'User-Agent':'Django-App/1.0',
         'Content-Type':'application/json',
     })
+    task_output_dir = _ensure_task_output_dir(task_id)
+    assembly_result_file = _get_task_assembly_file(task_id, repositoryName)
     request_body = {"Name":repositoryName}
     print(repositoryName)
     try:
@@ -1370,7 +1389,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
             GG = SupportGG.SupportGG(file_address_list,file_name_list)
             GG.assemblyPart(repositoryName)
             print("GO TO Show")
-            GG.show()
+            GG.show(output_dir=task_output_dir)
         except Exception as e:
             task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
             task_status["status"] = "failed"
@@ -1379,8 +1398,8 @@ def process_assembly_repo(repositoryName, django_request,task_id):
         max_wait_time = 20
         start_time = time.time()
         while time.time() - start_time < max_wait_time:
-            if(os.path.exists(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"))):
-                records = parse(os.path.join(Assembly_File_Address,f"{repositoryName}.gb"), "genbank")
+            if(os.path.exists(assembly_result_file)):
+                records = parse(assembly_result_file, "genbank")
                 for record in records:
                     Sequence = str(record.seq)
                 response = AssemblyResultUpload(django_request, repositoryName, Sequence, part, backbone, plasmid)
@@ -1388,7 +1407,12 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                     task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
                     task_status["status"] = "completed"
                     task_status['progress'] = 100
-                    task_status["result"] = os.path.join(Assembly_File_Address,f"{repositoryName}.gb")
+                    task_status["result"] = {
+                        "task_id": task_id,
+                        "file_name": repositoryName,
+                        "file_path": assembly_result_file,
+                        "download_url": f"/LabDatabase/getAssembly/{repositoryName}?task_id={task_id}",
+                    }
                     cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
                     return
                 else:
@@ -1402,7 +1426,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
             else:
                 time.sleep(0.5)
                 continue
-        print(os.path.exists(os.path.join(Assembly_File_Address,f"{repositoryName}.gb")))
+        print(os.path.exists(assembly_result_file))
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         task_status["status"] = "failed"
         task_status['progress'] = 100
@@ -1448,6 +1472,8 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
         'User-Agent':'Django-App/1.0',
         'Content-Type':'application/json',
     })
+    task_output_dir = _ensure_task_output_dir(task_id)
+    assembly_result_file = _get_task_assembly_file(task_id, plan_name)
     file_address_list = []
     file_name_list = []
     part = []
@@ -1460,14 +1486,23 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
         sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={backbone_id}',cookies = django_request.COOKIES)).json()['data']['sequence'].lower()
         backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{backbone_id}",cookies=django_request.COOKIES)).json()
         file_address = os.path.join(File_Address, "AssemblyFile")
+        
         ccdb_sequence = "ggcttactaaaagccagataacagtatgcatatttgcgcgctgatttttgcggtataagaatatatactgatatgtatacccgaagtatgtcaaaaagaggtatgctatgaagcagcgtattacagtgacagttgacagcgacagctatcagttgctcaaggcatatatgatgtcaatatctccggtctggtaagcacaaccatgcagaatgaagcccgtcgtctgcgtgccgaacgctggaaagcggaaaatcaggaagggatggctgaggtcgcccggtttattgaaatgaacggctcttttgctgacgagaacaggggctggtgaaatgcagtttaaggtttacacctataaaagagagagccgttatcgtctgtttgtggatgtacagagtgatattattgacacgcccgggcgacggatggtgatccccctggccagtgcacgtctgctgtcagataaagtctcccgtgaactttacccggtggtgcatatcggggatgaaagctggcgcatgatgaccaccgatatggccagtgtgccggtttccgttatcggggaagaagtggctgatctcagccaccgcgaaaatgacatcaaaaacgccattaacctgatgttctggggaatataa"
+        ccdb_reverse_sequence = "ttatattccccagaacatcaggttaatggcgtttttgatgtcattttcgcggtggctgagatcagccacttcttccccgataacggaaaccggcacactggccatatcggtggtcatcatgcgccagctttcatccccgatatgcaccaccgggtaaagttcacgggagactttatctgacagcagacgtgcactggccagggggatcaccatccgtcgcccgggcgtgtcaataatatcactctgtacatccacaaacagacgataacggctctctcttttataggtgtaaaccttaaactgcatttcaccagcccctgttctcgtcagcaaaagagccgttcatttcaataaaccgggcgacctcagccatcccttcctgattttccgctttccagcgttcggcacgcagacgacgggcttcattctgcatggttgtgcttaccagaccggagatattgacatcatatatgccttgagcaactgatagctgtcgctgtcaactgtcactgtaatacgctgcttcatagcatacctctttttgacatacttcgggtatacatatcagtatatattcttataccgcaaaaatcagcgcgcaaatatgcatactgttatctggcttttagtaagcc"
         ccdb_fi =  KmerIndex()
         ccdb_fi.add_sequence("ccdb",ccdb_sequence)
+        ccdb_fi.add_sequence("ccdb1",ccdb_reverse_sequence)
         ccdb_position = ccdb_fi.query(sequence)
+        
         scar_ident_list = scarIdentSitePosition(sequence)
+        
         #根据scar_list选择酶
-        ccdb_start_position = ccdb_position["ccdb"]["start"]
-        ccdb_end_position = ccdb_position["ccdb"]["end"]
+        if "ccdb" in ccdb_position.keys():
+            ccdb_start_position = ccdb_position["ccdb"]["start"]
+            ccdb_end_position = ccdb_position["ccdb"]["end"]
+        elif "ccdb1" in ccdb_position.keys():
+            ccdb_start_position = ccdb_position["ccdb1"]["start"]
+            ccdb_end_position = ccdb_position["ccdb1"]["end"]
         min_difference = 222222
         for each_scar in scar_ident_list:
             scar_name = list(each_scar.keys())[0]
@@ -1476,23 +1511,24 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                 if(ccdb_start_position < ccdb_end_position):
                     ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
                     ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
+                    print(ccdb_min_position)
+                    print(ccdb_max_position)
                     scar_min_position = min(scar_position[0],scar_position[1])
                     scar_max_position = max(scar_position[0],scar_position[1])
-                            
-                    if(scar_min_position < ccdb_start_position and scar_max_position > ccdb_end_position):
-                        if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
-                            min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
-                            target_enzyme = scar_name
+                    if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                        min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
+                        target_enzyme = scar_name
+                        print(min_difference)
                 else:
                     ccdb_min_position = min(ccdb_start_position,ccdb_end_position)
                     ccdb_max_position = max(ccdb_start_position,ccdb_end_position)
                     scar_min_position = min(scar_position[0],scar_position[1])
                     scar_max_position = max(scar_position[0],scar_position[1])
                         
-                    if(scar_min_position > ccdb_start_position and scar_max_position < ccdb_end_position):
-                        if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
-                            min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
-                            target_enzyme = scar_name
+                    if(abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position) < min_difference):
+                        min_difference = abs(ccdb_min_position-scar_min_position) + abs(ccdb_max_position - scar_max_position)
+                        target_enzyme = scar_name
+        print(f"target:{target_enzyme}")
         if(backboneFeature["success"] != True):
             #获取ccdb位置
             seq_obj = Seq(sequence)
@@ -1515,9 +1551,15 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
         partSource = (session.get(f"{Base_URL}partSource/{part_id}",cookies=django_request.COOKIES)).json()
         if(partSource['success'] != True):
             return {"success":False}
+        print(partType)
         if(target_enzyme != ""):
             if(target_enzyme == "BbsI"):
-                if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+                print("saccharomyces" in partSource['source'].lower())
+                #if("saccharomyces" in partSource['source'].lower() == False)
+                if("saccharomyces" in partSource['source'].lower()) == False:
+                    print("*********7777777777777777777777****************")
+
+                # if(partSource['source'].lower() != "saccharomyces cerevisiae"):
                     if(partType == "promoter"):
                         sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
                     elif(partType == "terminator"):
@@ -1536,27 +1578,32 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                     elif(partType == "cds"):
                         sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
             elif(target_enzyme == "BsaI"):
-                if(partSource['source'].lower() != "saccharomyces cerevisiae"):
-                    if(partType == "promoter"):
-                        sequence = "GGTCTCAGTGC" + sequence + "ATCAAGAGACC"
-                    elif(partType == "terminator"):
-                        sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
-                    elif(partType == "cds"):
-                        sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
-                    elif(partType == "rbs"):
-                        sequence = "GGTCTCAATCA" + sequence + "AATGAGAGACC"
-                    elif(partType == "p+r"):
-                        sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
-                else:
-                    if(partType == "promoter"):
-                        sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
-                    elif(partType == "terminator"):
-                        sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
-                    elif(partType == "cds"):
-                        sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
-                    
+                print("saccharomyces" in partSource['source'].lower())
+                try:
+                    if("saccharomyces" in partSource['source'].lower()) == False:
+                        print("*********88888888888888888888****************")
+                        if(partType == "promoter"):
+                            sequence = "GGTCTCAGTGC" + sequence + "ATCAAGAGACC"
+                            print(sequence)
+                        elif(partType == "terminator"):
+                            sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
+                        elif(partType == "cds"):
+                            sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
+                        elif(partType == "rbs"):
+                            sequence = "GGTCTCAATCA" + sequence + "AATGAGAGACC"
+                        elif(partType == "p+r"):
+                            sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
+                    else:
+                        if(partType == "promoter"):
+                            sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
+                        elif(partType == "terminator"):
+                            sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
+                        elif(partType == "cds"):
+                            sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
+                except Exception as e:
+                    print(e.args())
         else:
-            if(partSource['source'].lower() != "saccharomyces cerevisiae"):
+            if("saccharomyces" in partSource['source'].lower()) == False:
                 if(partType == "promoter"):
                     sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
                 elif(partType == "terminator"):
@@ -1576,9 +1623,11 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                     sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
         seq_obj = Seq(sequence)
         seq_reverse = str(seq_obj.reverse_complement())
-        fi = featureIdentify()
-        feature_list = fi.featureMatch(sequence)
-        reverse_feature_list = fi.featureMatch(seq_reverse)
+        # fi = featureIdentify()
+        # feature_list = fi.featureMatch(sequence)
+        # reverse_feature_list = fi.featureMatch(seq_reverse)
+        feature_list = {}
+        reverse_feature_list = {}
         scar_list = scarPosition(sequence)
         sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{each_part}')
         file_address = os.path.join(File_Address, "AssemblyFile")
@@ -1668,20 +1717,25 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
     try:
         GG = SupportGG.SupportGG(file_address_list,file_name_list)
         GG.assemblyPart(plan_name)
-        GG.show()
+        GG.show(output_dir=task_output_dir)
     except Exception as e:
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         task_status["status"] = "failed"
-        task_status["error"] = str(e.args)
+        task_status["error"] = ("PermissionError: filename=%s, errno=%s, strerror=%s",getattr(e, "filename", None), e.errno, e.strerror)
         cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
     max_wait_time = 20
     start_time = time.time()
     while time.time() - start_time < max_wait_time:
-        if(os.path.exists(os.path.join(Assembly_File_Address,f"{plan_name}.gb"))):
+        if(os.path.exists(assembly_result_file)):
             task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
             task_status["status"] = "completed"
             task_status['progress'] = 100
-            task_status["result"] = os.path.join(Assembly_File_Address,f"{plan_name}.gb")
+            task_status["result"] = {
+                "task_id": task_id,
+                "file_name": plan_name,
+                "file_path": assembly_result_file,
+                "download_url": f"/LabDatabase/getAssembly/{plan_name}?task_id={task_id}",
+            }
             cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
             print(task_id)
             return

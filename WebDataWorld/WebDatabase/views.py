@@ -377,6 +377,15 @@ def SearchByPartNameFilter(request):
                 return JsonResponse(data = str(e),status=404,safe=False)
 
 def getBackboneOriAndMarker(Backboneid):
+    """
+    getBackboneOriAndMarker API view.
+
+    Args:
+        Backboneid: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     ori_list = []
     marker_list = []
     ori_info = Backbone_Culture_Functions.objects.filter(backbone_id = Backboneid,function_type = 'ori').values('function_content')
@@ -389,6 +398,15 @@ def getBackboneOriAndMarker(Backboneid):
     return [ori_list, marker_list]
 
 def SearchByBackboneNameFilter(request):
+    """
+    SearchByBackboneNameFilter API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('keywords')
         if(Name == None or Name == ""):
@@ -411,6 +429,15 @@ def SearchByBackboneNameFilter(request):
 
 
 def SearchByPlasmidNameFilter(request):
+    """
+    SearchByPlasmidNameFilter API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         Name = request.GET.get('keywords')
         if(Name == None or Name == ""):
@@ -430,6 +457,15 @@ def SearchByPlasmidNameFilter(request):
                 return JsonResponse(data = str(e),status=404,safe=False)
 
 def SearchByPartID(request):
+    """
+    SearchByPartID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ID = request.GET.get('ID')
         if(ID == None or ID == ""):
@@ -446,6 +482,15 @@ def SearchByPartID(request):
         return JsonResponse(data="Just Get Method", status=400, safe=False)
 
 def SearchByPartAlterName(request):
+    """
+    SearchByPartAlterName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         try:
             AlterName = request.GET.get('AlterName')
@@ -464,6 +509,15 @@ def SearchByPartAlterName(request):
 
 
 def SearchByPartType(request):
+    """
+    SearchByPartType API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Type = request.GET.get('type')
         if(Type == None or Type == ""):
@@ -485,8 +539,16 @@ def SearchByPartType(request):
         else:
             return JsonResponse(data="No such part", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
-
 def SearchPartTypeByName(request):
+    """
+    SearchPartTypeByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name == None or Name == ""):
@@ -515,6 +577,15 @@ def SearchPartTypeByName(request):
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
 
 def SearchPartTypeByID(request):
+    """
+    SearchPartTypeByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ID = request.GET.get('ID')
         if(ID == None or ID == ""):
@@ -554,6 +625,15 @@ def SearchPartTypeByID(request):
 
 
 def SearchByRPU(request):
+    """
+    SearchByRPU API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if (request.method == "GET"):
         RPU = float(request.GET.get('rpu'))
         if (RPU == None or RPU == 0):
@@ -575,6 +655,15 @@ def SearchByRPU(request):
 
 
 def GetPartRPU(request):
+    """
+    GetPartRPU API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         partID = request.GET.get('partID')
         if(partID == None or partID == ""):
@@ -587,6 +676,15 @@ def GetPartRPU(request):
 
 
 def SearchBySeq(request):
+    """
+    SearchBySeq API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Seq = request.GET.get('seq')
         if(Seq == None or Seq == ""):
@@ -603,6 +701,15 @@ def SearchBySeq(request):
 
 
 def SearchPartFile(request):
+    """
+    SearchPartFile API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name == None or Name == ""):
@@ -627,6 +734,15 @@ def SearchPartFile(request):
 
 #Add
 def AddPartRPU(request):
+    """
+    AddPartRPU API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         name = request.POST.get('Name')
         if(name == None or name == ""):
@@ -645,6 +761,15 @@ def AddPartRPU(request):
 
 
 def AddPartData(request):
+    """
+    AddPartData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         # print(data)
@@ -696,6 +821,15 @@ def AddPartData(request):
 
 
 def AddPartFileAddress(request):
+    """
+    AddPartFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
     # if(request.method == "GET"):
         userid = request.session.get('info')['uid']
@@ -721,6 +855,15 @@ def AddPartFileAddress(request):
 
 #Update
 def UpdatePart(request):
+    """
+    UpdatePart API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         # print(data)
@@ -755,6 +898,15 @@ def UpdatePart(request):
         # return JsonResponse({'code':200,'status': 'success','data':'Part data updated'})
 
 def UpdatePartRPU(request):
+    """
+    UpdatePartRPU API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Name = request.POST.get('Name')
         rpu = float(request.POST.get('rpu'))
@@ -774,6 +926,15 @@ def UpdatePartRPU(request):
 
 
 def UpdatePartFileAddress(request):
+    """
+    UpdatePartFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         PartName = request.POST.get('PartName')
         Address = request.POST.get('Address')
@@ -792,6 +953,15 @@ def UpdatePartFileAddress(request):
 
 #Delete
 def deletePartData(request):
+    """
+    deletePartData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         # name = request.GET.get('name')
         # if(name == None or name == ""):
@@ -813,6 +983,15 @@ def deletePartData(request):
 
 
 def deletePartFile(request):
+    """
+    deletePartFile API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         userid = request.session.get('info')['uid']
         name = request.GET.get('name')
@@ -829,6 +1008,16 @@ def deletePartFile(request):
         # return JsonResponse({'code':200,'status': 'success','data':'Part file address deleted'})
 
 def PartListByUser(request,username):
+    """
+    PartListByUser API view.
+
+    Args:
+        request: Django HttpRequest object.
+        username: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         if(username == None or username == ""):
             return JsonResponse(data = {"success":False, "message":"Parameter cannot be empty"}, status=400, safe=False)
@@ -840,6 +1029,16 @@ def PartListByUser(request,username):
 
 
 def GetPartSource(request, partID):
+    """
+    GetPartSource API view.
+
+    Args:
+        request: Django HttpRequest object.
+        partID: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         try:
             source = Parttable.objects.get(partid = partID).sourceorganism
@@ -852,12 +1051,30 @@ def GetPartSource(request, partID):
 #---------------------------------------------------------------
 #pladmid need
 def PlasmidCount(request):
+    """
+    PlasmidCount API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         count = Plasmidneed.objects.values().count()
         return JsonResponse(data={"success":True, "data":count}, status = 200, safe=False)
     else:
         return JsonResponse(data={"success":False, "message":"Just GET method"}, status = 200, safe=False)
 def getOriAndMarker(plasmid_id):
+    """
+    getOriAndMarker API view.
+
+    Args:
+        plasmid_id: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     # print("8888888888888888")
     ori_list = []
     marker_list = []
@@ -872,6 +1089,15 @@ def getOriAndMarker(plasmid_id):
     return [ori_list, marker_list]
 
 def getdefaultplasmidscar(plasmidid):
+    """
+    getdefaultplasmidscar API view.
+
+    Args:
+        plasmidid: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     plasmid_obj = Plasmidscartable.objects.filter(plasmidid = plasmidid).first()
     if plasmid_obj != None:
         return plasmid_obj.bsai+"/"+plasmid_obj.bbsi
@@ -879,6 +1105,15 @@ def getdefaultplasmidscar(plasmidid):
         return "No Sequence"
 
 def PlasmidDataALL(request):
+    """
+    PlasmidDataALL API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         page = int(request.GET.get('page',0))
         if(page == 0):
@@ -930,6 +1165,15 @@ def PlasmidDataALL(request):
 #Plasmid Filter
 
 def PlasmidFilter(request):
+    """
+    PlasmidFilter API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'POST'):
         data = json.loads(request.body)
         Name = data['name']
@@ -1090,6 +1334,15 @@ def PlasmidFilter(request):
 
 #search
 def SearchByPlasmidName(request):
+    """
+    SearchByPlasmidName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name == None or Name == ""):
@@ -1108,6 +1361,15 @@ def SearchByPlasmidName(request):
             # return JsonResponse({'code':204,'status':'failed','data':"Plamsid Not Found"})
 
 def SearchByPlasmidID(request):
+    """
+    SearchByPlasmidID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ID = request.GET.get('ID')
         if(ID == None or ID == ""):
@@ -1126,6 +1388,15 @@ def SearchByPlasmidID(request):
             # return JsonResponse({'code':204,'status':'failed','data':"Plamsid Not Found"})
 
 def SearchByPlasmidAlterName(request):
+    """
+    SearchByPlasmidAlterName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         AlterName = request.GET.get('altername')
         if(AlterName == None or AlterName == ""):
@@ -1144,6 +1415,15 @@ def SearchByPlasmidAlterName(request):
             # return JsonResponse({'code':204,'status':'failed','data':[]})
 
 def SearchByPlasmidSeq(request):
+    """
+    SearchByPlasmidSeq API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Seq = request.GET.get('seq')
         if(Seq == None or Seq == ""):
@@ -1162,6 +1442,15 @@ def SearchByPlasmidSeq(request):
             # return JsonResponse({'code':204,'status':'failed','data':[]})
 
 def SearchPlasmidSequenceByName(request):
+    """
+    SearchPlasmidSequenceByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name == None or Name ==""):
@@ -1186,6 +1475,15 @@ def SearchPlasmidSequenceByName(request):
             # return JsonResponse({'code':204,'status':'failed','data':'Plasmid Not Found'})
 
 def SearchPlasmidSequenceByID(request):
+    """
+    SearchPlasmidSequenceByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         id = request.GET.get('plasmidid')
         if(id == None or id == 0):
@@ -1203,6 +1501,15 @@ def SearchPlasmidSequenceByID(request):
         # return JsonResponse({'code':204,'status':'failed','data':'Plasmid Not Found'})
 
 def SearchByOri(request):
+    """
+    SearchByOri API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Ori = request.GET.get('oriClone')
         if(Ori == None or Ori == ""):
@@ -1225,6 +1532,15 @@ def SearchByOri(request):
 
 
 def SearchByMarker(request):
+    """
+    SearchByMarker API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Marker = request.GET.get('markerHost')
         if(Marker == None or Marker == ""):
@@ -1246,6 +1562,15 @@ def SearchByMarker(request):
             # return JsonResponse({'code':204,'status':'failed','data':"Plasmid Not Found"})
 
 def SearchByLevel(request):
+    """
+    SearchByLevel API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Level = request.GET.get('level')
         if(Level == None or Level == ""):
@@ -1265,6 +1590,15 @@ def SearchByLevel(request):
 
 
 def SearchByPlate(request):
+    """
+    SearchByPlate API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Plate = request.GET.get('plate')
         if(Plate == None or Plate == ""):
@@ -1283,6 +1617,15 @@ def SearchByPlate(request):
             # return JsonResponse({'code':204,'status':'failed','data':"Plasmid Not Found"})
 
 def SearchPlasmidParent(request):
+    """
+    SearchPlasmidParent API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         plasmidName = request.GET.get('plasmidName')
         if(plasmidName == None or plasmidName == ""):
@@ -1305,6 +1648,15 @@ def SearchPlasmidParent(request):
             # return JsonResponse({'code':204,'status':'failed','data':"Plasmid Parent not Found"})
 
 def SearchPlasmidParentByID(request):
+    """
+    SearchPlasmidParentByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         plasmidID = request.GET.get('plasmidID')
         if(plasmidID == None or plasmidID == ""):
@@ -1322,6 +1674,15 @@ def SearchPlasmidParentByID(request):
             return JsonResponse(data = "No such plasmid",status=404,safe=False)
         
 def GetParentID(request):
+    """
+    GetParentID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         plasmidID = request.GET.get('plasmidID')
         if(plasmidID == None or plasmidID == ""):
@@ -1341,6 +1702,15 @@ def GetParentID(request):
 
 
 def SearchPlasmidFileAddress(request):
+    """
+    SearchPlasmidFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name == None or Name == ""):
@@ -1363,6 +1733,15 @@ def SearchPlasmidFileAddress(request):
 #Add
 #TODO:用户管理
 def AddPlasmidFileAddress(request):
+    """
+    AddPlasmidFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         name = request.POST.get('name')
         Address = request.POST.get('address')
@@ -1379,6 +1758,15 @@ def AddPlasmidFileAddress(request):
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Address Added'})
 
 def AddPlasmidData(request):
+    """
+    AddPlasmidData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
@@ -1431,6 +1819,15 @@ def AddPlasmidData(request):
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Added'})
 
 def AddParentPlasmid(request):
+    """
+    AddParentPlasmid API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         if('SonPlasmidName' in data):
@@ -1465,6 +1862,15 @@ def AddParentPlasmid(request):
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Added'})
 
 def AddPlasmidParentByID(request):
+    """
+    AddPlasmidParentByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         sonPlasmidName = data['SonPlasmidName']
@@ -1496,6 +1902,15 @@ def AddPlasmidParentByID(request):
 
 
 def GetParentPart(request):
+    """
+    GetParentPart API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     try:
         if(request.method == 'GET'):
             sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
@@ -1510,6 +1925,15 @@ def GetParentPart(request):
 
 
 def GetParentBackbone(request):
+    """
+    GetParentBackbone API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         try:
             sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
@@ -1526,6 +1950,15 @@ def GetParentBackbone(request):
 
 
 def GetParentPlasmid(request):
+    """
+    GetParentPlasmid API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         try:
             sonPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
@@ -1539,6 +1972,15 @@ def GetParentPlasmid(request):
 
 
 def GetSonPlasmid(request):
+    """
+    GetSonPlasmid API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         parentPlasmidid = Plasmidneed.objects.filter(plasmidid = request.GET.get('plasmidid')).first()
         spResult = list(Parentplasmidtable.objects.filter(parentplasmidid = parentPlasmidid).values('sonplasmidid'))
@@ -1549,6 +1991,15 @@ def GetSonPlasmid(request):
 
 #Update
 def UpdatePlasmidData(request):
+    """
+    UpdatePlasmidData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         if("OriginName" in data):
@@ -1604,6 +2055,15 @@ def UpdatePlasmidData(request):
 
 
 def UpdatePlasmidFileAddress(request):
+    """
+    UpdatePlasmidFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         PlasmidName = request.POST.get('name')
         Address = request.POST.get('address')
@@ -1623,6 +2083,15 @@ def UpdatePlasmidFileAddress(request):
 
 #delete
 def deletePlasmidData(request):
+    """
+    deletePlasmidData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         # name = request.GET.get('name')
         # if(name == None or name == ""):
@@ -1651,6 +2120,15 @@ def deletePlasmidData(request):
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Deleted'})
 
 def deletePlasmidFileAddress(request):
+    """
+    deletePlasmidFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         PlasmidName = request.GET.get('PlasmidName')
         if(PlasmidName == None or PlasmidName == ""):
@@ -1668,6 +2146,15 @@ def deletePlasmidFileAddress(request):
 
 
 def DeleteParentPlasmid(request):
+    """
+    DeleteParentPlasmid API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ParentPlasmidName = request.GET.get('plasmidName')
         if(ParentPlasmidName == None or ParentPlasmidName == ""):
@@ -1682,6 +2169,15 @@ def DeleteParentPlasmid(request):
         # return JsonResponse({'code':200,'status':'success','data':'Parent Plasmid Deleted'})
 
 def setPlasmidCulture(request):
+    """
+    setPlasmidCulture API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         plasmidName = data["name"]
@@ -1717,6 +2213,15 @@ def setPlasmidCulture(request):
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 def getPlasmidCulture(request):
+    """
+    getPlasmidCulture API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         plasmidid = request.GET.get("plasmidId");
         try:
@@ -1727,6 +2232,15 @@ def getPlasmidCulture(request):
             
 
 def PlasmidFields(request):
+    """
+    PlasmidFields API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     fields =[field.name for field in Plasmidneed._meta.get_fields()]
     fields.remove("parentparttable")
     fields.remove("parentplasmidtable")
@@ -1739,6 +2253,16 @@ def PlasmidFields(request):
     return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
 
 def PlasmidListByUser(request,username):
+    """
+    PlasmidListByUser API view.
+
+    Args:
+        request: Django HttpRequest object.
+        username: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         if(username == None or username == ""):
             return JsonResponse(data = {"success":False, "message":"Parameter cannot be empty"}, status=400, safe=False)
@@ -1758,6 +2282,15 @@ def PlasmidListByUser(request,username):
 #----------------------------------------------------------
 #Backbone table
 def BackboneCount(request):
+    """
+    BackboneCount API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         count = Backbonetable.objects.values().count()
         return JsonResponse(data={"success":True, "data":count}, status = 200, safe=False)
@@ -1766,6 +2299,15 @@ def BackboneCount(request):
     
     
 def getdefaultbackbonescar(backboneid):
+    """
+    getdefaultbackbonescar API view.
+
+    Args:
+        backboneid: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     backbone_obj = Backbonescartable.objects.filter(backboneid = backboneid).first()
     if backbone_obj != None:
         return backbone_obj.bsai + "/" + backbone_obj.bbsi
@@ -1773,6 +2315,15 @@ def getdefaultbackbonescar(backboneid):
         return "No Sequence"
 #Search
 def BackboneDataALL(request):
+    """
+    BackboneDataALL API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         page = int(request.GET.get('page',0))
         if(page == 0):
@@ -1821,6 +2372,15 @@ def BackboneDataALL(request):
 #Backbone filter
 
 def BackboneFilter(request):
+    """
+    BackboneFilter API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         # print(data)
@@ -2003,6 +2563,15 @@ def BackboneFilter(request):
 
 
 def SearchByBackboneName(request):
+    """
+    SearchByBackboneName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name == None or Name == ""):
@@ -2021,6 +2590,15 @@ def SearchByBackboneName(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
 
 def SearchByBackboneID(request):
+    """
+    SearchByBackboneID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ID = request.GET.get('ID')
         if(ID == None or ID == ""):
@@ -2039,6 +2617,15 @@ def SearchByBackboneID(request):
             # return JsonResponse({'code':204,'status':'failed','data':"Plamsid Not Found"})
 
 def  SearchByBackboneSeq(request):
+    """
+    SearchByBackboneSeq API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Seq = request.GET.get('seq')
         if(Seq == None or Seq == ""):
@@ -2057,6 +2644,15 @@ def  SearchByBackboneSeq(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
 
 def GetBackboneSeqByID(request):
+    """
+    GetBackboneSeqByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ID = request.GET.get('backboneid')
         if(ID ==None or ID == 0):
@@ -2073,6 +2669,15 @@ def GetBackboneSeqByID(request):
 
 
 def SearchByBackboneSpecies(request):
+    """
+    SearchByBackboneSpecies API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Species = request.GET.get('species')
         if(Species == None or Species == ""):
@@ -2091,6 +2696,15 @@ def SearchByBackboneSpecies(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
 
 def SearchByBackboneMarker(request):
+    """
+    SearchByBackboneMarker API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Marker = request.GET.get('marker')
         if(Marker == None or Marker == ""):
@@ -2112,6 +2726,15 @@ def SearchByBackboneMarker(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
 
 def SearchByBackboneOri(request):
+    """
+    SearchByBackboneOri API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Ori = request.GET.get('ori')
         if(Ori == None or Ori == ""):
@@ -2132,6 +2755,15 @@ def SearchByBackboneOri(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
 
 def SearchByCopyNumber(request):
+    """
+    SearchByCopyNumber API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         CopyNumber = request.GET.get('copynumber')
         if(CopyNumber == None or CopyNumber == ""):
@@ -2150,6 +2782,15 @@ def SearchByCopyNumber(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Found'})
 
 def SearchBackboneFileAddress(request):
+    """
+    SearchBackboneFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2170,6 +2811,15 @@ def SearchBackboneFileAddress(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No Backbone Address Found'})
 #Add
 def AddBackboneData(request):
+    """
+    AddBackboneData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
@@ -2213,6 +2863,15 @@ def AddBackboneData(request):
 
 #TODO:用户管理
 def AddBackboneFileAddress(request):
+    """
+    AddBackboneFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Backbonename = request.POST.get('name')
         Address = request.POST.get('address')
@@ -2230,6 +2889,15 @@ def AddBackboneFileAddress(request):
 
 #Update
 def UpdateBackboneData(request):
+    """
+    UpdateBackboneData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         if("OriginalName" in data):
@@ -2277,6 +2945,15 @@ def UpdateBackboneData(request):
 
 
 def UpdateBackboneFileAddress(request):
+    """
+    UpdateBackboneFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'POST'):
         data = json.load(request.body)
         Name = data['name']
@@ -2296,6 +2973,15 @@ def UpdateBackboneFileAddress(request):
 
 #Delete
 def DeleteBackboneData(request):
+    """
+    DeleteBackboneData API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         # Name = request.GET.get('name')
         # if(Name == None or Name == ""):
@@ -2325,6 +3011,15 @@ def DeleteBackboneData(request):
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Deleted'})
 
 def DeleteBackboneFileAddress(request):
+    """
+    DeleteBackboneFileAddress API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2342,6 +3037,15 @@ def DeleteBackboneFileAddress(request):
 
 
 def setBackboneCulture(request):
+    """
+    setBackboneCulture API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         if("id" in data):
@@ -2382,6 +3086,15 @@ def setBackboneCulture(request):
 
 
 def BackboneFields(request):
+    """
+    BackboneFields API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     fields =[field.name for field in Backbonetable._meta.get_fields()]
     fields.remove("backbone_culture_functions")
     fields.remove("backbonescartable")
@@ -2390,6 +3103,16 @@ def BackboneFields(request):
     return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
 
 def BackboneListByUser(request,username):
+    """
+    BackboneListByUser API view.
+
+    Args:
+        request: Django HttpRequest object.
+        username: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         if(username == None or username == ""):
             return JsonResponse(data = {"success":False, "message":"Parameter cannot be empty"}, status=400, safe=False)
@@ -2399,6 +3122,15 @@ def BackboneListByUser(request,username):
     else:
         return JsonResponse(data={"success":False,"message":"Just GET method"},status =400, safe=False)
 def deleteBackboneFeature(request):
+    """
+    deleteBackboneFeature API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if request.method == "GET":
         try:
             name = request.GET.get("name")
@@ -2415,6 +3147,16 @@ def deleteBackboneFeature(request):
                 
                 
 def AddBackboneFeature(request, BackboneName):
+    """
+    AddBackboneFeature API view.
+
+    Args:
+        request: Django HttpRequest object.
+        BackboneName: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         start_position = data['start_position']
@@ -2439,6 +3181,16 @@ def AddBackboneFeature(request, BackboneName):
         return JsonResponse(data={'success':False,'message':"Just POST Method"}, status = 200, safe=False)
 
 def GetBackboneFeature(request, BackboneID):
+    """
+    GetBackboneFeature API view.
+
+    Args:
+        request: Django HttpRequest object.
+        BackboneID: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         try:
             result = Backbonefeaturetable.objects.filter(backboneid=BackboneID).values()
@@ -2455,6 +3207,15 @@ def GetBackboneFeature(request, BackboneID):
 #=========================================================================================
 #TestData
 def SearchByTestdataName(request):
+    """
+    SearchByTestdataName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2477,6 +3238,15 @@ def SearchByTestdataName(request):
 #=============================================================================================
 #DBD
 def GetDBDList(request):
+    """
+    GetDBDList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         DBDList = Dbdtable.objects.all()
         DBDDict = []
@@ -2493,6 +3263,15 @@ def GetDBDList(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No DB Data Found'})
 
 def GetDBDNameList(request):
+    """
+    GetDBDNameList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         DBDNameList = Dbdtable.objects.all()
         Namelist = []
@@ -2506,6 +3285,15 @@ def GetDBDNameList(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No DB Data Found'})
 
 def GetDBDKdList(request):
+    """
+    GetDBDKdList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         DBDKdList = Dbdtable.objects.all()
         KdList = []
@@ -2519,6 +3307,15 @@ def GetDBDKdList(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No DB Data Found'})
 
 def GetDBD(request):
+    """
+    GetDBD API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2533,6 +3330,15 @@ def GetDBD(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No DB Data Found'})
 
 def GetDBDAllByName(request):
+    """
+    GetDBDAllByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2549,6 +3355,15 @@ def GetDBDAllByName(request):
             return JsonResponse(data="No such DBD", status=404,safe=False)
 
 def GetDBDMenu(request):
+    """
+    GetDBDMenu API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         DBDList = Dbdtable.objects.all()
         DBDMenu = []
@@ -2562,6 +3377,15 @@ def GetDBDMenu(request):
             return JsonResponse(data="No DBD Menu", status=404,safe=False)
 
 def GetDBDKd(request):
+    """
+    GetDBDKd API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2576,6 +3400,15 @@ def GetDBDKd(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No DB Data Found'})
 
 def AddDBD(request):
+    """
+    AddDBD API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Name = request.POST.get('name')
         I0 = float(request.POST.get('i0'))
@@ -2587,6 +3420,15 @@ def AddDBD(request):
             return JsonResponse(data="Added DBD", status=200,safe=False)
 
 def UpdateDBD(request):
+    """
+    UpdateDBD API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Name = request.POST.get('name')
         I0 = float(request.POST.get('i0'))
@@ -2607,6 +3449,15 @@ def UpdateDBD(request):
 #===================================================================================================
 #LBD Dimer
 def GetLBDDimer(request):
+    """
+    GetLBDDimer API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         LBDDimerList = Lbddimertable.objects.all()
         LBDDimerDict = []
@@ -2623,6 +3474,15 @@ def GetLBDDimer(request):
 
 
 def GetLBDDimerMenu(request):
+    """
+    GetLBDDimerMenu API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         LBDDimerList = Lbddimertable.objects.all()
         LBDMenu = []
@@ -2637,6 +3497,15 @@ def GetLBDDimerMenu(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No LBD Dimer Data Found'})
 
 def GetLBDDimerAllByName(request):
+    """
+    GetLBDDimerAllByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2654,6 +3523,15 @@ def GetLBDDimerAllByName(request):
 
 
 def GetLBDDimerNameList(request):
+    """
+    GetLBDDimerNameList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         LBDDimerList = Lbddimertable.objects.all()
         NameList = []
@@ -2667,6 +3545,15 @@ def GetLBDDimerNameList(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No LBD Dimer Data Found'})
 
 def AddLBDDimer(request):
+    """
+    AddLBDDimer API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Name = request.POST.get('name')
         k1 = float(request.POST.get('k1'))
@@ -2681,6 +3568,15 @@ def AddLBDDimer(request):
             return JsonResponse(data="Added LBDDimer", status=200,safe=False)
 
 def UpdateLbdDimer(request):
+    """
+    UpdateLbdDimer API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Name = request.POST.get('name')
         k1 = float(request.POST.get('k1'))
@@ -2703,6 +3599,15 @@ def UpdateLbdDimer(request):
 #===================================================================================================
 #LBD NR
 def GetLBDNr(request):
+    """
+    GetLBDNr API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         LBDNrList = Lbdnrtable.objects.all()
         LBDList = []
@@ -2721,6 +3626,15 @@ def GetLBDNr(request):
 
 
 def GetLBDNRMenu(request):
+    """
+    GetLBDNRMenu API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         LBDNrList = Lbdnrtable.objects.all()
         LBDNRMenu = []
@@ -2735,6 +3649,15 @@ def GetLBDNRMenu(request):
             # return JsonResponse({'code':204,'status':'failed','data':'No LBDNR Data Found'})
 
 def GetLBDNRAllByName(request):
+    """
+    GetLBDNRAllByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         name = request.GET.get('name')
         if(name == None or name == ""):
@@ -2752,6 +3675,15 @@ def GetLBDNRAllByName(request):
 
 
 def GetLBDNRNameList(request):
+    """
+    GetLBDNRNameList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         LBDNRList = Lbdnrtable.objects.all()
         LBDNameList = []
@@ -2766,6 +3698,15 @@ def GetLBDNRNameList(request):
 
 
 def AddLbdnr(request):
+    """
+    AddLbdnr API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Name = request.POST.get('name')
         k1 = float(request.POST.get('k1'))
@@ -2781,6 +3722,15 @@ def AddLbdnr(request):
             return JsonResponse(data="Added LBD NR", status=200,safe=False)
 
 def UpdateLBDnr(request):
+    """
+    UpdateLBDnr API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         Name = request.POST.get('name')
         k1 = float(request.POST.get('k1'))
@@ -2796,6 +3746,15 @@ def UpdateLBDnr(request):
             return JsonResponse(data="Updated LBD NR", status=200, safe=False)
 
 def GetPartIDByName(request):
+    """
+    GetPartIDByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name != None and Name != ""):
@@ -2809,6 +3768,15 @@ def GetPartIDByName(request):
 
 
 def GetPartNameByID(request):
+    """
+    GetPartNameByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ID = request.GET.get('ID')
         if(ID != None and ID != ""):
@@ -2823,6 +3791,15 @@ def GetPartNameByID(request):
 
 
 def GetPartSeqByID(request):
+    """
+    GetPartSeqByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         ID = request.GET.get('partid')
         if(ID == None or ID == 0):
@@ -2840,6 +3817,15 @@ def GetPartSeqByID(request):
 
 
 def GetBackboneIDByName(request):
+    """
+    GetBackboneIDByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         Name = request.GET.get('name')
         if(Name != None and Name != ''):
@@ -2853,6 +3839,15 @@ def GetBackboneIDByName(request):
         
         
 def GetBackboneNameByID(request):
+    """
+    GetBackboneNameByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         ID = request.GET.get('ID')
         if(ID != None and ID != ''):
@@ -2865,6 +3860,15 @@ def GetBackboneNameByID(request):
             return JsonResponse(data="ID cannot be empty",status=400,safe=False)
 
 def GetPlasmidIDByName(request):
+    """
+    GetPlasmidIDByName API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method=='GET'):
         Name = request.GET.get('name')
         if(Name != None and Name != ""):
@@ -2878,6 +3882,15 @@ def GetPlasmidIDByName(request):
         
         
 def GetPlasmidNameByID(request):
+    """
+    GetPlasmidNameByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     
     if(request.method=='GET'):
         ID = request.GET.get('ID')
@@ -2892,6 +3905,15 @@ def GetPlasmidNameByID(request):
 
 
 def AddPlasmidParentInfo(request):
+    """
+    AddPlasmidParentInfo API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         if("PlasmidName" in data):
@@ -2923,6 +3945,15 @@ def AddPlasmidParentInfo(request):
 
     
 def AddParentPart(request):
+    """
+    AddParentPart API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         if('SonPlasmidName' in data):
@@ -2959,6 +3990,15 @@ def AddParentPart(request):
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 def AddParentPartByID(request):
+    """
+    AddParentPartByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         sonPlasmidName = data['SonPlasmidName']
@@ -2992,6 +4032,15 @@ def AddParentPartByID(request):
         return JsonResponse(data={'success':False,'error':'time out'},status = 400, safe = False)
 
 def AddParentBackbone(request):
+    """
+    AddParentBackbone API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         if('SonPlasmidName' in data):
@@ -3030,6 +4079,15 @@ def AddParentBackbone(request):
 
 
 def AddBackboneParentByID(request):
+    """
+    AddBackboneParentByID API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         sonPlasmidName = data['SonPlasmidName']
@@ -3064,6 +4122,15 @@ def AddBackboneParentByID(request):
 
 
 def DeletePlasmidParent(request):
+    """
+    DeletePlasmidParent API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         plasmidID = request.GET.get("plasmidid")
         
@@ -3076,6 +4143,16 @@ def DeletePlasmidParent(request):
             return JsonResponse({"success":False,"message":str(e.args)},status = 400, safe=False)
 
 def getPartValueList(request,column):
+    """
+    getPartValueList API view.
+
+    Args:
+        request: Django HttpRequest object.
+        column: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         if(column != None and column != ""):
             categories = Parttable.objects.values_list(column,flat=True).distinct()
@@ -3088,6 +4165,16 @@ def getPartValueList(request,column):
             return JsonResponse(data="column cannot be empty",status=400, safe=False)
         
 def getBackboneValueList(request,column):
+    """
+    getBackboneValueList API view.
+
+    Args:
+        request: Django HttpRequest object.
+        column: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         if(column != None and column != ""):
             if(column == "ori"):
@@ -3107,6 +4194,16 @@ def getBackboneValueList(request,column):
             return JsonResponse(data="column cannot be empty",status=400, safe=False)
 
 def getPlasmidValueList(request,column):
+    """
+    getPlasmidValueList API view.
+
+    Args:
+        request: Django HttpRequest object.
+        column: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         if(column != None and column != ""):
             if(column == "ori" or column == "marker"):
@@ -3128,6 +4225,15 @@ def getPlasmidValueList(request,column):
 #======================================================================
 #Part Scar Operation
 def getPartScar(request):
+    """
+    getPartScar API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     try:
         if(request.method == 'GET'):
             id = request.GET.get('id')
@@ -3143,6 +4249,15 @@ def getPartScar(request):
         return JsonResponse(data={"success":False,"message":str(e.args)},status=400,safe=False)
 
 def setPartScar(request):
+    """
+    setPartScar API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'POST'):
         data = json.loads(request.body)
         name = data['name']
@@ -3194,6 +4309,15 @@ def setPartScar(request):
 #==================================================================================
 #Backbone Scar Operation
 def getBackboneScar(request):
+    """
+    getBackboneScar API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         id = request.GET.get('id')
         if(id != None and id != ""):
@@ -3209,6 +4333,15 @@ def getBackboneScar(request):
         return JsonResponse(data = {'success':False, 'error':'Just GET method'},status = 400, safe=False)
 
 def setBackboneScar(request):
+    """
+    setBackboneScar API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'POST'):
         data = json.loads(request.body)
         if("name" in data):
@@ -3261,6 +4394,15 @@ def setBackboneScar(request):
 #=====================================================================================
 #Plasmid Scar Operation
 def getPlasmidScar(request):
+    """
+    getPlasmidScar API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'GET'):
         plasmidid = request.GET.get('plasmidid')
         if(plasmidid != None and plasmidid != ""):
@@ -3273,6 +4415,15 @@ def getPlasmidScar(request):
             return JsonResponse(data="Name cannot be empty",status = 400,safe=False)
 
 def setPlasmidScar(request):
+    """
+    setPlasmidScar API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == 'POST'):
         data = json.loads(request.body)
         if("name" in data):
@@ -3325,6 +4476,15 @@ def setPlasmidScar(request):
     
 
 def getPartScarList(request):
+    """
+    getPartScarList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         # bsmbi = request.POST.get('bsmbi')
         # bsai = request.POST.get('bsai')
@@ -3355,6 +4515,15 @@ def getPartScarList(request):
         return JsonResponse(data = {'success':True,'data':categories_list}, status=200,safe=False)
 
 def getBackboneScarList(request):
+    """
+    getBackboneScarList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         # bsmbi = request.POST.get('bsmbi')
         # bsai = request.POST.get('bsai')
@@ -3385,6 +4554,15 @@ def getBackboneScarList(request):
         return JsonResponse(data = {'success':True,'data':categories_list}, status=200,safe=False)
 
 def getPlasmidScarList(request):
+    """
+    getPlasmidScarList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         # bsmbi = request.POST.get('bsmbi')
         # bsai = request.POST.get('bsai')
@@ -3416,6 +4594,15 @@ def getPlasmidScarList(request):
 
 
 def UpdatePartSequence(request):
+    """
+    UpdatePartSequence API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
@@ -3436,6 +4623,15 @@ def UpdatePartSequence(request):
         return JsonResponse(data = {'success':False, 'message' : "just POST method"}, status = 500, safe = False)
 
 def UpdateBackboneSequence(request):
+    """
+    UpdateBackboneSequence API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
@@ -3456,6 +4652,15 @@ def UpdateBackboneSequence(request):
         return JsonResponse(data = {'success':False, 'message' : "just POST method"}, status = 500, safe = False)
     
 def UpdatePlasmidSequence(request):
+    """
+    UpdatePlasmidSequence API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
@@ -3477,6 +4682,15 @@ def UpdatePlasmidSequence(request):
     
 
 def getuserlist(request):
+    """
+    getuserlist API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         userlist = list(CustomUser.objects.values('uname').distinct())
         return JsonResponse(data = {'success':True, "data":userlist}, status = 200, safe = False)
@@ -3484,6 +4698,15 @@ def getuserlist(request):
         return JsonResponse(data = {"success":False, "message":"Just GET method"}, status = 400, safe=False)
 
 def getAllUserUploadList(request):
+    """
+    getAllUserUploadList API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         userlist = list(CustomUser.objects.values('uname').distinct())
         result = []
@@ -3497,6 +4720,16 @@ def getAllUserUploadList(request):
         return JsonResponse(data = {"success":False, "message":"Just GET method"},status = 200, safe = False)
 
 def getUserPartCount(request,uname):
+    """
+    getUserPartCount API view.
+
+    Args:
+        request: Django HttpRequest object.
+        uname: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         count = Parttable.objects.filter(user = uname).count()
         return JsonResponse({"success":True,"count":count},status=200, safe=False)
@@ -3504,6 +4737,16 @@ def getUserPartCount(request,uname):
         return JsonResponse({"success":False,"message":"Just Get Method"},status=400,safe=False)
     
 def getUserBackboneCount(request,uname):
+    """
+    getUserBackboneCount API view.
+
+    Args:
+        request: Django HttpRequest object.
+        uname: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         count = Backbonetable.objects.filter(user = uname).count()
         return JsonResponse({"success":True,"count":count},status=200, safe=False)
@@ -3511,6 +4754,16 @@ def getUserBackboneCount(request,uname):
         return JsonResponse({"success":False,"message":"Just Get Method"},status=400,safe=False)
 
 def getUserPlasmidCount(request,uname):
+    """
+    getUserPlasmidCount API view.
+
+    Args:
+        request: Django HttpRequest object.
+        uname: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         count = Plasmidneed.objects.filter(user = uname).count()
         return JsonResponse({"success":True,"count":count},status=200, safe=False)
@@ -3518,6 +4771,16 @@ def getUserPlasmidCount(request,uname):
         return JsonResponse({"success":False,"message":"Just Get Method"},status=400,safe=False)
 
 def getUserrepositoryCount(request,uid):
+    """
+    getUserrepositoryCount API view.
+
+    Args:
+        request: Django HttpRequest object.
+        uid: Input parameter.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         count = 0
         repositoryList = Temporaryrepository.objects.filter(userid = uid)
@@ -3530,6 +4793,15 @@ def getUserrepositoryCount(request,uid):
     
 @csrf_exempt
 def create_repository(request):
+    """
+    create_repository API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         
         data = json.loads(request.body)
@@ -3555,6 +4827,15 @@ def create_repository(request):
 @csrf_exempt
 #Get Repositories of the user
 def get_repositories(request):
+    """
+    get_repositories API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "GET"):
         try:
             user = CustomUser.objects.get(uid=request.session['info']['uid'])
@@ -3570,6 +4851,15 @@ def get_repositories(request):
 @csrf_exempt
 #Get a repository of the user
 def get_repository(request):
+    """
+    get_repository API view.
+
+    Args:
+        request: Django HttpRequest object.
+
+    Returns:
+        JsonResponse | Any: View response or computed result.
+    """
     if(request.method == "POST"):
         userid = request.session['info']['uid']
         data = json.loads(request.body)

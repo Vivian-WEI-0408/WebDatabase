@@ -88,7 +88,8 @@ class SequenceAnnotator:
                 if(each_feature["feature_start"] > each_feature["feature_end"]):
                     file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
                     file.write(f"                     /label={each_feature['feature_label']}\n")
-                    if(each_feature["feature_apeinfo"] != None):
+
+                    if(each_feature["feature_apeinfo"] != None and each_feature["feature_apeinfo"] != ""):
                         file.write(f"                     /color={each_feature['feature_apeinfo']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
                     else:
@@ -97,7 +98,7 @@ class SequenceAnnotator:
                 else:
                     file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}{each_feature['feature_start']}..{each_feature['feature_end']}\n")
                     file.write(f"                     /label={each_feature['feature_label']}\n")
-                    if(each_feature["feature_apeinfo"] != None):
+                    if(each_feature["feature_apeinfo"] != None and each_feature["feature_apeinfo"] != ""):
                         file.write(f"                     /color={each_feature['feature_apeinfo']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
                     else:

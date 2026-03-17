@@ -1,3 +1,4 @@
+import os
 import os.path
 import dnacauldron
 
@@ -22,10 +23,11 @@ class SupportGG:
         # assert len(self.simulation.construct_records[0]) == 8016
 
 
-    def show(self):
+    def show(self, output_dir="output"):
         print("Show!!!")
+        os.makedirs(output_dir, exist_ok=True)
         report_writer = dnacauldron.AssemblyReportWriter(include_mix_graphs=True, include_assembly_plots=True)
-        self.simulation.write_report("output", report_writer=report_writer)
+        self.simulation.write_report(output_dir, report_writer=report_writer)
 
 
     def AddPart(self, records):

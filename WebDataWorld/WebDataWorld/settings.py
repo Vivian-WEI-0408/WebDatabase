@@ -93,7 +93,7 @@ DATABASES = {
         'NAME': 'labdnadata',
         'USER':'root',
         'PASSWORD':'04080117',
-        'HOST':'10.30.76.2',
+        'HOST':'localhost',
         'PORT':3306
     }
 }

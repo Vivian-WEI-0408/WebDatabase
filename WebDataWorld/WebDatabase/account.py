@@ -307,16 +307,23 @@ class CustomLoginForm(AuthenticationForm):
         if user is None and '@' in username:
             try:
                 user_obj = CustomUser.objects.get(email=username)
+                print(user_obj)
                 user = authenticate(username=user_obj.username, password=md5(password))
+                print(user)
                 self.cleaned_data['uid'] = user.uid
                 return user
             except CustomUser.DoesNotExist:
-                pass
+                print("用户不存在")
+                self.add_error("username","用户不存在")
+                return user
+            except Exception as e:
+                print("1111111")
+                print(e.args)
         else:
             print("用户不存在")
             self.add_error("username","用户不存在")
             return user
-@csrf_protect
+# @csrf_protect
 def login_view(request):
     print("aaaaaaa")
     if request.user.is_authenticated:
@@ -381,6 +388,7 @@ def register(request):
     return render(request, 'Register.html', {'form': form})
 
 def logout(request):
+    print("7777777")
     from django.contrib.auth import logout
     if request.user.is_authenticated:
         logout(request)
