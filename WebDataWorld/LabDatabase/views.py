@@ -1,4 +1,4 @@
-import io
+﻿import io
 import time
 from django.shortcuts import render,redirect
 from django.http import JsonResponse,HttpResponse,FileResponse,Http404
@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
 from LabDatabase.excel_processor import ExcelProcessor
 from LabDatabase.map_processor import process_map_file
+from LabDatabase.genbank_format_checker import process_uploaded_genbank
 import requests
 from LabDatabase.CaculateModule import GGAssembly
 # from WebDatabase.models import UploadedFile
@@ -39,6 +40,8 @@ Exp_URL = "http://10.30.76.75:8009/"
 File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
 Assembly_File_Address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\output"
 TASK_STATUS_PREFIX = 'file_task_'
+TASK_STATUS_LOCK = threading.Lock()
+GENBANK_FIXED_OUTPUT_DIR = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile"
 
 
 def _get_task_output_dir(task_id):
@@ -56,7 +59,7 @@ def _get_task_assembly_file(task_id, file_name):
 # class User_auth(MiddlewareMixin):
 
 #     def process_request(self,request):
-#         #排除不需要登录就能访问的页面
+#         #鎺掗櫎涓嶉渶瑕佺櫥褰曞氨鑳借闂殑椤甸潰
 #         if request.path_info == "/WebDatabase/login" or request.path_info == "":
 #             return
 #         info = request.session.get('info')
@@ -242,54 +245,56 @@ def download_template(request,type):
 file_name: [filename, file_type]
 """
 def process_map_async(upload_map, file_name, upload_type, django_request, task_id, index, number_of_task):
+    result = False
+    task_error = None
     try:
         upload_map_temp = upload_map.read()
         upload_map.seek(0)
-        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         if(file_name[1] == "dna"):
             try:
                 file_obj = io.BytesIO(upload_map_temp)
                 result = process_map_file(file_obj, file_name, upload_type,django_request,Base_URL)
             except Exception as e:
                 print(e.args)
+                task_error = f"{file_name[0]} 上传失败"
         else:
             upload_map_temp = upload_map_temp.decode("utf-8")
             upload_map = io.StringIO(upload_map_temp)
             result = process_map_file(upload_map, file_name, upload_type,django_request,Base_URL)
-        # print(result)
-        
-        # print(task_status['error'])
-        if(result):
-            task_status_new = {
-                'status':'processing',
-                'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
-                'result':None,
-                'error':task_status['error']
-            }
-            # print(task_id)
-            # print(task_status)
-            cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
-        else:
-            
-            task_status_new = {
-                'status':'processing',
-                'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
-                'result':None,
-                'error':task_status['error'].append(f"{file_name} 上传失败"),
-            }
-            cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
+        print(result)
+        if(not result and task_error is None):
+            task_error = f"{file_name[0]} 上传失败"
     except Exception as e:
-        task_status_new = {
-                'status':'processing',
-                'progress':max(task_status['progress'], round((index+1)/number_of_task)*100),
-                'result':None,
-                'error':task_status['error'].append(f"{file_name} 上传失败"),
-            }
-        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
-        # print(str(e.args))
-        
-                
+        print(e.args)
+        task_error = f"{file_name[0]} 上传失败"
 
+    with TASK_STATUS_LOCK:
+        task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}') or {
+            'status':'processing',
+            'progress':0,
+            'result':None,
+            'error':[],
+            'processed_count':0,
+            'total_count':number_of_task,
+        }
+        if(task_status.get('error') is None):
+            task_status['error'] = []
+        if(task_error is not None):
+            task_status['error'].append(task_error)
+
+        processed_count = task_status.get('processed_count', 0) + 1
+        total_count = task_status.get('total_count', number_of_task)
+        progress = int(processed_count * 100 / max(total_count, 1))
+
+        task_status_new = {
+            'status':'completed' if processed_count >= total_count else 'processing',
+            'progress':progress,
+            'result':task_status.get('result'),
+            'error':task_status['error'],
+            'processed_count':processed_count,
+            'total_count':total_count,
+        }
+        cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status_new,timeout=3600)
 
 def process_excel_async(upload_record,django_request,task_id):
     Error_rows = []
@@ -304,14 +309,14 @@ def process_excel_async(upload_record,django_request,task_id):
         cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
         file_content = upload_record.read()
         excel_data = pd.read_excel(io.BytesIO(file_content))
-        # print(excel_data.columns)
+        print(excel_data.columns)
         if(excel_data.columns.tolist()[0] == "PartName"):
             type = "part"
         elif(excel_data.columns.tolist()[0] == "BackboneName"):
             type = "backbone"
         elif(excel_data.columns.tolist()[0] == "PlasmidName"):
             type = "plasmid"
-        # print(type)
+        print(type)
         result = ExcelProcessor.process_excel_file(django_request,excel_data,type,Base_URL)
         # print(result)
         task_status['progress'] = 100
@@ -321,14 +326,14 @@ def process_excel_async(upload_record,django_request,task_id):
         if len(Error_rows) == 0 and len(Empty_sequence_rows) == 0:
             task_status['result'] = {
                 'success':True,
-                'message':"文件上传成功"
+                'message':"上传成功"
             }
         else:
             message = ""
             if(len(Error_rows) != 0):
-                message += "上传出错的有以下：\n"+str(Error_rows)+"/n"
+                message += "上传失败的行如下：\n" + str(Error_rows) + "\n"
             if(len(Empty_sequence_rows) != 0):
-                message += "需要补充序列有以下：\n"+str(Empty_sequence_rows)
+                message += "序列为空的行如下：\n" + str(Empty_sequence_rows)
             task_status['result'] = {
                 'success':True,
                 'message':message,
@@ -367,7 +372,7 @@ def process_gg_assembly_async(upload_file, django_request, task_id):
                 task_status['status'] = 'completed'
                 task_status['result'] = {
                     'success':True,
-                    'message':"文件上传成功"
+                    'message':"上传成功"
                 }
             else:
                 task_status['progress'] = 100
@@ -382,7 +387,7 @@ def process_gg_assembly_async(upload_file, django_request, task_id):
             task_status['error'] = result["error"]
             task_status['result'] = {
                 'success':False,
-                'message':"文件上传失败"
+                'message':"上传失败"
             }
         cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
         
@@ -418,9 +423,9 @@ def CreateTempRepository(request):
         )
         thread.daemon = True
         thread.start()
-        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件上传成功，正在处理中..."},status = 200, safe = False)
+        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件已接收，正在后台处理中..."},status = 200, safe = False)
     else:
-        return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
+        return JsonResponse({'success':False,'message':'请求方法错误'},status = 405, safe = False)
     
     
 @csrf_exempt
@@ -445,32 +450,32 @@ def UploadFile(request):
         )
         thread.daemon = True
         thread.start()
-        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件上传成功，正在处理中..."},status = 200, safe = False)
+        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件已接收，正在后台处理中..."},status = 200, safe = False)
     #     print(len(Empty_sequence_rows))
     #     if(len(Error_rows) == 0 and len(Empty_sequence_rows) == 0):
-    #         return JsonResponse(data={'success':True,'message':"文件上传成功"},status = 200, safe=False)
+    #         return JsonResponse(data={'success':True,'message':"鏂囦欢涓婁紶鎴愬姛"},status = 200, safe=False)
     #     else:
     #         message = ""
     #         if(len(Error_rows) != 0):
-    #             message += "上传出错的行有以下：\n"+str(Error_rows)+"\n"
+    #             message += "涓婁紶鍑洪敊鐨勮鏈変互涓嬶細\n"+str(Error_rows)+"\n"
     #         if(len(Empty_sequence_rows) != 0):
     #             print("aaaaaaa")
-    #             message += "需要补充序列的有以下：\n"+str(Empty_sequence_rows)
+    #             message += "闇€瑕佽ˉ鍏呭簭鍒楃殑鏈変互涓嬶細\n"+str(Empty_sequence_rows)
     #         return JsonResponse(data = {'success':True, 'message': message},status = 200, safe=False)
     else:
-        return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
+        return JsonResponse({'success':False,'message':'请求方法错误'},status = 405, safe = False)
     
 def task_status(request, task_id):
     task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
     print(task_status)
     if(not task_status):
-        response_data = {
+        return JsonResponse({
             'task_id':task_id,
-            'status':task_status['status'],
-            'progress':task_status['progress'],
+            'status':'failed',
+            'progress':0,
             'error':"任务不存在或已过期"
-        }
-        return JsonResponse(response_data,status=404)
+        },status=404)
+
     if(task_status['progress'] == 100 and task_status['status'] != "failed"):
         task_status['status'] = 'completed'
     response_data = {
@@ -513,11 +518,14 @@ def excel_task_status(request, task_id):
 def UploadMap(request):
     if request.method == 'POST' and request.FILES.getlist('files'):
         files = request.FILES.getlist('files')
+        number_of_task = len(files)
         task_status = {
             'status':'processing',
             'progress':0,
             'result':None,
             'error':[],
+            'processed_count':0,
+            'total_count':number_of_task,
         }
         task_id = str(uuid.uuid4())
         cache.set(f'{TASK_STATUS_PREFIX}{task_id}',task_status,timeout=3600)
@@ -525,7 +533,6 @@ def UploadMap(request):
         
         # title = request.POST.get('title', file.name)
         pattern = r'^([^\_|.]+)'
-        number_of_task = len(files)
         # print(number_of_task)
         index = 0
         for each in files:
@@ -546,9 +553,49 @@ def UploadMap(request):
             thread.daemon = True
             thread.start()
             index+=1
-        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件上传成功，正在处理中..."},status = 200, safe = False)
+        return JsonResponse({'task_id':task_id,'status':'processing','message':"文件已接收，正在后台处理中..."},status = 200, safe = False)
     else:
         return JsonResponse({'success':False,'message':'Upload record is empty'})
+
+
+@csrf_exempt
+def CheckAndFixGenBank(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Only POST method is allowed"}, status=405, safe=False)
+
+    upload_file = request.FILES.get("file")
+    if upload_file is None:
+        return JsonResponse({"success": False, "message": "file is required"}, status=400, safe=False)
+
+    try:
+        result = process_uploaded_genbank(upload_file)
+        fixed_text = result["fixed_bytes"].decode(result["encoding"], errors="replace")
+
+        upload_name = os.path.basename(getattr(upload_file, "name", "uploaded"))
+        upload_base = os.path.splitext(upload_name)[0].strip()
+        if not upload_base:
+            upload_base = "uploaded"
+        safe_base = re.sub(r'[\\/:*?"<>|]+', "_", upload_base)
+        save_name = f"{safe_base}.gb"
+
+        os.makedirs(GENBANK_FIXED_OUTPUT_DIR, exist_ok=True)
+        save_path = os.path.join(GENBANK_FIXED_OUTPUT_DIR, save_name)
+
+        with open(save_path, "wb") as f:
+            f.write(result["fixed_bytes"])
+
+        response = {
+            "success": True,
+            "changed": result["changed"],
+            "issue_count": len(result["issues"]),
+            "issues": result["issues"],
+            "fixed_filename": save_name,
+            "fixed_content": fixed_text,
+            "file_path": save_path,
+        }
+        return JsonResponse(response, status=200, safe=False)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500, safe=False)
 
 
 
@@ -659,6 +706,8 @@ def downloadPartMap(request,partid):
             'Content-Type':'application/json',
         })
         sequence = (session.get(f'{Base_URL}GetPartSeqByID?partid={partid}',cookies = request.COOKIES)).json()['data']['level0sequence'].lower()
+        name = (session.get(f"{Base_URL}PartNameByID?ID={partid}",cookies=request.COOKIES)).json()['PartName']
+        alias = (session.get(f"{Base_URL}PartAliasByID?ID={partid}",cookies=request.COOKIES)).json()['PartAlias']
         type = (session.get(f"{Base_URL}TypeByID?ID={partid}",cookies=request.COOKIES)).json()['Type'].lower()
         # print(sequence)
         seq_obj = Seq(sequence)
@@ -667,7 +716,7 @@ def downloadPartMap(request,partid):
         feature_list = fi.featureMatch(sequence)
         reverse_feature_list = fi.featureMatch(seq_reverse)
         scar_list = scarPosition(sequence)
-        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partid}')
+        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partid}-{name}-{alias}')
         file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
         thread = threading.Thread(
             target = sa.GenerateGBKFile,
@@ -678,10 +727,10 @@ def downloadPartMap(request,partid):
         # sa.GenerateGBKFile()
         max_wait_time = 5
         start_time = time.time()
-        map_path = rf'{file_address}\part-{partid}.gbk'
+        map_path = rf'{file_address}\part-{partid}-{name}-{alias}.gbk'
         while time.time() - start_time < max_wait_time:
             if(os.path.exists(map_path) and os.stat(map_path).st_size != 0):
-                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'part-{partid}.gbk')
+                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'part-{partid}-{name}-{alias}.gbk')
                 return response
             else:
                 time.sleep(1)
@@ -696,6 +745,8 @@ def downloadBackboneMap(request,backboneid):
             'Content-Type':'application/json',
         })
         sequence = (session.get(f'{Base_URL}GetBackboneSeqByID?backboneid={backboneid}',cookies = request.COOKIES)).json()['data']['sequence'].lower()
+        name = (session.get(f"{Base_URL}BackboneNameByID?ID={backboneid}",cookies=request.COOKIES)).json()['BackboneName']
+        alias = (session.get(f"{Base_URL}BackboneAliasByID?ID={backboneid}",cookies=request.COOKIES)).json()['BackboneAlias']
         backboneFeature = (session.get(f"{Base_URL}GetBackboneFeature/{backboneid}",cookies=request.COOKIES)).json()
         
         file_address = r"C:\Users\admin\Desktop\WebDatabase\WebDataWorld\LabDatabase\static\LabDatabase\DownloadFile\GenerateFile\\"
@@ -707,7 +758,7 @@ def downloadBackboneMap(request,backboneid):
             feature_list = fi.featureMatch(sequence)
             reverse_feature_list = fi.featureMatch(seq_reverse)
             scar_list = scarPosition(sequence)
-            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneid}')
+            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'backbone-{backboneid}-{name}-{alias}')
             thread = threading.Thread(
                 target = sa.GenerateGBKFile,
                 args= (file_address,)
@@ -717,17 +768,17 @@ def downloadBackboneMap(request,backboneid):
         else:
             thread = threading.Thread(
                 target = SequenceAnnotator.GeneratorBackboneNoSa,
-                args = (f'backbone-{backboneid}',sequence,file_address,backboneFeature['data'])
+                args = (f'backbone-{backboneid}-{name}-{alias}',sequence,file_address,backboneFeature['data'])
             )
             thread.daemon = True
             thread.start()
             # sa.GenerateGBKFile()
-        map_path = rf'{file_address}backbone-{backboneid}.gbk'
+        map_path = rf'{file_address}backbone-{backboneid}-{name}-{alias}.gbk'
         start_time = time.time()
         max_wait_time = 5
         while time.time() - start_time < max_wait_time:
             if(os.path.exists(map_path) and os.stat(map_path).st_size != 0):
-                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'backbone-{backboneid}.gbk')
+                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'backbone-{backboneid}-{name}-{alias}.gbk')
                 return response
             else:
                 time.sleep(1)
@@ -743,11 +794,13 @@ def downloadPlasmidMap(request,plasmidid):
             'Content-Type':'application/json',
         })
         sequence = (session.get(f'{Base_URL}PlasmidSeqByID?plasmidid={plasmidid}',cookies = request.COOKIES)).json()['data']['sequenceconfirm'].lower()
+        name = (session.get(f"{Base_URL}PlasmidNameByID?ID={plasmidid}",cookies=request.COOKIES)).json()["PlasmidName"]
+        alias = (session.get(f"{Base_URL}PlasmidAliasByID?ID={plasmidid}",cookies=request.COOKIES)).json()["PlasmidAlias"]
         seq_obj = Seq(sequence)
         scar_list = scarPosition(sequence)
         seq_reverse = str(seq_obj.reverse_complement())
         PlasmidParentBackboneResponse = (session.get(f"{Base_URL}GetBackboneParent?plasmidid={plasmidid}",cookies=request.COOKIES)).json()
-        sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{plasmidid}')
+        sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{plasmidid}-{name}-{alias}')
         if(PlasmidParentBackboneResponse['success']):
             PlasmidParentBackbone = PlasmidParentBackboneResponse['data'][0]['id']
             ParentBackboneSequenceResponse = (session.get(f"{Base_URL}GetBackboneSeqByID?backboneid={PlasmidParentBackbone}", cookies=request.COOKIES)).json()
@@ -825,12 +878,12 @@ def downloadPlasmidMap(request,plasmidid):
         thread.daemon = True
         thread.start()
         # sa.GenerateGBKFile()
-        map_path = rf'{file_address}plasmid-{plasmidid}.gbk'
+        map_path = rf'{file_address}plasmid-{plasmidid}-{name}-{alias}.gbk'
         max_wait_time = 5
         start_time = time.time()
         while time.time() - start_time < max_wait_time:
             if(os.path.exists(map_path) and os.stat(map_path).st_size != 0):
-                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'plasmid-{plasmidid}.gbk')
+                response = FileResponse(open(map_path,'rb'),as_attachment=True,filename=f'plasmid-{plasmidid}-{name}-{alias}.gbk')
                 return response
             else:
                 time.sleep(1)
@@ -936,7 +989,7 @@ def exportuserdata(request,username):
             )
             thread.daemon = True
             thread.start()
-            return JsonResponse(data={'task_id':excel_id,'status':'processing','message':"任务已创建，结束后请在右侧弹窗获取文件"},status=200, safe = False)
+            return JsonResponse(data={'task_id':excel_id,'status':'processing','message':"导出任务已创建，请稍后下载结果文件"},status=200, safe = False)
         else:
             return JsonResponse(data={"success":False,"message":"parameter cannot be empty"}, status=400, safe=False)
     else:
@@ -1029,7 +1082,7 @@ def ExportAllData(request):
         thread.daemon = True
         thread.start()
         
-        return JsonResponse(data={'task_id':excel_id,'status':'processing','message':"任务已创建，结束后请在右侧弹窗获取文件"}, status=200, safe=False)
+        return JsonResponse(data={'task_id':excel_id,'status':'processing','message':"导出任务已创建，请稍后下载结果文件"}, status=200, safe=False)
     else:
         return JsonResponse(data={'success':False,'message':"Just GET method"}, status=400, safe=False)
 
@@ -1105,6 +1158,17 @@ def getDocument(request, fileid):
         else:
             return JsonResponse(data={"success":False},status=400, safe=False)
 
+
+def getDocumentByAddress(request):
+    if(request.method == "GET"):
+        file_address = request.GET.get("address")
+        if(os.path.exists(file_address)):
+            response = FileResponse(open(file_address,'rb'),as_attachment=True)
+            return response
+        else:
+            return JsonResponse(data={"success":False},status=400,safe=False)
+
+
 def getAssemblyFile(request, fileName):
     if(request.method == "GET"):
         task_id = request.GET.get("task_id")
@@ -1117,6 +1181,9 @@ def getAssemblyFile(request, fileName):
             return response
         else:
             return JsonResponse(data={"success":False},status=400, safe=False)
+
+
+
 
 
 def AssemblyRepo(request):
@@ -1137,9 +1204,9 @@ def AssemblyRepo(request):
         )
         thread.daemon = True
         thread.start()
-        return JsonResponse({"task_id":task_id,'status':'processing','message':"任务已创建，正在组装中"},status=200,safe=False)
+        return JsonResponse({"task_id":task_id,'status':'processing','message':"组装任务已创建，正在后台处理中..."},status=200,safe=False)
     else:
-        return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
+        return JsonResponse({'success':False,'message':'请求方法错误'},status = 405, safe = False)
     
 def process_assembly_repo(repositoryName, django_request,task_id):
     session = requests.Session()
@@ -1155,7 +1222,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
         repository_response = session.post(f"{Base_URL}getrepo",json=request_body,cookies=django_request.COOKIES)
         print(repository_response.json())
     except Exception as e:
-        return render(django_request,'error.html',{'error':"获取仓库错误"})
+        return render(django_request,'error.html',{'error':"获取仓库信息失败"})
     if(repository_response.status_code == 200):
         repository_data = repository_response.json()['data']
         part = repository_data['parts']
@@ -1179,7 +1246,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
             ccdb_position = ccdb_fi.query(sequence)
             
             scar_ident_list = scarIdentSitePosition(sequence)
-            #根据scar_list选择酶
+            #鏍规嵁scar_list閫夋嫨閰?
             if "ccdb" in ccdb_position.keys():
                 ccdb_start_position = ccdb_position["ccdb"]["start"]
                 ccdb_end_position = ccdb_position["ccdb"]["end"]
@@ -1187,6 +1254,8 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                 ccdb_start_position = ccdb_position["ccdb1"]["start"]
                 ccdb_end_position = ccdb_position["ccdb1"]["end"]
             min_difference = 222222
+            print(f"ccdb{ccdb_start_position},{ccdb_end_position}")
+            print(f"scar{scar_ident_list}")
             for each_scar in scar_ident_list:
                 scar_name = list(each_scar.keys())[0]
                 scar_position = each_scar[scar_name]["index"]
@@ -1234,7 +1303,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                 return {"success":False}
             if(target_enzyme != ""):
                 if(target_enzyme == "BbsI"):
-                    if("saccharomyces" in partSource['source'].lower() == False):
+                    if(("saccharomyces" in partSource['source'].lower()) == False):
                     # if(partSource['source'].lower() != "saccharomyces cerevisiae"):
                         if(partType == "promoter"):
                             sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
@@ -1254,7 +1323,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                         elif(partType == "cds"):
                             sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
                 elif(target_enzyme == "BsaI"):
-                    if("saccharomyces" in partSource['source'].lower() == False):
+                    if(("saccharomyces" in partSource['source'].lower()) == False):
                         if(partType == "promoter"):
                             sequence = "GGTCTCAGTGC" + sequence + "ATCAAGAGACC"
                         elif(partType == "terminator"):
@@ -1273,7 +1342,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                         elif(partType == "cds"):
                             sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
             else:
-                if("saccharomyces" in partSource['source'].lower() == False):
+                if(("saccharomyces" in partSource['source'].lower()) == False):
                     if(partType == "promoter"):
                         sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
                     elif(partType == "terminator"):
@@ -1374,7 +1443,7 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                             type = typeResponse.json()['Type'].lower()
                             new_feature = {each_key:[fetch_result[each_key]["start"],fetch_result[each_key]["end"],type]}
                             sa.add_feature(new_feature)
-                sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidName}')
+                # sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{plasmidName}')
                 file_address = os.path.join(File_Address, "AssemblyFile")
                 sa.GenerateGBKFile(file_address)
                 file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{plasmidName}.gbk"))
@@ -1431,14 +1500,14 @@ def process_assembly_repo(repositoryName, django_request,task_id):
         task_status["status"] = "failed"
         task_status['progress'] = 100
         task_status["result"] = None
-        task_status["error"] = "组装Scar错误"
+        task_status["error"] = "组装结果文件生成失败"
         cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
     else:
         task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
         task_status["status"] = "failed"
         task_status['progress'] = 100
         task_status["result"] = None
-        task_status["error"] = "获取仓库失败"
+        task_status["error"] = "获取仓库数据失败"
         cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
                         
 def AssemblyWithoutRepo(request):
@@ -1462,9 +1531,9 @@ def AssemblyWithoutRepo(request):
         )
         thread.daemon = True
         thread.start()
-        return JsonResponse({"task_id":task_id,'status':'processing','message':"任务已创建，正在组装中"},status=200,safe=False)
+        return JsonResponse({"task_id":task_id,'status':'processing','message':"组装任务已创建，正在后台处理中..."},status=200,safe=False)
     else:
-        return JsonResponse({'success':False,'message':'方法不允许'},status = 405, safe = False)
+        return JsonResponse({'success':False,'message':'请求方法错误'},status = 405, safe = False)
 
 def process_assembly_without_repo(partList, backboneList, plasmidList, django_request,task_id,plan_name):
     session = requests.Session()
@@ -1496,7 +1565,7 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
         
         scar_ident_list = scarIdentSitePosition(sequence)
         
-        #根据scar_list选择酶
+        #鏍规嵁scar_list閫夋嫨閰?
         if "ccdb" in ccdb_position.keys():
             ccdb_start_position = ccdb_position["ccdb"]["start"]
             ccdb_end_position = ccdb_position["ccdb"]["end"]
@@ -1530,7 +1599,7 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                         target_enzyme = scar_name
         print(f"target:{target_enzyme}")
         if(backboneFeature["success"] != True):
-            #获取ccdb位置
+            #鑾峰彇ccdb浣嶇疆
             seq_obj = Seq(sequence)
             seq_reverse = str(seq_obj.reverse_complement())
             fi = featureIdentify()
@@ -1746,7 +1815,7 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
     task_status["status"] = "failed"
     task_status['progress'] = 100
     task_status["result"] = None
-    task_status["error"] = "组装Scar错误"
+    task_status["error"] = "组装结果文件生成失败"
     cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
 
 
@@ -1771,7 +1840,7 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
     plasmidid = session.get(f'{Base_URL}PlasmidID?name={Name}',cookies=django_request.COOKIES)
     
     if(response.status_code != 200):
-        return {"success":False, "message":"添加质粒错误"}
+        return {"success":False, "message":"添加质粒失败"}
     Ori_list = []
     Marker_list = []
     OriAndMarkerLabel = FittingLabels(Sequence)
@@ -1782,13 +1851,13 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
     plasmid_culture_body = {"name":Name, "ori":Ori_list,"marker":Marker_list}
     plasmid_culture_response = session.post(f"{Base_URL}setPlasmidCulture",json = plasmid_culture_body, cookies=django_request.COOKIES)
     if(plasmid_culture_response.status_code != 200):
-        return {"success":False, "message":"质粒培养信息添加错误"}
+        return {"success":False, "message":"更新质粒培养信息失败"}
     scar_result_list = scarFunction(Sequence)
     scar_data_body = {'name':Name,'bsmbi':scar_result_list[0],'bsai':scar_result_list[1],'bbsi':scar_result_list[2],'aari':scar_result_list[3],'sapi':scar_result_list[4]}
     scar_response = session.post(f'{Base_URL}setPlasmidScar',json=scar_data_body,cookies=django_request.COOKIES)
     if(scar_response.status_code != 200):
-        return {"success":False, "message":"质粒scar信息添加错误"}
-    #清空当前plasmid对应的层级信息
+        return {"success":False, "message":"更新质粒 Scar 信息失败"}
+    #娓呯┖褰撳墠plasmid瀵瑰簲鐨勫眰绾т俊鎭?
     delete_parent_info_thread = threading.Thread(target=delete_parent_info, args=(session,plasmidid.json()["PlasmidID"],django_request))
     add_parent_info_thread = threading.Thread(target=add_parent_info,args=(session,django_request,Name,partList,BackboneList,PlasmidList))
     
@@ -1802,17 +1871,17 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
     #     request_body = {"SonPlasmidName":Name,"ParentPartID":each_part}
     #     part_response = session.post(f"{Base_URL}AddPartParentByID",json=request_body,cookies=django_request.COOKIES)
     #     if(part_response.status_code != 200):
-    #         return {"success":False,"message":"Parent Part 添加失败"}
+    #         return {"success":False,"message":"Parent Part 娣诲姞澶辫触"}
     # for each_backbone in BackboneList:
     #     request_body = {"SonPlasmidName":Name,"ParentBackboneID":each_backbone}
     #     backbone_response = session.post(f"{Base_URL}AddBackboneParentByID",json=request_body,cookies=django_request.COOKIES)
     #     if(backbone_response.status_code != 200):
-    #         return {"success":False,"message":"Parent Backbone 添加失败"}
+    #         return {"success":False,"message":"Parent Backbone 娣诲姞澶辫触"}
     # for each_plasmid in PlasmidList:
     #     request_body = {"SonPlasmidName":Name,"ParentPlasmidID":each_plasmid}
     #     plasmid_response = session.post(f"{Base_URL}AddPlasmidParentByID",json=request_body,cookies=django_request.COOKIES)
     #     if(plasmid_response.status_code != 200):
-    #         return {"success":False,"message":"Parent Plasmid 添加失败"}
+    #         return {"success":False,"message":"Parent Plasmid 娣诲姞澶辫触"}
     return {"success":True}
 
 def delete_parent_info(session,plasmidid,django_request):
@@ -1893,7 +1962,7 @@ def modify_backbone(request,backboneid):
         if(update_backbone_response.status_code == 200 and update_backbone_culture_response.status_code == 200 and update_backbone_scar_response.status_code == 200):
             return JsonResponse({"success":True},status = 200, safe=False)
         else:
-            return JsonResponse({"success":False,"message":"更新失败"},status=400,safe=False)
+            return JsonResponse({"success":False,"message":"保存失败"},status=400,safe=False)
         
 def modify_plasmid(request,plasmidid):
     session = requests.Session()
@@ -1922,13 +1991,13 @@ def modify_plasmid(request,plasmidid):
                     "Backbone":[],
                     "Plasmid":[],
                 }
-        if(plasmidParentPart.status_code == 200):
+        if(plasmidParentPart.status_code == 200 and "data" in plasmidParentPart.json()):
             for each_Part in plasmidParentPart.json()['data']:
                 result['Part'].append(each_Part["name"])
-        if(plasmidParentBackbone.status_code == 200):
+        if(plasmidParentBackbone.status_code == 200 and "data" in plasmidParentBackbone.json()):
             for each_Backbone in plasmidParentBackbone.json()['data']:
                 result['Backbone'].append(each_Backbone["name"])
-        if(plasmidParentPlasmid.status_code == 200):
+        if(plasmidParentPlasmid.status_code == 200 and "data" in plasmidParentPlasmid.json()):
             for each_Plasmid in plasmidParentPlasmid.json()['data']:
                 result['Plasmid'].append(each_Plasmid["name"])
         if(Plasmid_obj['customparentinformation'] != "" and Plasmid_obj['customparentinformation']!= None and Plasmid_obj['customparentinformation'] != 'None' and Plasmid_obj['customparentinformation'] != 'NULL' and Plasmid_obj['customparentinformation'] != 'nan'):
@@ -1977,7 +2046,7 @@ def modify_plasmid(request,plasmidid):
         if(update_plasmid_response.status_code == 200 and update_plasmid_scar_response.status_code == 200):
             return JsonResponse({"success":True},status = 200, safe=False)
         else:
-            return JsonResponse({"success":False,"message":"更新失败"},status=400,safe=False)
+            return JsonResponse({"success":False,"message":"保存失败"},status=400,safe=False)
 
 def GetExperienceDetail(request, partName):
     session = requests.session()
@@ -2033,7 +2102,7 @@ def GetParentInfo(request):
         plasmidSonPlasmid = session.get(f'{Base_URL}GetPlasmidSon?plasmidid={plasmidID}',cookies = request.COOKIES)
 
         plasmidCustomInfo = session.get(f"{Base_URL}getPlasmidCulture?plasmidId={plasmidID}",cookies=request.COOKIES)
-        
+        print(plasmidParentPlasmid.json())
         if(plasmidParentPart.status_code == 200 and plasmidParentBackbone.status_code == 200 and
             plasmidParentPlasmid.status_code == 200 and plasmidSonPlasmid.status_code == 200 and plasmidCustomInfo.status_code == 200):
             result = {
@@ -2056,9 +2125,9 @@ def GetParentInfo(request):
                                         # "parentPlasmid":plasmidParentPlasmid.json()['data'],"parentInfo":result})
             print(f"parentPart:{plasmidParentBackbone.json()}")
             return JsonResponse(data = {"success":True,"parentPart":plasmidParentPart.json()['data'] if 'data' in plasmidParentPart.json() else [],"parentBackbone":plasmidParentBackbone.json()['data'] if 'data' in plasmidParentBackbone.json() else [],
-                                        "parentPlasmid":plasmidParentPlasmid.json()['data'] if 'data' in plasmidParentPlasmid else [],"parentInfo":result},status=200,safe=False)
+                                        "parentPlasmid":plasmidParentPlasmid.json()['data'] if 'data' in plasmidParentPlasmid.json() else [],"parentInfo":result},status=200,safe=False)
         else:
-            return render(request,'error.html',{'error':"获取层级信息错误"})
+            return render(request,'error.html',{'error':"获取父级信息失败"})
         
 
 
@@ -2085,13 +2154,13 @@ def showRepository(request, repositoryName):
                 if(part_name_response.status_code == 200):
                     part_name = part_name_response.json()["PartName"]
                 else:
-                    #返回一个预设的错误图像
+                    # part name fetch failed
                     return HttpResponse("False",content_type="text")
                 part_type_response = session.get(f"{Base_URL}TypeByID?ID={each_part}",cookies=request.COOKIES)
                 if(part_type_response.status_code == 200):
                     part_type = part_type_response.json()["Type"]
                 else:
-                    #返回一个预设的错误图像
+                    # part type fetch failed
                     return HttpResponse("False",content_type="text")
                 part_scar_response = session.get(f"{Base_URL}getPartScar?id={each_part}",cookies=request.COOKIES).json()
                 print(part_scar_response)
@@ -2128,3 +2197,4 @@ def showRepository(request, repositoryName):
             repository_data = {"user":user,"name":repositoryName,"created_time":response.json()["created_time"],"expired_time":response.json()["expired_time"],"part_number":response.json()["data"]["total_parts"],"plasmid_number":response.json()["data"]["total_plasmids"],"parts":part_info_list,"backbones":backbone_info_list,"plasmids":plasmid_info_list}
             print(repository_data)
     return render(request, "repositoryPage.html",{"repository":repository_data})
+

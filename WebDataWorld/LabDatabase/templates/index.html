@@ -20,6 +20,15 @@
                 <h1>🧬 生物元件管理系统</h1>
                 <p>管理 Part、Backbone 和 Plasmid 数据</p>
             </div>
+
+            {% csrf_token %}
+            <div class="Format-Cheaker">
+                GenBank Format Cheaker
+                <label for="Format-Checker" class="form-label"></label>
+                <input class="form-control" type="file" id="Format-Checker" accept=".gb, .gbk, .ape">
+                <button type="button" class="btn btn-primary" id="Format-Checker-button">submit</button>
+            </div>
+
             <div class="user-card">
                 {% if user.is_authenticated %}
                     <a href="/LabDatabase/user/{{user.username}}" class="username-link"><i class="fas fa-user-circle"></i> {{user.username}}</a>

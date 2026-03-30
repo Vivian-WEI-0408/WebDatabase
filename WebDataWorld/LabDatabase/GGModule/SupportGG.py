@@ -34,9 +34,8 @@ class SupportGG:
         self.repository.add_records(records)
 
 if __name__ == '__main__':
-    AddressList = ['C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\backbone-pCQM005-Level0-A1A2.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-promoter-Pspank(c).gbk']
-    FileName = ["backbone-pCQM005-Level0-A1A2",
-                "part-promoter-Pspank(c)",]
+    AddressList = ['C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\backbone-CWJB21.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-p+r-Ptrc+cym2.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-terminator-pEcT04.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-cds-pEcC09.gbk']
+    FileName = ['backbone-CWJB21', 'part-p+r-Ptrc+cym2', 'part-terminator-pEcT04', 'part-cds-pEcC09']
     test = SupportGG(AddressList,FileName)
     test.assemblyPart("webtest")
     test.show()

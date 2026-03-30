@@ -10,6 +10,7 @@ from .FileGenerator import SequenceAnnotator
 from .ScarIdentify import scarPosition, scarFunction
 from Bio.SeqIO import parse
 from ControllerModule import FittingLabels
+from urllib.parse import urlencode
 
 
 
@@ -126,7 +127,9 @@ class GGFileProcessor:
                                 Assembly_Plasmid_List = []
                             part_ids = []
                             for each_part in Assembly_Part_List:
-                                part_obj = session.get(f"{BASE_URL}PartName?name={each_part.strip()}",cookies=django_request.COOKIES)
+                                query = urlencode({"name":each_part.strip()})
+                                part_obj = session.get(f"{BASE_URL}PartName?{query}",cookies=django_request.COOKIES)
+                                print(part_obj.json())
                                 if(part_obj.status_code == 200):
                                     part_ids.append(part_obj.json()['data']['partid'])
                                 else:

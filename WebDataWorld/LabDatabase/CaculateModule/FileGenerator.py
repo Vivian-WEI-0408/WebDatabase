@@ -25,7 +25,7 @@ class SequenceAnnotator:
             'rbs':'#FFE1C4',
             'ori':'#999999',
             'scar':'#ff0000',
-            'restriction_site':'#CCCCCC',
+            'restriction_site':'#4f46fe',
             'binding':'#cccccc',
             'spacer':'#ABABC6',
             'homo':'#99CCFF',
@@ -66,6 +66,7 @@ class SequenceAnnotator:
             return
     @staticmethod
     def GeneratorBackboneNoSa(name,sequence,file_address, feature_list):
+        print("NoSA")
         accession = "."
         version = "1.0"
         Keywords = "."
@@ -86,7 +87,15 @@ class SequenceAnnotator:
             for each_feature in feature_list:
                 
                 if(each_feature["feature_start"] > each_feature["feature_end"]):
-                    file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
+                    if(each_feature["feature_type"].upper() == "CDS"):
+                        if(sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "GTG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "TTG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATC" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATA" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ACG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "CTG"):
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
+                        else:
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}complement(join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']}))\n")
+                    else:
+                        file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
                     file.write(f"                     /label={each_feature['feature_label']}\n")
 
                     if(each_feature["feature_apeinfo"] != None and each_feature["feature_apeinfo"] != ""):
@@ -96,7 +105,17 @@ class SequenceAnnotator:
                         file.write(f"                     /color=#ffff80\n")
                         file.write(f"                     /ApEinfo_fwdcolor=#ffff80\n")
                 else:
-                    file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}{each_feature['feature_start']}..{each_feature['feature_end']}\n")
+                    if(each_feature["feature_type"].upper() == "CDS"):
+                        if(sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "GTG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "TTG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATC" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATA" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ACG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "CTG"):
+                            print("zhengxiang")
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}{each_feature['feature_start']}..{each_feature['feature_end']}\n")
+                        else:
+                            print("fanxiang")
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}complement({each_feature['feature_start']}..{each_feature['feature_end']})\n")
+                    else:
+                        file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}{each_feature['feature_start']}..{each_feature['feature_end']}\n")
                     file.write(f"                     /label={each_feature['feature_label']}\n")
                     if(each_feature["feature_apeinfo"] != None and each_feature["feature_apeinfo"] != ""):
                         file.write(f"                     /color={each_feature['feature_apeinfo']}\n")
@@ -133,6 +152,7 @@ class SequenceAnnotator:
             file.close()
 
     def GenerateGBKFile(self, file_address, type="circular"):
+        print("SA")
         if(type == "circular"):
             definition = "synthetic circular DNA"
         else:
@@ -177,7 +197,13 @@ class SequenceAnnotator:
                             file.write(f"                     /ApEinfo_fwdcolor={self.colors['ori']}\n")
                 elif(self.feature_list[each_feature][2].lower() == "cds"):
                     if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
-                        file.write(f"     CDS             join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
+                        if(self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "ATG" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "GTG" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "TTG"
+                            or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "ATC" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature]+2].upper() == "ATA" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "ACG"
+                            or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "CTG"):
+                            file.write(f"     CDS             join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
+                        else:
+                            file.write(f"     CDS             complement(join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]}))\n")
+                            
                         file.write(f"                     /label={each_feature}\n")
                         if(len(self.feature_list[each_feature]) > 3):
                             file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
@@ -186,7 +212,12 @@ class SequenceAnnotator:
                             file.write(f"                     /color={self.colors['CDS']}\n")
                             file.write(f"                     /ApEinfo_fwdcolor={self.colors['CDS']}\n")
                     else:
-                        file.write(f"     CDS             {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
+                        if(self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "ATG" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "GTG" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "TTG"
+                            or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "ATC" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "ATA" or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "ACG"
+                            or self.sequence[self.feature_list[each_feature][0]-1:self.feature_list[each_feature][0]+2].upper() == "CTG"):
+                            file.write(f"     CDS             {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
+                        else:
+                            file.write(f"     CDS             complement({self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]})\n")
                         file.write(f"                     /label={each_feature}\n")
                         if(len(self.feature_list[each_feature]) > 3):
                             file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
@@ -384,6 +415,26 @@ class SequenceAnnotator:
                         else:
                             file.write(f"                     /color={self.colors['BsubAmy']}\n")
                             file.write(f"                     /ApEinfo_fwdcolor={self.colors['BsubAmy']}\n")
+                elif(self.feature_list[each_feature][2].lower() == "rbs"):
+                    if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
+                        file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['rbs']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['rbs']}\n")
+                    else:
+                        file.write(f"     misc_feature     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['rbs']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['rbs']}\n")
+                
                 
             for each_feature in self.reverse_feature_list.keys():
                 if(self.reverse_feature_list[each_feature][2].lower() == "origin"):
@@ -518,6 +569,17 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['BsubAmy']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['BsubAmy']}\n")
+                elif(self.reverse_feature_list[each_feature][2].lower() == "rbs"):
+                    if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
+                        file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        file.write(f"                     /color={self.colors['rbs']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['rbs']}\n")
+                    else:
+                        file.write(f"     misc_feature     complement({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length - self.reverse_feature_list[each_feature][0] + 1})\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        file.write(f"                     /color={self.colors['rbs']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['rbs']}\n")
                 
             if(type == "promoter" or type == "p+r"):
                 file.write(f"     promoter        1..{self.length}\n")

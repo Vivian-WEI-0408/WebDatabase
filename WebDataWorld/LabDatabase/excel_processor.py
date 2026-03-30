@@ -155,7 +155,7 @@ class ExcelProcessor:
                         continue
                     else:
                         # session = createSession(django_request)
-                        data_body = {'name':row['PartName'],'alias':row['Alias'],'Level0Sequence':row['Sequence'],'source':row['Species'],'type':row['Type'],'note':""}
+                        data_body = {'name':row['PartName'],'alias':row['Alias'],'Level0Sequence':row['Sequence'],'source':row['Species'],'type':row['Type'],'note':row['Note']}
                         response = session.post(f'{BASE_URL}AddPartData',json=data_body,cookies=django_request.COOKIES)
                         if(response.status_code != 200):
                             error_rows.append(f'第{index}行，{row["PartName"]} 添加数据失败\n')

@@ -46,11 +46,11 @@ class WebDatabaseApiFlowTests(TestCase):
         )
         Partscartable.objects.create(
             part_id=cls.part,
-            bsmbi="CGTCTC",
-            bsai="GGTCTC",
-            bbsi="GAAGAC",
-            aari="CACCTGC",
-            sapi="GCTCTTC",
+            bsmbi="AB",
+            bsai="AB",
+            bbsi="AB",
+            aari="AB",
+            sapi="AB"
         )
 
         cls.backbone = Backbonetable.objects.create(
@@ -73,11 +73,11 @@ class WebDatabaseApiFlowTests(TestCase):
         )
         Backbonescartable.objects.create(
             backboneid=cls.backbone,
-            bsmbi="CGTCTC",
-            bsai="GGTCTC",
-            bbsi="GAAGAC",
-            aari="CACCTGC",
-            sapi="GCTCTTC",
+            bsmbi="AB",
+            bsai="AB",
+            bbsi="AB",
+            aari="AB",
+            sapi="AB",
         )
 
         cls.plasmid = Plasmidneed.objects.create(

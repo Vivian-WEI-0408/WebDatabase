@@ -690,6 +690,56 @@ class UserProfile(models.Model):
         profile, created = cls.objects.get_or_create(user = user)
         return profile
 
+
+class VisitorProfile(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    visitor_uuid = models.CharField(max_length=36, unique=True)
+    institution = models.CharField(max_length=255)
+    lab_name = models.CharField(max_length=255)
+    person_name = models.CharField(max_length=255)
+    cookie_key = models.CharField(max_length=128, unique=True, blank=True, null=True)
+    visit_count = models.PositiveIntegerField(default=0)
+    first_seen_at = models.DateTimeField(default=timezone.now)
+    last_seen_at = models.DateTimeField(default=timezone.now)
+    last_path = models.CharField(max_length=255, blank=True, null=True)
+    last_ip = models.CharField(max_length=45, blank=True, null=True)
+    last_user_agent = models.CharField(max_length=512, blank=True, null=True)
+    created_by_user = models.ForeignKey(
+        'CustomUser',
+        models.SET_NULL,
+        db_column='created_by_user_id',
+        blank=True,
+        null=True,
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'visitorprofile'
+
+    def __str__(self):
+        return f"{self.person_name} ({self.institution}/{self.lab_name})"
+
+
+class VisitorAccessLog(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    visitor = models.ForeignKey(VisitorProfile, models.CASCADE, db_column='visitor_id')
+    visited_at = models.DateTimeField(default=timezone.now)
+    path = models.CharField(max_length=255)
+    method = models.CharField(max_length=16, default='GET')
+    ip = models.CharField(max_length=45, blank=True, null=True)
+    user_agent = models.CharField(max_length=512, blank=True, null=True)
+    referer = models.CharField(max_length=512, blank=True, null=True)
+    cookie_snapshot = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'visitoraccesslog'
+
+    def __str__(self):
+        return f"{self.visitor_id} {self.method} {self.path}"
+
 class Yeastmodels(models.Model):
     collection = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)

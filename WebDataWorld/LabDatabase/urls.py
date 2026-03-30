@@ -18,6 +18,7 @@ urlpatterns = [
 
     #Upload Sequence Map
     path("UploadMap",views.UploadMap,name="UploadMap"),
+    path("CheckAndFixGenBank", views.CheckAndFixGenBank, name="CheckAndFixGenBank"),
 
 
 
@@ -52,6 +53,7 @@ urlpatterns = [
     path("exportUserData/<str:username>",views.exportuserdata,name="exportuserdata"),
     path("exportallData",views.ExportAllData,name="exportallData"),
     path("getDocument/<str:fileid>",views.getDocument,name="getDocument"),
+    path("getDocByAdd",views.getDocumentByAddress,name="getDocByAdd"),
     path("getAssembly/<str:fileName>",views.getAssemblyFile,name="getAssembly"),
     
     path("createRepo",views.CreateTempRepository,name="createRepo"),

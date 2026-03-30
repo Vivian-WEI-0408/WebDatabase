@@ -6,7 +6,8 @@ from django.db.utils import OperationalError
 import math
 import json
 import uuid
-from django.db import transaction
+import re
+from django.db import transaction, IntegrityError
 import time
 from django.utils import timezone
 from django.db.models import Q
@@ -17,13 +18,38 @@ from .models import (Backbonetable,Parentplasmidtable,
                     TbPartUserfileaddress,TbPlasmidUserfileaddress, Temporaryrepository,
                     Testdatatable,CustomUser,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
                     Parentparttable, Partscartable, Backbonescartable, Plasmidscartable, \
-                    Plasmid_Culture_Functions,Backbone_Culture_Functions,Backbonefeaturetable,)
+                    Plasmid_Culture_Functions,Backbone_Culture_Functions,Backbonefeaturetable,
+                    VisitorProfile, VisitorAccessLog)
 from django.views.decorators.csrf import csrf_exempt
 # from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
 #     PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
 #     TbPartUserfileaddressSerializer,TbPlasmidUserfileaddressSerializer,TestdatatableSerializer
 import logging
 from .logger import request_logger
+
+
+def _build_or_keyword_query(raw_keywords, fields):
+    """
+    Build AND fuzzy query from whitespace-separated keywords.
+    Each keyword can match any field (OR within keyword, AND across keywords).
+    """
+    if raw_keywords is None:
+        return None
+
+    keywords = [kw for kw in re.split(r"\s+", str(raw_keywords).strip()) if kw]
+    if not keywords:
+        return None
+
+    keyword_query = None
+    for kw in keywords:
+        per_keyword_query = Q()
+        for field in fields:
+            per_keyword_query |= Q(**{f"{field}__icontains": kw})
+        if keyword_query is None:
+            keyword_query = per_keyword_query
+        else:
+            keyword_query &= per_keyword_query
+    return keyword_query
 
 
 #----------------------------------------------------------
@@ -261,7 +287,9 @@ def PartFilter(request):
                     # 'partid','name','type','sourceorganism','reference'
                     result = result.filter(type = type)
                 if(name != "" and result != None):
-                    result = result.filter(Q(name__icontains = name) | Q(alias__icontains = name))
+                    keyword_query = _build_or_keyword_query(name, ["name", "alias"])
+                    if keyword_query is not None:
+                        result = result.filter(keyword_query)
                 if(result != None):
                     PartResult.append(list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag'))[0])
         else:
@@ -271,7 +299,9 @@ def PartFilter(request):
                 result = result.filter(type = type)
             if(name != "" and result != None):
                 # print(name)
-                result = result.filter(Q(name__icontains = name) | Q(alias__icontains = name))
+                keyword_query = _build_or_keyword_query(name, ["name", "alias"])
+                if keyword_query is not None:
+                    result = result.filter(keyword_query)
             if(result != None):
                 PartResult = (list(result.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag')))
         # print(PartResult)
@@ -368,7 +398,11 @@ def SearchByPartNameFilter(request):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
-                promoterResult = list(Parttable.objects.filter(name__icontains = Name,type=Type).values('partid','name','sourceorganism','reference'))
+                result = Parttable.objects.filter(type=Type)
+                keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                if keyword_query is not None:
+                    result = result.filter(keyword_query)
+                promoterResult = list(result.values('partid','name','sourceorganism','reference'))
                 if(len(promoterResult[0]) > 0):
                     return JsonResponse(data=promoterResult,status=200,safe=False)
                 else:
@@ -414,7 +448,11 @@ def SearchByBackboneNameFilter(request):
         else:
             try:
                 # backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','ori','marker','species'))
-                backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','species'))
+                result = Backbonetable.objects
+                keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                if keyword_query is not None:
+                    result = result.filter(keyword_query)
+                backboneResult = list(result.values('id','name','species'))
                 #TODO: 标记ori，marker
                 for each in backboneResult:
                     info_list = getBackboneOriAndMarker(each['id'])
@@ -444,7 +482,11 @@ def SearchByPlasmidNameFilter(request):
             return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
-                plasmidResult = list(Plasmidneed.objects.filter(name__icontains=Name).values('plasmidid','name'))
+                result = Plasmidneed.objects
+                keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                if keyword_query is not None:
+                    result = result.filter(keyword_query)
+                plasmidResult = list(result.values('plasmidid','name'))
                 if(len(plasmidResult) > 0):
                     for each in plasmidResult:
                         info_list = getOriAndMarker(each['plasmidid'])
@@ -803,18 +845,22 @@ def AddPartData(request):
         if(name == "" or name == None):
             return JsonResponse(data="Parameters name", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name or Sequence can not be empty'})
-        if(Parttable.objects.filter(name=name).first() != None):
+        exist_part = Parttable.objects.filter(name__iexact=name).first()
+        if(exist_part != None):
             updateDate = timezone.now()
-            Parttable.objects.filter(name = name).update(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
+            Parttable.objects.filter(partid=exist_part.partid).update(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
                                 confirmedsequence = ConfirmedSequence, insertsequence = InsertSequence,
                                 sourceorganism = sourceOrganism, reference=reference, note=note, type=type,user=username, updatedate = updateDate)
         else:
             uploadDate = timezone.now()
             updateDate = timezone.now()
-            Parttable.objects.create(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
-                                confirmedsequence = ConfirmedSequence, insertsequence = InsertSequence,
-                                sourceorganism = sourceOrganism, reference=reference, note=note, type=type,user=username,
-                                uploaddate = uploadDate, updatedate = updateDate)
+            try:
+                Parttable.objects.create(name=name, alias=alias, lengthinlevel0=length, level0sequence=level0Seq,
+                                    confirmedsequence = ConfirmedSequence, insertsequence = InsertSequence,
+                                    sourceorganism = sourceOrganism, reference=reference, note=note, type=type,user=username,
+                                    uploaddate = uploadDate, updatedate = updateDate)
+            except IntegrityError:
+                return JsonResponse(data={"success":False, "message":"Part name already exists"}, status=409, safe=False)
         return JsonResponse(data="Added part data", status=200,safe=False)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data added'})
 
@@ -887,12 +933,17 @@ def UpdatePart(request):
         NewNote = data["note"]
         if(NewName == None or NewName == ""):
             return JsonResponse(data="Parameters Name cannot be empty", status=400,safe=False)
+        if(Parttable.objects.filter(name__iexact=NewName).exclude(partid=PartID).exists()):
+            return JsonResponse(data={"success":False, "message":"Part name already exists"}, status=409, safe=False)
         updateDate = timezone.now()
         # print(updateDate)
-        Parttable.objects.filter(partid = PartID).update(name=NewName, alias=NewAlias,type=NewType,lengthinlevel0=NewLength,
-                                                           level0sequence=NewLevel0Sequence,confirmedsequence=NewConfirmedSequence,
-                                                           insertsequence=NewInsertSequence,sourceorganism = NewSourceOrganism,
-                                                           reference=NewReference,note=NewNote, updatedate = updateDate,user=request.session.get('info')['uname'])
+        try:
+            Parttable.objects.filter(partid = PartID).update(name=NewName, alias=NewAlias,type=NewType,lengthinlevel0=NewLength,
+                                                               level0sequence=NewLevel0Sequence,confirmedsequence=NewConfirmedSequence,
+                                                               insertsequence=NewInsertSequence,sourceorganism = NewSourceOrganism,
+                                                               reference=NewReference,note=NewNote, updatedate = updateDate,user=request.session.get('info')['uname'])
+        except IntegrityError:
+            return JsonResponse(data={"success":False, "message":"Part name already exists"}, status=409, safe=False)
         # print("11111112222")
         return JsonResponse(data="Updated part data", status=200,safe=False)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data updated'})
@@ -1211,7 +1262,9 @@ def PlasmidFilter(request):
                         continue
                 result = result.filter(plasmidid = each_id['plasmidid'])
                 if(Name != '' and result != None):
-                    result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                    keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                    if keyword_query is not None:
+                        result = result.filter(keyword_query)
                 if(result != None):
                     temp_result = list(result.order_by('name').values('plasmidid','name','alias','level','tag'))[0]
                     # 'plasmidid','name','oricloning','orihost','markercloning','markerhost','level'
@@ -1260,7 +1313,9 @@ def PlasmidFilter(request):
                     PlasmidResult = []
                     result = Plasmidneed.objects
                     if(Name != "" and result != None):
-                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                        keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                        if keyword_query is not None:
+                            result = result.filter(keyword_query)
                     if(len(result) != 0):
                         temp_result = list(result.values('plasmidid','name','alias','level','tag'))
                         # print(temp_result)
@@ -1282,7 +1337,9 @@ def PlasmidFilter(request):
                 for each_id in final_plasmid_id_list:
                     result = Plasmidneed.objects.filter(plasmidid = each_id)
                     if(Name != "" and result != None):
-                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                        keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                        if keyword_query is not None:
+                            result = result.filter(keyword_query)
                     if(len(result) != 0):
                         temp_result = (list(result.values('plasmidid','name','alias','level','tag')))[0]
                         info_list = getOriAndMarker(temp_result['plasmidid'])
@@ -1788,18 +1845,21 @@ def AddPlasmidData(request):
         if(name == None or name == "" or level == None or level == ""):
             return JsonResponse(data="Required parameter cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Level,Sequence,ori,marker information can not be empty'})
-        if(Plasmidneed.objects.filter(name = name).first() == None):
+        exist_plasmid = Plasmidneed.objects.filter(name__iexact=name).first()
+        if(exist_plasmid == None):
             try:
                 Plasmidneed.objects.create(name=name, level = level, length = length, sequenceconfirm=sequence,
                                    plate=plate, state = state, note=note, alias=alias,customparentinformation = ParentInfo,
                                    uploaddate = timezone.now(), updatedate = timezone.now(), user = username)
                 return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
+            except IntegrityError:
+                return JsonResponse(data={"success":False, "message":"Plasmid name already exists"},status = 409, safe=False)
             except Exception as e:
                 return JsonResponse(data="fail upload",status = 400, safe=False)
         else:
             try:
                 with transaction.atomic():
-                    plasmid_obj = Plasmidneed.objects.select_for_update().get(name = name)
+                    plasmid_obj = Plasmidneed.objects.select_for_update().get(plasmidid=exist_plasmid.plasmidid)
                     plasmid_obj.name = name
                     plasmid_obj.level = level
                     plasmid_obj.length = length
@@ -1814,6 +1874,8 @@ def AddPlasmidData(request):
                     plasmid_obj.updatedate = timezone.now()
                     plasmid_obj.save()
                 return JsonResponse(data="Plasmid Data Added", status=200,safe=False)
+            except IntegrityError:
+                return JsonResponse(data = {"success":False, "message":"Plasmid name already exists"}, status = 409, safe = False)
             except Exception as e:
                 return JsonResponse(data = str(e), status = 400, safe = False)
         # return JsonResponse({'code':200,'status':'success','data':'Plasmid Data Added'})
@@ -2028,21 +2090,26 @@ def UpdatePlasmidData(request):
         tag = "abnormal" if(len(newOri) > 1 or len(newMarker) > 1) else "normal"
         if(newName == None or newName == ""):
             return JsonResponse(data="New Name cannot be empty", status=400,safe=False)
+        if(Plasmidneed.objects.filter(name__iexact=newName).exclude(plasmidid=PlasmidID).exists()):
+            return JsonResponse(data={"success":False, "message":"Plasmid name already exists"}, status=409, safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Name,Ori,Marker,Sequence can not be empty'})
-        with transaction.atomic():
-            plasmid_obj = Plasmidneed.objects.select_for_update().get(plasmidid = PlasmidID)
-            plasmid_obj.name = newName
-            plasmid_obj.level = newLevel
-            plasmid_obj.length = newLength
-            plasmid_obj.sequenceconfirm = newSequence
-            plasmid_obj.plate = newPlate
-            plasmid_obj.alias = newAlias
-            plasmid_obj.state = newState
-            plasmid_obj.user = newUser
-            plasmid_obj.note = newNote
-            plasmid_obj.tag = tag
-            plasmid_obj.updatedate = timezone.now()
-            plasmid_obj.save()
+        try:
+            with transaction.atomic():
+                plasmid_obj = Plasmidneed.objects.select_for_update().get(plasmidid = PlasmidID)
+                plasmid_obj.name = newName
+                plasmid_obj.level = newLevel
+                plasmid_obj.length = newLength
+                plasmid_obj.sequenceconfirm = newSequence
+                plasmid_obj.plate = newPlate
+                plasmid_obj.alias = newAlias
+                plasmid_obj.state = newState
+                plasmid_obj.user = newUser
+                plasmid_obj.note = newNote
+                plasmid_obj.tag = tag
+                plasmid_obj.updatedate = timezone.now()
+                plasmid_obj.save()
+        except IntegrityError:
+            return JsonResponse(data={"success":False, "message":"Plasmid name already exists"}, status=409, safe=False)
         Plasmid_Culture_Functions.objects.filter(plasmid_id = PlasmidID).delete()
         plasmidOBJ = Plasmidneed.objects.get(plasmidid = PlasmidID)
         for each in newOri:
@@ -2427,7 +2494,9 @@ def BackboneFilter(request):
                 # if(marker != "" and result != None):
                 #     result = result.filter(marker = marker)
                 if(Name != "" and result != None):
-                    result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                    keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                    if keyword_query is not None:
+                        result = result.filter(keyword_query)
                 if(len(result) != 0):
                     
                     # PartResult.append(result.order_by('name').values('partid','name','type','sourceorganism','reference'))
@@ -2473,7 +2542,9 @@ def BackboneFilter(request):
                     BackboneResult = []
                     result = Backbonetable.objects
                     if(Name != "" and result != None):
-                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                        keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                        if keyword_query is not None:
+                            result = result.filter(keyword_query)
                     if(len(result) != 0):
                         temp_result = list(result.values('id','name','alias','species','tag'))
                         for each in temp_result:
@@ -2494,7 +2565,9 @@ def BackboneFilter(request):
                 for each_id in final_backbone_id_list:
                     result = Backbonetable.objects.filter(id = each_id)
                     if(Name != "" and result != None):
-                        result = result.filter(Q(name__icontains = Name) | Q(alias__icontains = Name))
+                        keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+                        if keyword_query is not None:
+                            result = result.filter(keyword_query)
                     if(len(result) != 0):
                         temp_result = (list(result.values('id','name','alias','species','tag')))[0]
                         info_list = getBackboneOriAndMarker(temp_result['id'])
@@ -2835,9 +2908,10 @@ def AddBackboneData(request):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, sequence can not be empty'})
         # tag = "abnormal" if (len(ori) > 1 or len(marker) > 1) else "normal"
-        if(Backbonetable.objects.filter(name = name).first() != None):
+        exist_backbone = Backbonetable.objects.filter(name__iexact=name).first()
+        if(exist_backbone != None):
             with transaction.atomic():
-                backbone_obj = Backbonetable.objects.select_for_update().get(name = name)
+                backbone_obj = Backbonetable.objects.select_for_update().get(id=exist_backbone.id)
                 backbone_obj.name = name
                 backbone_obj.length = length
                 backbone_obj.sequence = sequence
@@ -2849,15 +2923,18 @@ def AddBackboneData(request):
                 backbone_obj.tag = tag
                 backbone_obj.updatedate = timezone.now()
                 backbone_obj.save()
-                backbone_id = Backbonetable.objects.filter(name = name).first()
+                backbone_id = backbone_obj
                 Backbone_Culture_Functions.objects.filter(backbone_id = backbone_id.id).delete()
         else:
             uploadDate = timezone.now()
             updateDate = timezone.now()
-            Backbonetable.objects.create(name=name, length=length, sequence=sequence,
-                                    species = species,copynumber=copynumber, notes=note, alias=alias,user=username, tag=tag,
-                                    uploaddate = uploadDate, updatedate = updateDate)
-            backbone_id = Backbonetable.objects.filter(name = name).first()
+            try:
+                Backbonetable.objects.create(name=name, length=length, sequence=sequence,
+                                        species = species,copynumber=copynumber, notes=note, alias=alias,user=username, tag=tag,
+                                        uploaddate = uploadDate, updatedate = updateDate)
+                backbone_id = Backbonetable.objects.filter(name = name).first()
+            except IntegrityError:
+                return JsonResponse(data={"success":False, "message":"Backbone name already exists"}, status=409, safe=False)
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Added'})
 
@@ -2925,21 +3002,26 @@ def UpdateBackboneData(request):
         # tag = "abnormal" if (len(newOri) >1 or len(newMarker) > 1) else "normal"
         if(newName == None or newName == ""):
             return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+        if(Backbonetable.objects.filter(name__iexact=newName).exclude(id=BackboneID).exists()):
+            return JsonResponse(data={"success":False, "message":"Backbone name already exists"}, status=409, safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'name, Sequence can not be empty'})
-        with transaction.atomic():
-            backbone_obj = Backbonetable.objects.select_for_update().get(id = BackboneID)
-            
-            backbone_obj.name = newName
-            backbone_obj.length = newLength
-            backbone_obj.sequence = newSequence
-            backbone_obj.species = newSpecies
-            backbone_obj.copynumber = newCopynumber
-            backbone_obj.notes = newNote
-            backbone_obj.alias = newAlias
-            backbone_obj.user = newUser
-            backbone_obj.tag = newTag
-            backbone_obj.updatedate = timezone.now()
-            backbone_obj.save()
+        try:
+            with transaction.atomic():
+                backbone_obj = Backbonetable.objects.select_for_update().get(id = BackboneID)
+                
+                backbone_obj.name = newName
+                backbone_obj.length = newLength
+                backbone_obj.sequence = newSequence
+                backbone_obj.species = newSpecies
+                backbone_obj.copynumber = newCopynumber
+                backbone_obj.notes = newNote
+                backbone_obj.alias = newAlias
+                backbone_obj.user = newUser
+                backbone_obj.tag = newTag
+                backbone_obj.updatedate = timezone.now()
+                backbone_obj.save()
+        except IntegrityError:
+            return JsonResponse(data={"success":False, "message":"Backbone name already exists"}, status=409, safe=False)
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Updated'})
 
@@ -3788,6 +3870,17 @@ def GetPartNameByID(request):
         else:
             return JsonResponse(data = "ID cannot be empty",status=400,safe=False)
 
+def GetPartAliasByID(request):
+    if(request.method == "GET"):
+        ID = request.GET.get('ID')
+        if(ID != None and ID != ""):
+            Name = Parttable.objects.filter(partid = ID).first()
+            if(Name != None):
+                return JsonResponse(data = {"PartAlias":Name.alias},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such part",status=404, safe=False)
+        else:
+            return JsonResponse(data = "ID cannot be empty",status=400,safe=False)
 
 
 def GetPartSeqByID(request):
@@ -3859,6 +3952,20 @@ def GetBackboneNameByID(request):
         else:
             return JsonResponse(data="ID cannot be empty",status=400,safe=False)
 
+def GetBackboneAliasByID(request):
+    if(request.method == 'GET'):
+        ID = request.GET.get('ID')
+        if(ID != None and ID != ''):
+            Name = Backbonetable.objects.filter(id=ID).first()
+            if(Name != None):
+                return JsonResponse(data={"BackboneAlias":Name.alias},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such Backbone",status=404, safe=False)
+        else:
+            return JsonResponse(data="ID cannot be empty",status=400,safe=False)
+
+
+
 def GetPlasmidIDByName(request):
     """
     GetPlasmidIDByName API view.
@@ -3903,6 +4010,17 @@ def GetPlasmidNameByID(request):
         else:
             return JsonResponse(data = "ID cannot be empty",status=400,safe=False)
 
+def GetPlasmidAliasByID(request):
+    if(request.method=='GET'):
+        ID = request.GET.get('ID')
+        if(ID != None and ID != ""):
+            Name = Plasmidneed.objects.filter(plasmidid = ID).first()
+            if(Name != None):
+                return JsonResponse(data = {"PlasmidAlias":Name.alias},status=200,safe=False)
+            else:
+                return JsonResponse(data = "No such Plasmid",status=400, safe=False)
+        else:
+            return JsonResponse(data = "ID cannot be empty",status=400,safe=False)
 
 def AddPlasmidParentInfo(request):
     """
@@ -4606,19 +4724,22 @@ def UpdatePartSequence(request):
     if(request.method == "POST"):
         data = json.loads(request.body)
         name = data['name']
-        sequence = data['sequence']
+        sequence = data['Level0Sequence']
         # NewLength = len(request.POST.get('Level0Sequence'))
         # NewLevel0Sequence = request.POST.get('Level0Sequence')
-        try:
-            part_obj = Parttable.objects.select_for_update().get(name = name)
-            # Parttable.objects.filter(name = part_obj.name).update(lengthinlevel0 = len(sequence), Level0Sequence = sequence)
-            part_obj.lengthinlevel0 = len(sequence)
-            part_obj.level0sequence = sequence
-            part_obj.updatedate = timezone.now()
-            part_obj.save()
-            return JsonResponse(data = {'success': True}, status = 200, safe = False)
-        except Parttable.DoesNotExist:
-            return JsonResponse(data = {'success':False, 'message':"Part Does Not Exist"}, status = 404, safe = False)
+        with transaction.atomic():
+            try:
+                part_obj = Parttable.objects.select_for_update().get(name = name)
+                # Parttable.objects.filter(name = part_obj.name).update(lengthinlevel0 = len(sequence), Level0Sequence = sequence)
+                part_obj.lengthinlevel0 = len(sequence)
+                part_obj.level0sequence = sequence
+                part_obj.updatedate = timezone.now()
+                part_obj.save()
+                return JsonResponse(data = {'success': True}, status = 200, safe = False)
+            except Parttable.DoesNotExist:
+                return JsonResponse(data = {'success':False, 'message':"Part Does Not Exist"}, status = 404, safe = False)
+            except Exception as e:
+                return JsonResponse(data = {'success':False, 'message' : e.args}, status = 500, safe = False)
     else:
         return JsonResponse(data = {'success':False, 'message' : "just POST method"}, status = 500, safe = False)
 
@@ -5330,3 +5451,371 @@ def get_repository_parts(request):
         })
     except Exception as e:
         return JsonResponse({'error': f'Internal server error: {str(e)}'}, status=500)
+
+
+def _serialize_visitor_profile(profile):
+    return {
+        "id": profile.id,
+        "visitor_uuid": profile.visitor_uuid,
+        "institution": profile.institution,
+        "lab_name": profile.lab_name,
+        "person_name": profile.person_name,
+        "cookie_key": profile.cookie_key,
+        "visit_count": profile.visit_count,
+        "first_seen_at": profile.first_seen_at.isoformat() if profile.first_seen_at else None,
+        "last_seen_at": profile.last_seen_at.isoformat() if profile.last_seen_at else None,
+        "last_path": profile.last_path,
+        "last_ip": profile.last_ip,
+        "last_user_agent": profile.last_user_agent,
+        "created_by_user_id": profile.created_by_user_id,
+        "created_at": profile.created_at.isoformat() if profile.created_at else None,
+        "updated_at": profile.updated_at.isoformat() if profile.updated_at else None,
+    }
+
+
+def _serialize_visitor_access_log(log):
+    return {
+        "id": log.id,
+        "visitor_id": log.visitor_id,
+        "visited_at": log.visited_at.isoformat() if log.visited_at else None,
+        "path": log.path,
+        "method": log.method,
+        "ip": log.ip,
+        "user_agent": log.user_agent,
+        "referer": log.referer,
+        "cookie_snapshot": log.cookie_snapshot,
+    }
+
+
+def _get_request_json(request):
+    try:
+        return json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return None
+
+
+def _get_session_user_id(request):
+    try:
+        return request.session.get("info", {}).get("uid")
+    except Exception:
+        return None
+
+
+@csrf_exempt
+def createVisitorProfile(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Just POST method"}, status=405, safe=False)
+
+    request_data = _get_request_json(request)
+    if request_data is None:
+        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400, safe=False)
+
+    visitor_uuid = str(request_data.get("visitor_uuid") or uuid.uuid4())
+    institution = (request_data.get("institution") or "").strip()
+    lab_name = (request_data.get("lab_name") or "").strip()
+    person_name = (request_data.get("person_name") or "").strip()
+    cookie_key = request_data.get("cookie_key")
+    created_by_user_id = request_data.get("created_by_user_id") or _get_session_user_id(request)
+
+    if not institution or not lab_name or not person_name:
+        return JsonResponse(
+            {"success": False, "message": "institution, lab_name and person_name cannot be empty"},
+            status=400,
+            safe=False,
+        )
+
+    create_kwargs = {
+        "visitor_uuid": visitor_uuid,
+        "institution": institution,
+        "lab_name": lab_name,
+        "person_name": person_name,
+        "cookie_key": cookie_key,
+        "created_by_user_id": created_by_user_id,
+    }
+
+    try:
+        with transaction.atomic():
+            profile = VisitorProfile.objects.create(**create_kwargs)
+        return JsonResponse({"success": True, "data": _serialize_visitor_profile(profile)}, status=200, safe=False)
+    except IntegrityError as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=409, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+def getVisitorProfile(request):
+    if request.method != "GET":
+        return JsonResponse({"success": False, "message": "Just GET method"}, status=405, safe=False)
+
+    visitor_id = request.GET.get("id")
+    visitor_uuid = request.GET.get("visitor_uuid")
+    cookie_key = request.GET.get("cookie_key")
+
+    if not any([visitor_id, visitor_uuid, cookie_key]):
+        return JsonResponse({"success": False, "message": "id or visitor_uuid or cookie_key cannot be empty"}, status=400, safe=False)
+
+    try:
+        queryset = VisitorProfile.objects.all()
+        if visitor_id:
+            profile = queryset.get(id=visitor_id)
+        elif visitor_uuid:
+            profile = queryset.get(visitor_uuid=visitor_uuid)
+        else:
+            profile = queryset.get(cookie_key=cookie_key)
+        return JsonResponse({"success": True, "data": _serialize_visitor_profile(profile)}, status=200, safe=False)
+    except VisitorProfile.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor profile"}, status=404, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+def listVisitorProfiles(request):
+    if request.method != "GET":
+        return JsonResponse({"success": False, "message": "Just GET method"}, status=405, safe=False)
+
+    try:
+        queryset = VisitorProfile.objects.all().order_by("-last_seen_at", "-id")
+        institution = request.GET.get("institution")
+        lab_name = request.GET.get("lab_name")
+        person_name = request.GET.get("person_name")
+        keyword = request.GET.get("keyword")
+        created_by_user_id = request.GET.get("created_by_user_id")
+
+        if institution:
+            queryset = queryset.filter(institution__icontains=institution)
+        if lab_name:
+            queryset = queryset.filter(lab_name__icontains=lab_name)
+        if person_name:
+            queryset = queryset.filter(person_name__icontains=person_name)
+        if created_by_user_id:
+            queryset = queryset.filter(created_by_user_id=created_by_user_id)
+        keyword_query = _build_or_keyword_query(keyword, ["institution", "lab_name", "person_name", "cookie_key", "visitor_uuid"])
+        if keyword_query is not None:
+            queryset = queryset.filter(keyword_query)
+
+        data = [_serialize_visitor_profile(profile) for profile in queryset[:200]]
+        return JsonResponse({"success": True, "data": data, "count": len(data)}, status=200, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+@csrf_exempt
+def updateVisitorProfile(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Just POST method"}, status=405, safe=False)
+
+    request_data = _get_request_json(request)
+    if request_data is None:
+        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400, safe=False)
+
+    visitor_id = request_data.get("id")
+    visitor_uuid = request_data.get("visitor_uuid")
+    if not visitor_id and not visitor_uuid:
+        return JsonResponse({"success": False, "message": "id or visitor_uuid cannot be empty"}, status=400, safe=False)
+
+    try:
+        if visitor_id:
+            profile = VisitorProfile.objects.get(id=visitor_id)
+        else:
+            profile = VisitorProfile.objects.get(visitor_uuid=visitor_uuid)
+
+        for field in [
+            "institution", "lab_name", "person_name", "cookie_key",
+            "visit_count", "last_path", "last_ip", "last_user_agent", "created_by_user_id"
+        ]:
+            if field in request_data:
+                setattr(profile, field, request_data.get(field))
+
+        if "last_seen_at" in request_data and request_data.get("last_seen_at"):
+            profile.last_seen_at = request_data.get("last_seen_at")
+
+        profile.save()
+        return JsonResponse({"success": True, "data": _serialize_visitor_profile(profile)}, status=200, safe=False)
+    except VisitorProfile.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor profile"}, status=404, safe=False)
+    except IntegrityError as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=409, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+@csrf_exempt
+def deleteVisitorProfile(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Just POST method"}, status=405, safe=False)
+
+    request_data = _get_request_json(request)
+    if request_data is None:
+        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400, safe=False)
+
+    visitor_id = request_data.get("id")
+    visitor_uuid = request_data.get("visitor_uuid")
+    if not visitor_id and not visitor_uuid:
+        return JsonResponse({"success": False, "message": "id or visitor_uuid cannot be empty"}, status=400, safe=False)
+
+    try:
+        if visitor_id:
+            profile = VisitorProfile.objects.get(id=visitor_id)
+        else:
+            profile = VisitorProfile.objects.get(visitor_uuid=visitor_uuid)
+        profile.delete()
+        return JsonResponse({"success": True}, status=200, safe=False)
+    except VisitorProfile.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor profile"}, status=404, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+@csrf_exempt
+def createVisitorAccessLog(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Just POST method"}, status=405, safe=False)
+
+    request_data = _get_request_json(request)
+    if request_data is None:
+        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400, safe=False)
+
+    visitor_id = request_data.get("visitor_id")
+    visitor_uuid = request_data.get("visitor_uuid")
+    path = (request_data.get("path") or "").strip()
+    method = (request_data.get("method") or request.method or "POST").upper()
+    ip = request_data.get("ip") or request.META.get("REMOTE_ADDR")
+    user_agent = request_data.get("user_agent") or request.META.get("HTTP_USER_AGENT")
+    referer = request_data.get("referer") or request.META.get("HTTP_REFERER")
+    cookie_snapshot = request_data.get("cookie_snapshot")
+
+    if not path:
+        return JsonResponse({"success": False, "message": "path cannot be empty"}, status=400, safe=False)
+
+    try:
+        if visitor_id:
+            profile = VisitorProfile.objects.get(id=visitor_id)
+        elif visitor_uuid:
+            profile = VisitorProfile.objects.get(visitor_uuid=visitor_uuid)
+        else:
+            return JsonResponse({"success": False, "message": "visitor_id or visitor_uuid cannot be empty"}, status=400, safe=False)
+
+        with transaction.atomic():
+            access_log = VisitorAccessLog.objects.create(
+                visitor=profile,
+                path=path,
+                method=method,
+                ip=ip,
+                user_agent=user_agent,
+                referer=referer,
+                cookie_snapshot=cookie_snapshot,
+            )
+            profile.visit_count = (profile.visit_count or 0) + 1
+            profile.last_seen_at = access_log.visited_at
+            profile.last_path = path
+            profile.last_ip = ip
+            profile.last_user_agent = user_agent
+            profile.save(update_fields=["visit_count", "last_seen_at", "last_path", "last_ip", "last_user_agent", "updated_at"])
+
+        return JsonResponse(
+            {
+                "success": True,
+                "data": _serialize_visitor_access_log(access_log),
+                "visitor_profile": _serialize_visitor_profile(profile),
+            },
+            status=200,
+            safe=False,
+        )
+    except VisitorProfile.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor profile"}, status=404, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+def getVisitorAccessLog(request):
+    if request.method != "GET":
+        return JsonResponse({"success": False, "message": "Just GET method"}, status=405, safe=False)
+
+    log_id = request.GET.get("id")
+    if not log_id:
+        return JsonResponse({"success": False, "message": "id cannot be empty"}, status=400, safe=False)
+
+    try:
+        access_log = VisitorAccessLog.objects.get(id=log_id)
+        return JsonResponse({"success": True, "data": _serialize_visitor_access_log(access_log)}, status=200, safe=False)
+    except VisitorAccessLog.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor access log"}, status=404, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+def listVisitorAccessLogs(request):
+    if request.method != "GET":
+        return JsonResponse({"success": False, "message": "Just GET method"}, status=405, safe=False)
+
+    try:
+        queryset = VisitorAccessLog.objects.all().order_by("-visited_at", "-id")
+        visitor_id = request.GET.get("visitor_id")
+        visitor_uuid = request.GET.get("visitor_uuid")
+        path = request.GET.get("path")
+        method = request.GET.get("method")
+
+        if visitor_id:
+            queryset = queryset.filter(visitor_id=visitor_id)
+        if visitor_uuid:
+            queryset = queryset.filter(visitor__visitor_uuid=visitor_uuid)
+        if path:
+            queryset = queryset.filter(path__icontains=path)
+        if method:
+            queryset = queryset.filter(method__iexact=method)
+
+        data = [_serialize_visitor_access_log(log) for log in queryset[:500]]
+        return JsonResponse({"success": True, "data": data, "count": len(data)}, status=200, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+@csrf_exempt
+def updateVisitorAccessLog(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Just POST method"}, status=405, safe=False)
+
+    request_data = _get_request_json(request)
+    if request_data is None:
+        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400, safe=False)
+
+    log_id = request_data.get("id")
+    if not log_id:
+        return JsonResponse({"success": False, "message": "id cannot be empty"}, status=400, safe=False)
+
+    try:
+        access_log = VisitorAccessLog.objects.get(id=log_id)
+        for field in ["path", "method", "ip", "user_agent", "referer", "cookie_snapshot"]:
+            if field in request_data:
+                setattr(access_log, field, request_data.get(field))
+        if "visitor_id" in request_data and request_data.get("visitor_id"):
+            access_log.visitor_id = request_data.get("visitor_id")
+        access_log.save()
+        return JsonResponse({"success": True, "data": _serialize_visitor_access_log(access_log)}, status=200, safe=False)
+    except VisitorAccessLog.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor access log"}, status=404, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
+
+@csrf_exempt
+def deleteVisitorAccessLog(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Just POST method"}, status=405, safe=False)
+
+    request_data = _get_request_json(request)
+    if request_data is None:
+        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400, safe=False)
+
+    log_id = request_data.get("id")
+    if not log_id:
+        return JsonResponse({"success": False, "message": "id cannot be empty"}, status=400, safe=False)
+
+    try:
+        access_log = VisitorAccessLog.objects.get(id=log_id)
+        access_log.delete()
+        return JsonResponse({"success": True}, status=200, safe=False)
+    except VisitorAccessLog.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor access log"}, status=404, safe=False)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)

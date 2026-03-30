@@ -1,6 +1,9 @@
 from Bio.SeqIO import parse, write
+from Bio.Seq import Seq
 import requests
 import sys
+import traceback
+from Bio.Restriction import BsaI
 # sys.path.append(r"C:\Users\admin\Desktop\WebDatabaseBeta\WebDatabase\WebDataWorld\LabDatabase\CaculateModule")
 # from .snapgene_readersnapgene_reader import snapgene_to_dict
 from .CaculateModule import snapgene_reader
@@ -18,15 +21,13 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
     elif(file_name[1] == "gb" or file_name[1] == "gbk" or file_name[1] == "ape" or file_name[1] == "str"):
         try:
             records = parse(upload_map, "genbank")
-            # upload_map.seek(0)
-            print(records)
             for record in records:
-                print(record.seq)
                 Sequence = str(record.seq)
                 FeatureList = record.features
                 break
         except Exception as e:
-            print(e.__class__)
+            print(e.args)
+            traceback.print_exc()
             return False
     elif(file_name[1] == "dna"):
         try:
@@ -64,7 +65,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             CultureResponseResponse = session.post(f"{Base_URL}setPlasmidCulture",json = Culture_request_body, cookies = django_request.COOKIES)
             scar_request_body = {"name":name,"bsmbi":scar_data_body[0],"bsai":scar_data_body[1],"bbsi":scar_data_body[2],"aari":scar_data_body[3],"sapi":scar_data_body[4]}
             ScarUpdateResponse = session.post(f"{Base_URL}setPlasmidScar",json = scar_request_body,cookies=django_request.COOKIES)
-            if(SequenceUpdateResponse.status_code == 200 and CultureResponseResponse.status_code == 200 and ScarUpdateResponse.status_code == 200):
+            if((SequenceUpdateResponse.status_code == 200 or AddSequenceUpdateResponse.status_code == 200) and CultureResponseResponse.status_code == 200 and ScarUpdateResponse.status_code == 200):
                 return True
             else:
                 return False
@@ -120,17 +121,31 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             else:
                 return False
         elif(upload_type == "part"):
-            request_body = {"name":name, "Level0Sequence":Sequence}
-            SequenceUpdateResponse = session.post(f"{Base_URL}UpdatePartSequence",json=request_body,cookies=django_request.COOKIES)
-            if(SequenceUpdateResponse.status_code == 200):
-                return True
-            elif(SequenceUpdateResponse.json()['success'] == False and SequenceUpdateResponse.json()['message'] == "Part Does Not Exist"):
-                add_request_body = {"name":name,"alias":"","Level0Sequence":Sequence,"type":"promoter"}
-                SequenceAddResponse = session.post(f"{Base_URL}AddPartData",json=add_request_body,cookies=django_request.COOKIES)
-                if(SequenceAddResponse.status_code != 200):
+            try:
+                target_seq = ""
+                Enzyme_result = BsaI.catalyse(Seq(Sequence),linear=False)
+                for each_result in Enzyme_result:
+                    if((BsaI.site in str(each_result)) == False):
+                        target_seq = str(each_result)
+                        # print(target_seq)
+                        break
+                request_body = {"name":name, "Level0Sequence":target_seq}
+                print(request_body)
+                SequenceUpdateResponse = session.post(f"{Base_URL}UpdatePartSequence",json=request_body,cookies=django_request.COOKIES)
+                if(SequenceUpdateResponse.status_code == 200):
+                    return True
+                elif(SequenceUpdateResponse.json()['success'] == False and SequenceUpdateResponse.json()['message'] == "Part Does Not Exist"):
+                    add_request_body = {"name":name,"alias":"","Level0Sequence":target_seq,"type":"promoter"}
+                    SequenceAddResponse = session.post(f"{Base_URL}AddPartData",json=add_request_body,cookies=django_request.COOKIES)
+                    if(SequenceAddResponse.status_code != 200):
+                        return False
+                else:
                     return False
-            else:
+                return True
+            except Exception as e:
+                print(e.args)
                 return False
+                
             
             
 # def AnalysisFeature(file_obj, type, name, session, django_request, Base_URL):
