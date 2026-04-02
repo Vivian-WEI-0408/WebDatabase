@@ -1310,9 +1310,45 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                         elif(partType == "terminator"):
                             sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                         elif(partType == "cds"):
-                            sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                            if(sequence[:3] == "atg"):
+                                sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                            else:
+                                sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
                         elif(partType == "rbs"):
-                            sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+                            #TODO: 处理Overlapping的问题
+                            partAlias = (session.get(f"{Base_URL}PartAliasByID?ID={each_part}",cookies=django_request.COOKIES)).json()["PartAlias"]
+                            print(f"partAlias:{partAlias}")
+                            print((("BCD" in partName) or ("BCD" in partAlias)))
+                            if(("AATTAAATTAATTGTGAGCGGATAACAATT".lower() in sequence) == True):
+                                sequence = "GAAGACCTATCA" + sequence
+                                if(sequence[-2:] == "aa"):
+                                    sequence = sequence + "TGAGGTCTTC"
+                                elif(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGGTCTTC"
+                                else:
+                                    sequence = sequence + "AATGAGGTCTTC"
+                            elif((("BCD" in partName) or ("BCD" in partAlias))):
+                                print("*******************************************************")
+                                if(sequence[:2] == "ca"):
+                                    sequence = "GAAGACCTAT" + sequence
+                                elif(sequence[:4] == "atca"):
+                                    sequence = "GAAGACCT" + sequence
+                                if(sequence[-2:] == "aa"):
+                                    sequence = sequence + "TGAGGTCTTC"
+                                elif(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGGTCTTC"
+                                print(sequence)
+                            else:
+                                if(sequence[:4] == "atca"):
+                                    sequence = "GAAGACCT" + sequence
+                                elif(sequence[:2] == "ca"):
+                                    sequence = "GAAGACCTAT" + sequence
+                                else:
+                                    sequence = "GAAGACCTATCA" + sequence
+                                if(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGGTCTTC"
+                                else:
+                                    sequence = sequence + "AATGAGGTCTTC"
                         elif(partType == "p+r"):
                             sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
                     else:
@@ -1321,7 +1357,10 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                         elif(partType == "terminator"):
                             sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                         elif(partType == "cds"):
-                            sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                            if(sequence[:3] == "atg"):
+                                sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                            else:
+                                sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
                 elif(target_enzyme == "BsaI"):
                     if(("saccharomyces" in partSource['source'].lower()) == False):
                         if(partType == "promoter"):
@@ -1329,9 +1368,41 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                         elif(partType == "terminator"):
                             sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
                         elif(partType == "cds"):
-                            sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
+                            if(sequence[:3] == "atg"):
+                                sequence = "GGTCTCAA" + sequence + "TAAAAGAGACC"
+                            else:
+                                sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
                         elif(partType == "rbs"):
-                            sequence = "GGTCTCAATCA" + sequence + "AATGAGAGACC"
+                            partAlias = (session.get(f"{Base_URL}PartAliasByID?ID={each_part}",cookies=django_request.COOKIES)).json()["PartAlias"]
+                            if(("AATTAAATTAATTGTGAGCGGATAACAATT".lower() in sequence) == True):
+                                sequence = "GGTCTCAATCA" + sequence
+                                if(sequence[-2:] == "aa"):
+                                    sequence = sequence + "TGAGAGACC"
+                                elif(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGAGACC"
+                                else:
+                                    sequence = sequence + "AATGAGAGACC"
+                            elif((("BCD" in partName) or ("BCD" in partAlias))):
+                                print("*******************************************************")
+                                if(sequence[:2] == "ca"):
+                                    sequence = "GGTCTCAAT" + sequence
+                                elif(sequence[:4] == "atca"):
+                                    sequence = "GGTCTCA" + sequence
+                                if(sequence[-2:] == "aa"):
+                                    sequence = sequence + "TGAGAGACC"
+                                elif(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGAGACC"
+                            else:
+                                if(sequence[:4] == "atca"):
+                                    sequence = "GGTCTCA" + sequence
+                                elif(sequence[:2] == "ca"):
+                                    sequence = "GGTCTCAAT" + sequence
+                                else:
+                                    sequence = "GGTCTCAATCA" + sequence
+                                if(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGAGACC"
+                                else:
+                                    sequence = sequence + "AATGAGAGACC"
                         elif(partType == "p+r"):
                             sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
                     else:
@@ -1348,9 +1419,41 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                     elif(partType == "terminator"):
                         sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                     elif(partType == "cds"):
-                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                        if(sequence[:3] == "atg"):
+                            sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                        else:
+                            sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
                     elif(partType == "rbs"):
-                        sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+                        partAlias = (session.get(f"{Base_URL}PartAliasByID?ID={each_part}",cookies=django_request.COOKIES)).json()["PartAlias"]
+                        if(("AATTAAATTAATTGTGAGCGGATAACAATT".lower() in sequence) == True):
+                            sequence = "GAAGACCTATCA" + sequence
+                            if(sequence[-2:] == "aa"):
+                                sequence = sequence + "TGAGGTCTTC"
+                            elif(sequence[-1] == "a"):
+                                sequence = sequence + "ATGAGGTCTTC"
+                            else:
+                                sequence = sequence + "AATGAGGTCTTC"
+                        elif((("BCD" in partName) or ("BCD" in partAlias))):
+                            print("*******************************************************")
+                            if(sequence[:2] == "ca"):
+                                sequence = "GAAGACCTAT" + sequence
+                            elif(sequence[:4] == "atca"):
+                                sequence = "GAAGACCT" + sequence
+                            if(sequence[-2:] == "aa"):
+                                sequence = sequence + "TGAGGTCTTC"
+                            elif(sequence[-1] == "a"):
+                                sequence = sequence + "ATGAGGTCTTC"
+                        else:
+                            if(sequence[:4] == "atca"):
+                                sequence = "GAAGACCT" + sequence
+                            elif(sequence[:2] == "ca"):
+                                sequence = "GAAGACCTAT" + sequence
+                            else:
+                                sequence = "GAAGACCTATCA" + sequence
+                            if(sequence[-1] == "a"):
+                                sequence = sequence + "ATGAGGTCTTC"
+                            else:
+                                sequence = sequence + "AATGAGGTCTTC"
                     elif(partType == "p+r"):
                         sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
                 else:
@@ -1359,7 +1462,10 @@ def process_assembly_repo(repositoryName, django_request,task_id):
                     elif(partType == "terminator"):
                         sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                     elif(partType == "cds"):
-                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                        if(sequence[:3] == "atg"):
+                            sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                        else:
+                            sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
             seq_obj = Seq(sequence)
             seq_reverse = str(seq_obj.reverse_complement())
             # fi = featureIdentify()
@@ -1613,11 +1719,14 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
         file_address_list.append(os.path.join(f"{file_address}",f"backbone-{each_backbone}.gbk"))
         file_name_list.append(f"backbone-{each_backbone}")
     for each_part in partList:
-        part_id = (session.get(f"{Base_URL}PartID?name={each_part}",cookies=django_request.COOKIES)).json()['PartID']
-        part.append(part_id)
-        sequence = (session.get(f'{Base_URL}GetPartSeqByID?partid={part_id}',cookies = django_request.COOKIES)).json()['data']['level0sequence'].lower()
-        partType = (session.get(f"{Base_URL}TypeByID?ID={part_id}", cookies=django_request.COOKIES)).json()['Type'].lower()
-        partSource = (session.get(f"{Base_URL}partSource/{part_id}",cookies=django_request.COOKIES)).json()
+        part.append(each_part)
+        part_name = (session.get(f"{Base_URL}PartNameByID?ID={each_part}",cookies=django_request.COOKIES)).json()["PartName"]
+        print(each_part)
+        sequence_response = (session.get(f'{Base_URL}GetPartSeqByID?partid={each_part}',cookies = django_request.COOKIES)).json()
+        print(sequence_response)
+        sequence = sequence_response['data']['level0sequence'].lower()
+        partType = (session.get(f"{Base_URL}TypeByID?ID={each_part}", cookies=django_request.COOKIES)).json()['Type'].lower()
+        partSource = (session.get(f"{Base_URL}partSource/{each_part}",cookies=django_request.COOKIES)).json()
         if(partSource['success'] != True):
             return {"success":False}
         print(partType)
@@ -1626,17 +1735,46 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                 print("saccharomyces" in partSource['source'].lower())
                 #if("saccharomyces" in partSource['source'].lower() == False)
                 if("saccharomyces" in partSource['source'].lower()) == False:
-                    print("*********7777777777777777777777****************")
-
                 # if(partSource['source'].lower() != "saccharomyces cerevisiae"):
                     if(partType == "promoter"):
                         sequence = "GAAGACCTGTGC" + sequence + "ATCAAGGTCTTC"
                     elif(partType == "terminator"):
                         sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                     elif(partType == "cds"):
-                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                        if(sequence[:3] == "atg"):
+                            sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                        else:
+                            sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
                     elif(partType == "rbs"):
-                        sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+                        partAlias = (session.get(f"{Base_URL}PartAliasByID?ID={each_part}",cookies=django_request.COOKIES)).json()["PartAlias"]
+                        if(("AATTAAATTAATTGTGAGCGGATAACAATT".lower() in sequence) == True):
+                            sequence = "GAAGACCTATCA" + sequence
+                            if(sequence[-2:] == "aa"):
+                                sequence = sequence + "TGAGGTCTTC"
+                            elif(sequence[-1] == "a"):
+                                sequence = sequence + "ATGAGGTCTTC"
+                            else:
+                                sequence = sequence + "AATGAGGTCTTC"
+                        elif((("BCD" in part_name) or ("BCD" in partAlias))):
+                            if(sequence[:2] == "ca"):
+                                sequence = "GAAGACCTAT" + sequence
+                            elif(sequence[:4] == "atca"):
+                                sequence = "GAAGACCT" + sequence
+                            if(sequence[-2:] == "aa"):
+                                sequence = sequence + "TGAGGTCTTC"
+                            elif(sequence[-1] == "a"):
+                                sequence = sequence + "ATGAGGTCTTC"
+                        else:
+                            if(sequence[:4] == "atca"):
+                                sequence = "GAAGACCT" + sequence
+                            elif(sequence[:2] == "ca"):
+                                sequence = "GAAGACCTAT" + sequence
+                            else:
+                                sequence = "GAAGACCTATCA" + sequence
+                            if(sequence[-1] == "a"):
+                                sequence = sequence + "ATGAGGTCTTC"
+                            else:
+                                sequence = sequence + "AATGAGGTCTTC"
                     elif(partType == "p+r"):
                         sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
                 else:
@@ -1645,21 +1783,54 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                     elif(partType == "terminator"):
                         sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                     elif(partType == "cds"):
-                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                        if(sequence[:3] == "atg"):
+                            sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                        else:
+                            sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
             elif(target_enzyme == "BsaI"):
                 print("saccharomyces" in partSource['source'].lower())
                 try:
                     if("saccharomyces" in partSource['source'].lower()) == False:
-                        print("*********88888888888888888888****************")
                         if(partType == "promoter"):
                             sequence = "GGTCTCAGTGC" + sequence + "ATCAAGAGACC"
                             print(sequence)
                         elif(partType == "terminator"):
                             sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
                         elif(partType == "cds"):
-                            sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
+                            if(sequence[:3] == "atg"):
+                                sequence = "GGTCTCAA" + sequence + "TAAAAGAGACC"
+                            else:
+                                sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
                         elif(partType == "rbs"):
-                            sequence = "GGTCTCAATCA" + sequence + "AATGAGAGACC"
+                            partAlias = (session.get(f"{Base_URL}PartAliasByID?ID={each_part}",cookies=django_request.COOKIES)).json()["PartAlias"]
+                            if(("AATTAAATTAATTGTGAGCGGATAACAATT".lower() in sequence) == True):
+                                sequence = "GGTCTCAATCA" + sequence
+                                if(sequence[-2:] == "aa"):
+                                    sequence = sequence + "TGAGAGACC"
+                                elif(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGAGACC"
+                                else:
+                                    sequence = sequence + "AATGAGAGACC"
+                            elif((("BCD" in part_name) or ("BCD" in partAlias))):
+                                if(sequence[:2] == "ca"):
+                                    sequence = "GGTCTCAAT" + sequence
+                                elif(sequence[:4] == "atca"):
+                                    sequence = "GGTCTCA" + sequence
+                                if(sequence[-2:] == "aa"):
+                                    sequence = sequence + "TGAGAGACC"
+                                elif(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGAGACC"
+                            else:
+                                if(sequence[:4] == "atca"):
+                                    sequence = "GGTCTCA" + sequence
+                                elif(sequence[:2] == "ca"):
+                                    sequence = "GGTCTCAAT" + sequence
+                                else:
+                                    sequence = "GGTCTCAATCA" + sequence
+                                if(sequence[-1] == "a"):
+                                    sequence = sequence + "ATGAGAGACC"
+                                else:
+                                    sequence = sequence + "AATGAGAGACC"
                         elif(partType == "p+r"):
                             sequence = "GGTCTCAGTGC" + sequence + "AATGAGAGACC"
                     else:
@@ -1668,7 +1839,10 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                         elif(partType == "terminator"):
                             sequence = "GGTCTCATAAA" + sequence + "CCTCAGAGACC"
                         elif(partType == "cds"):
-                            sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
+                            if(sequence[:3] == "atg"):
+                                sequence = "GGTCTCAA" + sequence + "TAAAAGAGACC"
+                            else:
+                                sequence = "GGTCTCAAATG" + sequence + "TAAAAGAGACC"
                 except Exception as e:
                     print(e.args())
         else:
@@ -1678,9 +1852,40 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                 elif(partType == "terminator"):
                     sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                 elif(partType == "cds"):
-                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                    if(sequence[:3] == "atg"):
+                        sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                    else:
+                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
                 elif(partType == "rbs"):
-                    sequence = "GAAGACCTATCA" + sequence + "AATGAGGTCTTC"
+                    partAlias = (session.get(f"{Base_URL}PartAliasByID?ID={each_part}",cookies=django_request.COOKIES)).json()["PartAlias"]
+                    if(("AATTAAATTAATTGTGAGCGGATAACAATT".lower() in sequence) == True):
+                        sequence = "GAAGACCTATCA" + sequence
+                        if(sequence[-2:] == "aa"):
+                            sequence = sequence + "TGAGGTCTTC"
+                        elif(sequence[-1] == "a"):
+                            sequence = sequence + "ATGAGGTCTTC"
+                        else:
+                            sequence = sequence + "AATGAGGTCTTC"
+                    elif((("BCD" in part_name) or ("BCD" in partAlias))):
+                        if(sequence[:2] == "ca"):
+                            sequence = "GAAGACCTAT" + sequence
+                        elif(sequence[:4] == "atca"):
+                            sequence = "GAAGACCT" + sequence
+                        if(sequence[-2:] == "aa"):
+                            sequence = sequence + "TGAGGTCTTC"
+                        elif(sequence[-1] == "a"):
+                            sequence = sequence + "ATGAGGTCTTC"
+                    else:
+                        if(sequence[:4] == "atca"):
+                            sequence = "GAAGACCT" + sequence
+                        elif(sequence[:2] == "ca"):
+                            sequence = "GAAGACCTAT" + sequence
+                        else:
+                            sequence = "GAAGACCTATCA" + sequence
+                        if(sequence[-1] == "a"):
+                            sequence = sequence + "ATGAGGTCTTC"
+                        else:
+                            sequence = sequence + "AATGAGGTCTTC"
                 elif(partType == "p+r"):
                     sequence = "GAAGACCTGTGC" + sequence + "AATGAGGTCTTC"
             else:
@@ -1689,7 +1894,10 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                 elif(partType == "terminator"):
                     sequence = "GAAGACCTTAAA" + sequence + "CCTCAGGTCTTC"
                 elif(partType == "cds"):
-                    sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
+                    if(sequence[:3] == "atg"):
+                        sequence = "GAAGACCTA" + sequence + "TAAAAGGTCTTC"
+                    else:
+                        sequence = "GAAGACCTAATG" + sequence + "TAAAAGGTCTTC"
         seq_obj = Seq(sequence)
         seq_reverse = str(seq_obj.reverse_complement())
         # fi = featureIdentify()
@@ -1698,24 +1906,24 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
         feature_list = {}
         reverse_feature_list = {}
         scar_list = scarPosition(sequence)
-        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{each_part}')
+        sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'part-{partType}-{part_name}')
         file_address = os.path.join(File_Address, "AssemblyFile")
         sa.GenerateGBKFile(file_address)
-        file_address_list.append(os.path.join(f"{file_address}",f"part-{partType}-{each_part}.gbk"))
-        file_name_list.append(f'part-{partType}-{each_part}')
+        file_address_list.append(os.path.join(f"{file_address}",f"part-{partType}-{part_name}.gbk"))
+        file_name_list.append(f'part-{partType}-{part_name}')
     for each_plasmid in plasmidList:
-        plasmidID = (session.get(f"{Base_URL}PlasmidID?name={each_plasmid}",cookies=django_request.COOKIES)).json()['PlasmidID']
+        plasmidID = (session.get(f"{Base_URL}PlasmidID?name={each_plasmid[:20]}",cookies=django_request.COOKIES)).json()['PlasmidID']
         plasmid.append(plasmidID)
-        if(os.path.exists(os.path.join(Assembly_File_Address,f"{each_plasmid}.gb"))):
-            file_address_list.append(os.path.join(Assembly_File_Address,f"{each_plasmid}.gb"))
-            file_name_list.append(each_plasmid)
+        if(os.path.exists(os.path.join(Assembly_File_Address,f"{each_plasmid[:20]}.gb"))):
+            file_address_list.append(os.path.join(Assembly_File_Address,f"{each_plasmid[:20]}.gb"))
+            file_name_list.append(each_plasmid[:20])
         else:
             sequence = (session.get(f'{Base_URL}PlasmidSeqByID?plasmidid={plasmidID}',cookies = django_request.COOKIES)).json()['data']['sequenceconfirm'].lower()
             seq_obj = Seq(sequence)
             scar_list = scarPosition(sequence)
             seq_reverse = str(seq_obj.reverse_complement())
             PlasmidParentBackboneResponse = (session.get(f"{Base_URL}GetBackboneParent?plasmidid={plasmidID}",cookies=django_request.COOKIES)).json()
-            sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{each_plasmid}')
+            sa = SequenceAnnotator(sequence,{},{},scar_list,name=f'plasmid-{each_plasmid[:20]}')
             if(PlasmidParentBackboneResponse['success']):
                 PlasmidParentBackbone = PlasmidParentBackboneResponse['data'][0]['id']
                 ParentBackboneSequenceResponse = (session.get(f"{Base_URL}GetBackboneSeqByID?backboneid={PlasmidParentBackbone}", cookies=django_request.COOKIES)).json()
@@ -1773,11 +1981,11 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
                         type = typeResponse.json()['Type'].lower()
                         new_feature = {each_key:[fetch_result[each_key]["start"],fetch_result[each_key]["end"],type]}
                         sa.add_feature(new_feature)
-            sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{each_plasmid}')
+            # sa = SequenceAnnotator(sequence,feature_list,reverse_feature_list,scar_list,name=f'plasmid-{each_plasmid}')
             file_address = os.path.join(File_Address, "AssemblyFile")
             sa.GenerateGBKFile(file_address)
-            file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{each_plasmid}.gbk"))
-            file_name_list.append(f"plasmid-{each_plasmid}")
+            file_address_list.append(os.path.join(f"{file_address}",f"plasmid-{each_plasmid[:20]}.gbk"))
+            file_name_list.append(f"plasmid-{each_plasmid[:20]}")
     print(file_address_list)
     task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
     task_status["status"] = "processing"
@@ -1796,18 +2004,31 @@ def process_assembly_without_repo(partList, backboneList, plasmidList, django_re
     start_time = time.time()
     while time.time() - start_time < max_wait_time:
         if(os.path.exists(assembly_result_file)):
-            task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
-            task_status["status"] = "completed"
-            task_status['progress'] = 100
-            task_status["result"] = {
-                "task_id": task_id,
-                "file_name": plan_name,
-                "file_path": assembly_result_file,
-                "download_url": f"/LabDatabase/getAssembly/{plan_name}?task_id={task_id}",
-            }
-            cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
-            print(task_id)
-            return
+            records = parse(assembly_result_file, "genbank")
+            for record in records:
+                Sequence = str(record.seq)
+            response = AssemblyResultUpload(django_request, plan_name[:20], Sequence, part, backbone, plasmid)
+            if(response["success"]):
+                task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+                task_status["status"] = "completed"
+                task_status['progress'] = 100
+                task_status["result"] = {
+                    "task_id": task_id,
+                    "file_name": plan_name,
+                    "file_path": assembly_result_file,
+                    "download_url": f"/LabDatabase/getAssembly/{plan_name}?task_id={task_id}",
+                }
+                cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+                print(task_id)
+                return
+            else:
+                task_status = cache.get(f'{TASK_STATUS_PREFIX}{task_id}')
+                task_status["status"] = "failed"
+                task_status['progress'] = 100
+                task_status["result"] = None
+                task_status["error"] = response.get("message", "组装结果入库失败")
+                cache.set(f"{TASK_STATUS_PREFIX}{task_id}",task_status)
+                return
         else:
             time.sleep(0.5)
             continue
@@ -1831,16 +2052,17 @@ def AssemblyResultUpload(django_request,Name, Sequence, partList, BackboneList, 
         'Content-Type':'application/json',
         'X-CSRFToken':token,
     })
-    if(len(partList) != 0):
+    if(len(partList) == 1):
+        level = 1
+    if(len(PlasmidList) == 3 or len(PlasmidList) == 4):
         level = 2
     else:
         level = 3
     data_body = {'name':Name,'alias':Name,'level':level,'sequence':Sequence,'note':"",'ParentInfo':""}
     response = session.post(f'{Base_URL}AddPlasmidData',json=data_body,cookies=django_request.COOKIES)
-    plasmidid = session.get(f'{Base_URL}PlasmidID?name={Name}',cookies=django_request.COOKIES)
-    
     if(response.status_code != 200):
-        return {"success":False, "message":"添加质粒失败"}
+        return {"success":False, "message":"存储质粒失败"}
+    plasmidid = session.get(f'{Base_URL}PlasmidID?name={Name}',cookies=django_request.COOKIES)
     Ori_list = []
     Marker_list = []
     OriAndMarkerLabel = FittingLabels(Sequence)
