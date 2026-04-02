@@ -740,6 +740,45 @@ class VisitorAccessLog(models.Model):
     def __str__(self):
         return f"{self.visitor_id} {self.method} {self.path}"
 
+
+class VisitorFeedback(models.Model):
+    FEEDBACK_TYPE_ISSUE = "issue"
+    FEEDBACK_TYPE_SUGGESTION = "suggestion"
+    FEEDBACK_TYPE_CHOICES = [
+        (FEEDBACK_TYPE_ISSUE, "Issue"),
+        (FEEDBACK_TYPE_SUGGESTION, "Suggestion"),
+    ]
+
+    STATUS_PENDING = "pending"
+    STATUS_REVIEWED = "reviewed"
+    STATUS_RESOLVED = "resolved"
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending"),
+        (STATUS_REVIEWED, "Reviewed"),
+        (STATUS_RESOLVED, "Resolved"),
+    ]
+
+    visitor_profile = models.ForeignKey(
+        VisitorProfile,
+        on_delete=models.CASCADE,
+        db_column='visitor_id'
+    )
+    feedback_type = models.CharField(max_length=32, choices=FEEDBACK_TYPE_CHOICES)
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    contact_email = models.EmailField(blank=True)
+    page_path = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'visitorfeedback'
+
+    def __str__(self):
+        return f"{self.get_feedback_type_display()}: {self.title}"
+
 class Yeastmodels(models.Model):
     collection = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)

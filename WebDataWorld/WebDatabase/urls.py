@@ -1,4 +1,4 @@
-from django.urls import path,include
+﻿from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 
 
@@ -201,6 +201,7 @@ urlpatterns = [
     path("listVisitorProfiles", views.listVisitorProfiles, name="listVisitorProfiles"),
     path("updateVisitorProfile", views.updateVisitorProfile, name="updateVisitorProfile"),
     path("deleteVisitorProfile", views.deleteVisitorProfile, name="deleteVisitorProfile"),
+    path("createVisitorFeedback", views.createVisitorFeedback, name="createVisitorFeedback"),
 
     path("createVisitorAccessLog", views.createVisitorAccessLog, name="createVisitorAccessLog"),
     path("getVisitorAccessLog", views.getVisitorAccessLog, name="getVisitorAccessLog"),
@@ -208,3 +209,4 @@ urlpatterns = [
     path("updateVisitorAccessLog", views.updateVisitorAccessLog, name="updateVisitorAccessLog"),
     path("deleteVisitorAccessLog", views.deleteVisitorAccessLog, name="deleteVisitorAccessLog"),
 ]
+

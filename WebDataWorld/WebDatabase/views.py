@@ -1,4 +1,4 @@
-import django.core.exceptions
+﻿import django.core.exceptions
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.core import serializers
@@ -19,7 +19,7 @@ from .models import (Backbonetable,Parentplasmidtable,
                     Testdatatable,CustomUser,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
                     Parentparttable, Partscartable, Backbonescartable, Plasmidscartable, \
                     Plasmid_Culture_Functions,Backbone_Culture_Functions,Backbonefeaturetable,
-                    VisitorProfile, VisitorAccessLog)
+                    VisitorProfile, VisitorAccessLog, VisitorFeedback)
 from django.views.decorators.csrf import csrf_exempt
 # from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
 #     PartrputableSerializer,ParttableSerializer,PlasmidneedSerializer,TbBackboneUserfileaddressSerializer,\
@@ -53,17 +53,17 @@ def _build_or_keyword_query(raw_keywords, fields):
 
 
 #----------------------------------------------------------
-#用户登录验证(中间件)
+#鐢ㄦ埛鐧诲綍楠岃瘉(涓棿浠?
 
 class User_auth(MiddlewareMixin):
     """
-    除了login,register,AdminLogin,ResetPassword页面，其余页面在路由获取资源前都需要经过用户验证
+    闄や簡login,register,AdminLogin,ResetPassword椤甸潰锛屽叾浣欓〉闈㈠湪璺敱鑾峰彇璧勬簮鍓嶉兘闇€瑕佺粡杩囩敤鎴烽獙璇?
     """
     
     def process_request(self,request):
         request.start_time = time.time()
         try:
-            #排除不需要登录就能访问的页面
+            #鎺掗櫎涓嶉渶瑕佺櫥褰曞氨鑳借闂殑椤甸潰
             if request.path_info == "/WebDatabase/login" or request.path_info == "/WebDatabase/register" or request.path_info == "/WebDatabase/AdminRegister" or request.path_info == "/WebDatabase/reset":
                 return
             info = request.session.get('info')
@@ -102,14 +102,14 @@ class User_auth(MiddlewareMixin):
 
 #-----------------------------------------------------------
 #Strain Table
-#新增数据方法
+#鏂板鏁版嵁鏂规硶
 def SearchByStrainName(request):
     """
-    通过菌株名称（Name）获取整体性信息
+    閫氳繃鑿屾牚鍚嶇О锛圢ame锛夎幏鍙栨暣浣撴€т俊鎭?
     Args:
         request: django request
     GET Args:
-        name: 菌株名称
+        name: 鑿屾牚鍚嶇О
     Returns:
         JsonResponse: 1. status_code = 200 list data if search successfully,
         2. status_code = 400/404 string data, if search unsuccessfully
@@ -123,7 +123,7 @@ def SearchByStrainName(request):
                 # return JsonResponse({'status': 201, 'data': "Name cannot be empty"})
             StrainList = Straintable.objects.filter(strainname=Name)
             if(len(StrainList) > 0):
-                # return HttpResponse("成功",data = StrainList)
+                # return HttpResponse("鎴愬姛",data = StrainList)
                 return JsonResponse(data=list(StrainList.values()), status=200,safe=False)
                 # return JsonResponse({'code':200,'status': 'success', 'data': list(StrainList.values())})
             else:
@@ -138,7 +138,7 @@ def SearchByStrainName(request):
 #ALL
 def PartFields(request):
     """
-    获取Parttable所有相关筛选信息项，不包括parentparttable，partrputable，partscartable，tbpartuserfileaddress
+    鑾峰彇Parttable鎵€鏈夌浉鍏崇瓫閫変俊鎭」锛屼笉鍖呮嫭parentparttable锛宲artrputable锛宲artscartable锛宼bpartuserfileaddress
     
     Args:
         request: django request
@@ -160,13 +160,13 @@ def PartFields(request):
     
 def PartCount(request):
     """
-    获取Part table的数据条数
+    鑾峰彇Part table鐨勬暟鎹潯鏁?
     
     Args:
         request: django request
     
     Returns:
-        JsonResponse: 1.JsonResponse.json()["success"]=True, JsonResponse.json()["data"]=integer(数据条数),JsonResponse.status_code=200 if search successfully,
+        JsonResponse: 1.JsonResponse.json()["success"]=True, JsonResponse.json()["data"]=integer(鏁版嵁鏉℃暟),JsonResponse.status_code=200 if search successfully,
         2.JsonResponse.json()['success'] = False,JsonResponse.json()["message"] = Error Information, JsonResponse.status_code=400/200 if search unsuccessfully.
     """
     
@@ -182,7 +182,7 @@ def PartCount(request):
 
 def PartDataALL(request):
     """
-    获取part table的所有数据条目，以name排序
+    鑾峰彇part table鐨勬墍鏈夋暟鎹潯鐩紝浠ame鎺掑簭
     
     Args:
         request: django request
@@ -352,7 +352,7 @@ def PartFilter(request):
 #Search
 def SearchByPartName(request):
     """
-    GET方法进行part table name的精确搜索, 参数为name
+    GET鏂规硶杩涜part table name鐨勭簿纭悳绱? 鍙傛暟涓簄ame
     
     Args:
         request: django request
@@ -382,7 +382,7 @@ def SearchByPartName(request):
 
 def SearchByPartNameFilter(request):
     """
-    通过名称name和type对Parttable的数据进行查询，名称为模糊查询
+    閫氳繃鍚嶇Оname鍜宼ype瀵筆arttable鐨勬暟鎹繘琛屾煡璇紝鍚嶇О涓烘ā绯婃煡璇?
     
     Args:
         request: django request
@@ -453,7 +453,7 @@ def SearchByBackboneNameFilter(request):
                 if keyword_query is not None:
                     result = result.filter(keyword_query)
                 backboneResult = list(result.values('id','name','species'))
-                #TODO: 标记ori，marker
+                #TODO: 鏍囪ori锛宮arker
                 for each in backboneResult:
                     info_list = getBackboneOriAndMarker(each['id'])
                     each['ori'] = info_list[0]
@@ -1022,7 +1022,7 @@ def deletePartData(request):
         username = request.user.uname
         partuploaduser = Parttable.objects.get(partid = PartID).user
         if(partuploaduser == "" or partuploaduser == None or username != partuploaduser):
-            return JsonResponse(data = {"success":False, "message" : "当前用户没有删除权限，请联系上传用户进行删除"},status = 400, safe=False)
+            return JsonResponse(data = {"success":False, "message" : "褰撳墠鐢ㄦ埛娌℃湁鍒犻櫎鏉冮檺锛岃鑱旂郴涓婁紶鐢ㄦ埛杩涜鍒犻櫎"},status = 400, safe=False)
         if(PartID == None):
             return JsonResponse(data={"success":False, "message":"No such part"}, status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Part Not Found'})
@@ -1788,7 +1788,7 @@ def SearchPlasmidFileAddress(request):
             # return JsonResponse({'code':204,'status':'failed','data':'Address Not Found'})
 
 #Add
-#TODO:用户管理
+#TODO:鐢ㄦ埛绠＄悊
 def AddPlasmidFileAddress(request):
     """
     AddPlasmidFileAddress API view.
@@ -1826,6 +1826,7 @@ def AddPlasmidData(request):
     """
     if(request.method == "POST"):
         data = json.loads(request.body)
+        print(data)
         name = data['name']
         # oriclone = data['oriclone']
         # orihost = data['orihost']
@@ -1838,7 +1839,11 @@ def AddPlasmidData(request):
         state = data['state'] if 'state' in data else 0
         note = data['note'] if 'note' in data else ""
         alias = data['alias']
-        username = request.session['info']['uname']
+        #TODO: 鏇存敼杩欓噷
+        try:
+            username = request.session['info']['uname']
+        except:
+            username = "webtest"
         ParentInfo = data['ParentInfo'] if 'ParentInfo' in data else ""
         # username = request.session.get('info')['uname']
         tag = data['tag'] if "tag" in data else "normal"
@@ -2171,7 +2176,7 @@ def deletePlasmidData(request):
         plasmid_user = Plasmidneed.objects.get(plasmidid = PlasmidID).user
         
         if(plasmid_user != request.user.uname):
-            return JsonResponse(data = {"success":False, "message":"当前用户没有删除权限，请联系上传用户进行删除"}, status = 400, safe=False)
+            return JsonResponse(data = {"success":False, "message":"褰撳墠鐢ㄦ埛娌℃湁鍒犻櫎鏉冮檺锛岃鑱旂郴涓婁紶鐢ㄦ埛杩涜鍒犻櫎"}, status = 400, safe=False)
         try:
             Parentplasmidtable.objects.filter(sonplasmidid=PlasmidID).delete()
             Parentplasmidtable.objects.filter(parentplasmidid=PlasmidID).delete()
@@ -2938,7 +2943,7 @@ def AddBackboneData(request):
         return JsonResponse(data="Added backbone data", status=200,safe=False)
         # return JsonResponse({'code':200,'status':'success','data':'Backbone Data Added'})
 
-#TODO:用户管理
+#TODO:鐢ㄦ埛绠＄悊
 def AddBackboneFileAddress(request):
     """
     AddBackboneFileAddress API view.
@@ -3076,7 +3081,7 @@ def DeleteBackboneData(request):
         print(Backbone_obj.user == username)
         print(Backbone_obj.user)
         if(Backbone_obj.user == None or Backbone_obj.user == "" or Backbone_obj.user != username):
-            return JsonResponse(data ={"success" : False, "message":"当前用户没有删除权限，请联系上传用户进行删除"} , status = 400, safe = False)
+            return JsonResponse(data ={"success" : False, "message":"褰撳墠鐢ㄦ埛娌℃湁鍒犻櫎鏉冮檺锛岃鑱旂郴涓婁紶鐢ㄦ埛杩涜鍒犻櫎"} , status = 400, safe = False)
         if(BackboneID == None):
             return JsonResponse(data={"success":False, "message":"No such BackboneID"}, status=404,safe=False)
             # return JsonResponse({'code':204,'status':'failed','data':'Backbone Not Found'})
@@ -5003,14 +5008,14 @@ def get_repository(request):
 @csrf_exempt
 def add_part_to_repository(request):
     """
-    将元件ID添加到用户的临时仓库中
-    支持单个元件ID或元件ID列表
+    灏嗗厓浠禝D娣诲姞鍒扮敤鎴风殑涓存椂浠撳簱涓?
+    鏀寔鍗曚釜鍏冧欢ID鎴栧厓浠禝D鍒楄〃
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
     
     try:
-        # 检查用户是否已登录
+        # 妫€鏌ョ敤鎴锋槸鍚﹀凡鐧诲綍
         if 'info' not in request.session or 'uid' not in request.session['info']:
             return JsonResponse({'error': 'User not logged in'}, status=401)
         
@@ -5022,11 +5027,11 @@ def add_part_to_repository(request):
             repositoryName = request_data.get('RepoName')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
-        # 获取或创建用户的临时仓库
+        # 鑾峰彇鎴栧垱寤虹敤鎴风殑涓存椂浠撳簱
         try:
             repository = Temporaryrepository.objects.get(userid=user,name=repositoryName)
         except Temporaryrepository.DoesNotExist:
-            # 创建新的临时仓库,询问名称
+            # 鍒涘缓鏂扮殑涓存椂浠撳簱,璇㈤棶鍚嶇О
             repository_id = uuid.uuid4()
             ttl_hours = 24
             expires_at = timezone.now() + timezone.timedelta(hours=ttl_hours)
@@ -5045,37 +5050,37 @@ def add_part_to_repository(request):
                 data={}
             )
         
-        # 检查仓库是否过期
+        # 妫€鏌ヤ粨搴撴槸鍚﹁繃鏈?
         if repository.is_expired():
             repositoryID = repository.id
             repository.delete()
             return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
         
-        # 获取请求数据
+        # 鑾峰彇璇锋眰鏁版嵁
         
-        # 验证必需字段
+        # 楠岃瘉蹇呴渶瀛楁
         if 'part_ids' not in request_data:
             return JsonResponse({'error': 'part_ids field is required'}, status=400)
         
         part_ids = request_data['part_ids']
         
-        # 确保part_ids是列表格式
+        # 纭繚part_ids鏄垪琛ㄦ牸寮?
         if not isinstance(part_ids, list):
             part_ids = [part_ids]
         
-        # 验证元件ID格式
+        # 楠岃瘉鍏冧欢ID鏍煎紡
         for part_id in part_ids:
             if not isinstance(part_id, (int, str)) or not str(part_id).strip():
                 return JsonResponse({'error': f'Invalid part_id: {part_id}'}, status=400)
         
-        # 获取现有数据
+        # 鑾峰彇鐜版湁鏁版嵁
         current_data = repository.data if repository.data else {}
         
-        # 确保parts列表存在
+        # 纭繚parts鍒楄〃瀛樺湪
         if 'parts' not in current_data:
             current_data['parts'] = []
         
-        # 添加新的元件ID（避免重复）
+        # 娣诲姞鏂扮殑鍏冧欢ID锛堥伩鍏嶉噸澶嶏級
         existing_part_ids = set(str(pid) for pid in current_data['parts'])
         new_parts = []
         
@@ -5085,11 +5090,11 @@ def add_part_to_repository(request):
                 new_parts.append(part_id)
                 existing_part_ids.add(part_id_str)
         
-        # 更新数据
+        # 鏇存柊鏁版嵁
         current_data['parts'].extend(new_parts)
         # current_data['last_updated'] = timezone.now().isoformat()
         current_data['total_parts'] = len(current_data['parts'])
-        # 保存到数据库
+        # 淇濆瓨鍒版暟鎹簱
         repository.data = current_data
         repository.repositoryupdate_time = timezone.now()
         repository.save()
@@ -5109,14 +5114,14 @@ def add_part_to_repository(request):
 @csrf_exempt
 def add_backbone_to_repository(request):
     """
-    将元件ID添加到用户的临时仓库中
-    支持单个元件ID或元件ID列表
+    灏嗗厓浠禝D娣诲姞鍒扮敤鎴风殑涓存椂浠撳簱涓?
+    鏀寔鍗曚釜鍏冧欢ID鎴栧厓浠禝D鍒楄〃
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
     
     try:
-        # 检查用户是否已登录
+        # 妫€鏌ョ敤鎴锋槸鍚﹀凡鐧诲綍
         if 'info' not in request.session or 'uid' not in request.session['info']:
             return JsonResponse({'error': 'User not logged in'}, status=401)
         
@@ -5128,11 +5133,11 @@ def add_backbone_to_repository(request):
             repositoryName = request_data.get('RepoName')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
-        # 获取或创建用户的临时仓库
+        # 鑾峰彇鎴栧垱寤虹敤鎴风殑涓存椂浠撳簱
         try:
             repository = Temporaryrepository.objects.get(userid=user,name=repositoryName)
         except Temporaryrepository.DoesNotExist:
-            # 创建新的临时仓库,询问名称
+            # 鍒涘缓鏂扮殑涓存椂浠撳簱,璇㈤棶鍚嶇О
             repository_id = uuid.uuid4()
             ttl_hours = 24
             expires_at = timezone.now() + timezone.timedelta(hours=ttl_hours)
@@ -5151,37 +5156,37 @@ def add_backbone_to_repository(request):
                 data={}
             )
         
-        # 检查仓库是否过期
+        # 妫€鏌ヤ粨搴撴槸鍚﹁繃鏈?
         if repository.is_expired():
             repositoryID = repository.id
             repository.delete()
             return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
         
-        # 获取请求数据
+        # 鑾峰彇璇锋眰鏁版嵁
         
-        # 验证必需字段
+        # 楠岃瘉蹇呴渶瀛楁
         if 'backbone_ids' not in request_data:
             return JsonResponse({'error': 'backbone_ids field is required'}, status=400)
         
         backbone_ids = request_data['backbone_ids']
         
-        # 确保part_ids是列表格式
+        # 纭繚part_ids鏄垪琛ㄦ牸寮?
         if not isinstance(backbone_ids, list):
             backbone_ids = [backbone_ids]
         
-        # 验证元件ID格式
+        # 楠岃瘉鍏冧欢ID鏍煎紡
         for backbone_id in backbone_ids:
             if not isinstance(backbone_id, (int, str)) or not str(backbone_id).strip():
                 return JsonResponse({'error': f'Invalid backbone_id: {backbone_id}'}, status=400)
         
-        # 获取现有数据
+        # 鑾峰彇鐜版湁鏁版嵁
         current_data = repository.data if repository.data else {}
         
-        # 确保parts列表存在
+        # 纭繚parts鍒楄〃瀛樺湪
         if 'backbones' not in current_data:
             current_data['backbones'] = []
         
-        # 添加新的元件ID（避免重复）
+        # 娣诲姞鏂扮殑鍏冧欢ID锛堥伩鍏嶉噸澶嶏級
         existing_backbone_ids = set(str(bid) for bid in current_data['backbones'])
         new_backbones = []
         
@@ -5191,12 +5196,12 @@ def add_backbone_to_repository(request):
                 new_backbones.append(backbone_id)
                 existing_backbone_ids.add(backbone_id_str)
         
-        # 更新数据
+        # 鏇存柊鏁版嵁
         current_data['backbones'].extend(new_backbones)
         # current_data['last_updated'] = timezone.now().isoformat()
         current_data['total_backbones'] = len(current_data['backbones'])
         
-        # 保存到数据库
+        # 淇濆瓨鍒版暟鎹簱
         repository.data = current_data
         repository.repositoryupdate_time = timezone.now()
         repository.save()
@@ -5216,14 +5221,14 @@ def add_backbone_to_repository(request):
 @csrf_exempt
 def add_plasmid_to_repository(request):
     """
-    将元件ID添加到用户的临时仓库中
-    支持单个元件ID或元件ID列表
+    灏嗗厓浠禝D娣诲姞鍒扮敤鎴风殑涓存椂浠撳簱涓?
+    鏀寔鍗曚釜鍏冧欢ID鎴栧厓浠禝D鍒楄〃
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
     
     try:
-        # 检查用户是否已登录
+        # 妫€鏌ョ敤鎴锋槸鍚﹀凡鐧诲綍
         if 'info' not in request.session or 'uid' not in request.session['info']:
             return JsonResponse({'error': 'User not logged in'}, status=401)
         
@@ -5235,11 +5240,11 @@ def add_plasmid_to_repository(request):
             repositoryName = request_data.get('RepoName')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
-        # 获取或创建用户的临时仓库
+        # 鑾峰彇鎴栧垱寤虹敤鎴风殑涓存椂浠撳簱
         try:
             repository = Temporaryrepository.objects.get(userid=user,name=repositoryName)
         except Temporaryrepository.DoesNotExist:
-            # 创建新的临时仓库,询问名称
+            # 鍒涘缓鏂扮殑涓存椂浠撳簱,璇㈤棶鍚嶇О
             repository_id = uuid.uuid4()
             ttl_hours = 24
             expires_at = timezone.now() + timezone.timedelta(hours=ttl_hours)
@@ -5258,37 +5263,37 @@ def add_plasmid_to_repository(request):
                 data={}
             )
         
-        # 检查仓库是否过期
+        # 妫€鏌ヤ粨搴撴槸鍚﹁繃鏈?
         if repository.is_expired():
             repositoryID = repository.id
             repository.delete()
             return JsonResponse(data = {'error': f'Repository {repositoryID} expired'}, status=410)
         
-        # 获取请求数据
+        # 鑾峰彇璇锋眰鏁版嵁
         
-        # 验证必需字段
+        # 楠岃瘉蹇呴渶瀛楁
         if 'plasmid_ids' not in request_data:
             return JsonResponse({'error': 'plasmid_ids field is required'}, status=400)
         
         plasmid_ids = request_data['plasmid_ids']
         
-        # 确保part_ids是列表格式
+        # 纭繚part_ids鏄垪琛ㄦ牸寮?
         if not isinstance(plasmid_ids, list):
             plasmid_ids = [plasmid_ids]
         
-        # 验证元件ID格式
+        # 楠岃瘉鍏冧欢ID鏍煎紡
         for plasmid_id in plasmid_ids:
             if not isinstance(plasmid_id, (int, str)) or not str(plasmid_id).strip():
                 return JsonResponse({'error': f'Invalid plasmid_id: {plasmid_id}'}, status=400)
         
-        # 获取现有数据
+        # 鑾峰彇鐜版湁鏁版嵁
         current_data = repository.data if repository.data else {}
         
-        # 确保parts列表存在
+        # 纭繚parts鍒楄〃瀛樺湪
         if 'plasmids' not in current_data:
             current_data['plasmids'] = []
         
-        # 添加新的元件ID（避免重复）
+        # 娣诲姞鏂扮殑鍏冧欢ID锛堥伩鍏嶉噸澶嶏級
         existing_plasmid_ids = set(str(pid) for pid in current_data['plasmids'])
         new_plasmids = []
         
@@ -5298,12 +5303,12 @@ def add_plasmid_to_repository(request):
                 new_plasmids.append(plasmid_id)
                 existing_plasmid_ids.add(plasmid_id_str)
         
-        # 更新数据
+        # 鏇存柊鏁版嵁
         current_data['plasmids'].extend(new_plasmids)
         # current_data['last_updated'] = timezone.now().isoformat()
         current_data['total_plasmids'] = len(current_data['plasmids'])
         
-        # 保存到数据库
+        # 淇濆瓨鍒版暟鎹簱
         repository.data = current_data
         repository.repositoryupdate_time = timezone.now()
         repository.save()
@@ -5325,64 +5330,64 @@ def add_plasmid_to_repository(request):
 @csrf_exempt
 def remove_part_from_repository(request):
     """
-    从用户的临时仓库中移除元件ID
+    浠庣敤鎴风殑涓存椂浠撳簱涓Щ闄ゅ厓浠禝D
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
     
     try:
-        # 检查用户是否已登录
+        # 妫€鏌ョ敤鎴锋槸鍚﹀凡鐧诲綍
         if 'info' not in request.session or 'uid' not in request.session['info']:
             return JsonResponse({'error': 'User not logged in'}, status=401)
         
         user_id = request.session['info']['uid']
         user = User.objects.get(uid=user_id)
         repositoryName = request.POST.get('RepoName')
-        # 获取用户的临时仓库
+        # 鑾峰彇鐢ㄦ埛鐨勪复鏃朵粨搴?
         try:
             repository = Temporaryrepository.objects.get(userid_id=user,name=repositoryName)
         except Temporaryrepository.DoesNotExist:
             return JsonResponse({'error': 'Repository not found'}, status=404)
         
-        # 检查仓库是否过期
+        # 妫€鏌ヤ粨搴撴槸鍚﹁繃鏈?
         if repository.is_expired():
             repository.delete()
             return JsonResponse({'error': 'Repository expired'}, status=410)
         
-        # 获取请求数据
+        # 鑾峰彇璇锋眰鏁版嵁
         import json
         try:
             request_data = json.loads(request.body.decode('utf-8'))
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON format'}, status=400)
         
-        # 验证必需字段
+        # 楠岃瘉蹇呴渶瀛楁
         if 'part_ids' not in request_data:
             return JsonResponse({'error': 'part_ids field is required'}, status=400)
         
         part_ids = request_data['part_ids']
         
-        # 确保part_ids是列表格式
+        # 纭繚part_ids鏄垪琛ㄦ牸寮?
         if not isinstance(part_ids, list):
             part_ids = [part_ids]
         
-        # 获取现有数据
+        # 鑾峰彇鐜版湁鏁版嵁
         current_data = repository.data if repository.data else {}
         
         if 'parts' not in current_data:
             return JsonResponse({'error': 'No parts in repository'}, status=404)
         
-        # 移除指定的元件ID
+        # 绉婚櫎鎸囧畾鐨勫厓浠禝D
         original_count = len(current_data['parts'])
         current_data['parts'] = [pid for pid in current_data['parts'] 
                                 if str(pid) not in [str(part_id) for part_id in part_ids]]
         removed_count = original_count - len(current_data['parts'])
         
-        # 更新数据
+        # 鏇存柊鏁版嵁
         # current_data['last_updated'] = timezone.now().isoformat()
         current_data['total_parts'] = len(current_data['parts'])
         
-        # 保存到数据库
+        # 淇濆瓨鍒版暟鎹簱
         repository.data = current_data
         repository.repositoryupdate_time = timezone.now()
         repository.save()
@@ -5402,19 +5407,19 @@ def remove_part_from_repository(request):
 @csrf_exempt
 def get_repository_parts(request):
     """
-    获取用户临时仓库中的所有元件ID
+    鑾峰彇鐢ㄦ埛涓存椂浠撳簱涓殑鎵€鏈夊厓浠禝D
     """
     if request.method != 'GET':
         return JsonResponse({'error': 'Only GET method allowed'}, status=405)
     
     try:
-        # 检查用户是否已登录
+        # 妫€鏌ョ敤鎴锋槸鍚﹀凡鐧诲綍
         if 'info' not in request.session or 'uid' not in request.session['info']:
             return JsonResponse({'error': 'User not logged in'}, status=401)
         
         user_id = request.session['info']['uid']
         
-        # 获取用户的临时仓库
+        # 鑾峰彇鐢ㄦ埛鐨勪复鏃朵粨搴?
         try:
             repository = Temporaryrepository.objects.get(userid_id=user_id)
         except Temporaryrepository.DoesNotExist:
@@ -5425,7 +5430,7 @@ def get_repository_parts(request):
                 'message': 'Repository not found or empty'
             })
         
-        # 检查仓库是否过期
+        # 妫€鏌ヤ粨搴撴槸鍚﹁繃鏈?
         if repository.is_expired():
             repository.delete()
             return JsonResponse({
@@ -5435,7 +5440,7 @@ def get_repository_parts(request):
                 'message': 'Repository expired'
             })
         
-        # 获取元件数据
+        # 鑾峰彇鍏冧欢鏁版嵁
         current_data = repository.data if repository.data else {}
         parts = current_data.get('parts', [])
         
@@ -5485,6 +5490,20 @@ def _serialize_visitor_access_log(log):
         "referer": log.referer,
         "cookie_snapshot": log.cookie_snapshot,
     }
+def _serialize_visitor_feedback(feedback):
+    return {
+        "id": feedback.id,
+        "visitor_id": feedback.visitor_profile_id,
+        "feedback_type": feedback.feedback_type,
+        "title": feedback.title,
+        "content": feedback.content,
+        "contact_email": feedback.contact_email,
+        "page_path": feedback.page_path,
+        "status": feedback.status,
+        "created_at": feedback.created_at.isoformat() if feedback.created_at else None,
+        "updated_at": feedback.updated_at.isoformat() if feedback.updated_at else None,
+    }
+
 
 
 def _get_request_json(request):
@@ -5727,6 +5746,63 @@ def createVisitorAccessLog(request):
         return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
 
 
+@csrf_exempt
+def createVisitorFeedback(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Just POST method"}, status=405, safe=False)
+
+    request_data = _get_request_json(request)
+    print(request_data)
+    if request_data is None:
+        return JsonResponse({"success": False, "message": "Invalid JSON format"}, status=400, safe=False)
+
+    visitor_id = request_data.get("visitor_id")
+    visitor_uuid = request_data.get("visitor_uuid") if "visitor_uuid" in request_data else None
+    feedback_type = (request_data.get("feedback_type") or "").strip().lower()
+    title = (request_data.get("title") or "").strip()
+    content = (request_data.get("content") or "").strip()
+    contact_email = (request_data.get("contact_email") or "").strip()
+    page_path = (request_data.get("page_path") or "").strip()
+    status_value = (request_data.get("status") or VisitorFeedback.STATUS_PENDING).strip().lower()
+
+    if not visitor_id and not visitor_uuid:
+        return JsonResponse({"success": False, "message": "visitor_id or visitor_uuid cannot be empty"}, status=400, safe=False)
+
+    if feedback_type not in {VisitorFeedback.FEEDBACK_TYPE_ISSUE, VisitorFeedback.FEEDBACK_TYPE_SUGGESTION}:
+        return JsonResponse({"success": False, "message": "invalid feedback_type"}, status=400, safe=False)
+
+    if not title or not content:
+        return JsonResponse({"success": False, "message": "title and content cannot be empty"}, status=400, safe=False)
+
+    if status_value not in {VisitorFeedback.STATUS_PENDING, VisitorFeedback.STATUS_REVIEWED, VisitorFeedback.STATUS_RESOLVED}:
+        return JsonResponse({"success": False, "message": "invalid status"}, status=400, safe=False)
+
+    try:
+        if visitor_id:
+            profile = VisitorProfile.objects.get(id=visitor_id)
+        else:
+            profile = VisitorProfile.objects.get(visitor_uuid=visitor_uuid)
+
+        print(profile)
+        feedback = VisitorFeedback.objects.create(
+            visitor_profile=profile,
+            feedback_type=feedback_type,
+            title=title,
+            content=content,
+            contact_email=contact_email,
+            page_path=page_path,
+            status=status_value,
+        )
+        print(feedback)
+        return JsonResponse({"success": True, "data": _serialize_visitor_feedback(feedback)}, status=201, safe=False)
+    except VisitorProfile.DoesNotExist:
+        return JsonResponse({"success": False, "message": "No such visitor profile"}, status=404, safe=False)
+    except IntegrityError as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=409, safe=False)
+    except Exception as exc:
+        print(str(exc.args))
+        return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+
 def getVisitorAccessLog(request):
     if request.method != "GET":
         return JsonResponse({"success": False, "message": "Just GET method"}, status=405, safe=False)
@@ -5819,3 +5895,7 @@ def deleteVisitorAccessLog(request):
         return JsonResponse({"success": False, "message": "No such visitor access log"}, status=404, safe=False)
     except Exception as exc:
         return JsonResponse({"success": False, "message": str(exc)}, status=400, safe=False)
+    
+
+
+
