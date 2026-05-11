@@ -294,6 +294,7 @@ class ExcelProcessor:
             
             return {'success':True,'error_row':error_rows,'empty_Seq_rows':empty_seq_rows}
         except Exception as e:
+            print(str(e.args))
             logger.error(f"处理Excel文件失败: {str(e.args[0])}")
             return {
                 'success': False,

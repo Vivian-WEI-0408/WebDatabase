@@ -6,6 +6,9 @@ from .CaculateModule import DNADiagram
 urlpatterns = [
     #index
     path("index",views.index,name="index"),
+    path("design-builder", views.design_builder, name="design_builder"),
+    path("design-builder/gene-search", views.design_gene_search, name="design_gene_search"),
+    path("design-builder/submit", views.submit_design_assembly, name="submit_design_assembly"),
     path("getdata",views.getData,name="getData"),
     path("filterdata",views.DataFilter,name="filterdata"),
     #user
@@ -19,6 +22,7 @@ urlpatterns = [
     #Upload Sequence Map
     path("UploadMap",views.UploadMap,name="UploadMap"),
     path("CheckAndFixGenBank", views.CheckAndFixGenBank, name="CheckAndFixGenBank"),
+    path("CustomScar", views.CustomScar, name="CustomScar"),
 
 
 
@@ -58,6 +62,7 @@ urlpatterns = [
     
     path("createRepo",views.CreateTempRepository,name="createRepo"),
     path("AssemblyRepo",views.AssemblyRepo,name="AssemblyRepo"),
+    # path("createRepoAndBatchAssembly",views.createRepoAndBatchAssembly,name="createRepoAndBatchAssembly"),
     
     path("AssemblyWithoutRepo",views.AssemblyWithoutRepo,name="AssemblyWithoutRepo"),
     

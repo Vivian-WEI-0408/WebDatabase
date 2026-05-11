@@ -9,9 +9,98 @@ from Bio.Restriction import BsaI
 from .CaculateModule import snapgene_reader
 from ControllerModule import FittingLabels
 from CaculateModule.ScarIdentify import scarPosition,scarFunction
-def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL):
+
+
+def _unique_nonempty_items(items):
+    unique_items = []
+    seen = set()
+    for item in items or []:
+        if item in [None, ""]:
+            continue
+        if item in seen:
+            continue
+        seen.add(item)
+        unique_items.append(item)
+    return unique_items
+
+
+def _crop_feature_payload(request_body, crop_interval, source_start=None, source_end=None):
+    if crop_interval is None:
+        return request_body
+
+    crop_start, crop_end = crop_interval
+    source_start = source_start if source_start is not None else request_body["start_position"]
+    source_end = source_end if source_end is not None else request_body["end_position"]
+
+    if source_start > source_end or source_start < crop_start or source_end > crop_end:
+        return None
+
+    cropped_body = request_body.copy()
+    cropped_body["start_position"] = source_start - crop_start + 1
+    cropped_body["end_position"] = source_end - crop_start + 1
+    return cropped_body
+
+
+def _save_features(session, django_request, Base_URL, name, file_type, feature_list, feature_api, crop_interval=None):
+    session.get(f"{Base_URL}delete{feature_api}Feature?name={name}", cookies=django_request.COOKIES)
+    feature_payloads = []
+    seen_payloads = set()
+
+    def _append_feature_payload(request_body, source_start=None, source_end=None):
+        cropped_body = _crop_feature_payload(request_body, crop_interval, source_start=source_start, source_end=source_end)
+        if cropped_body is None:
+            return
+        payload_key = (
+            cropped_body["start_position"],
+            cropped_body["end_position"],
+            cropped_body["label"],
+            cropped_body["feature_type"],
+            cropped_body["color"],
+            cropped_body["ape_info"],
+        )
+        if payload_key in seen_payloads:
+            return
+        seen_payloads.add(payload_key)
+        feature_payloads.append(cropped_body)
+
+    if(file_type == "gb" or file_type == "gbk" or file_type == "ape" or file_type == "str"):
+        for each_feature in feature_list:
+            try:
+                print(each_feature.qualifiers)
+                start_position = each_feature.location.start+1
+                end_position = each_feature.location.end
+                label = each_feature.qualifiers['label'][0] if "label" in each_feature.qualifiers else ""
+                feature_type = each_feature.type
+                color = each_feature.qualifiers['color'][0] if 'color' in each_feature.qualifiers else ""
+                ape_info = each_feature.qualifiers['ApEinfo_fwdcolor'][0] if 'ApEinfo_fwdcolor' in each_feature.qualifiers else color
+                request_body = {"start_position":start_position,"end_position":end_position,"label":label,"feature_type":feature_type,"color":color,"ape_info":ape_info}
+                _append_feature_payload(request_body)
+            except Exception as e:
+                continue
+    elif(file_type == "dna"):
+        for each_feature in feature_list:
+            try:
+                start_position = each_feature['start']
+                end_position = each_feature['end']
+                label = each_feature['name']
+                feature_type = each_feature['type']
+                color = each_feature['color']
+                ape_info = each_feature['color']
+                request_body = {"start_position":start_position,"end_position":end_position,"label":label,"feature_type":feature_type,"color":color,"ape_info":ape_info}
+                _append_feature_payload(
+                    request_body,
+                    source_start=each_feature['start']+1,
+                    source_end=each_feature['end'],
+                )
+            except Exception as e:
+                continue
+    for request_body in feature_payloads:
+        print(request_body)
+        session.post(f"{Base_URL}Add{feature_api}Feature/{name}", json=request_body, cookies=django_request.COOKIES)
+
+
+def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL, save_feature=False):
     FeatureList = []
-    print(file_name)
     if (file_name[1] == "fasta"):
         records = parse(upload_map, "fasta")
         # upload_map.seek(0)
@@ -26,7 +115,6 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                 FeatureList = record.features
                 break
         except Exception as e:
-            print(e.args)
             traceback.print_exc()
             return False
     elif(file_name[1] == "dna"):
@@ -46,6 +134,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
         })
         name = file_name[0][:20]
         if(upload_type == "plasmid"):
+            AddSequenceUpdateResponse = None
             Ori_list = []
             Marker_list = []
             OriAndMarkerLabel = FittingLabels(sequence= Sequence)
@@ -53,6 +142,8 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                 Ori_list.append(each_ori['Name'])
             for each_marker in OriAndMarkerLabel['Marker']:
                 Marker_list.append(each_marker['Name'])
+            Ori_list = _unique_nonempty_items(Ori_list)
+            Marker_list = _unique_nonempty_items(Marker_list)
             scar_data_body = scarFunction(Sequence)
             request_body = {"name":name, "sequence":Sequence}
             SequenceUpdateResponse = session.post(f"{Base_URL}UpdatePlasmidSequence",json=request_body,cookies=django_request.COOKIES)
@@ -65,7 +156,9 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
             CultureResponseResponse = session.post(f"{Base_URL}setPlasmidCulture",json = Culture_request_body, cookies = django_request.COOKIES)
             scar_request_body = {"name":name,"bsmbi":scar_data_body[0],"bsai":scar_data_body[1],"bbsi":scar_data_body[2],"aari":scar_data_body[3],"sapi":scar_data_body[4]}
             ScarUpdateResponse = session.post(f"{Base_URL}setPlasmidScar",json = scar_request_body,cookies=django_request.COOKIES)
-            if((SequenceUpdateResponse.status_code == 200 or AddSequenceUpdateResponse.status_code == 200) and CultureResponseResponse.status_code == 200 and ScarUpdateResponse.status_code == 200):
+            if(save_feature and (SequenceUpdateResponse.status_code == 200 or (AddSequenceUpdateResponse is not None and AddSequenceUpdateResponse.status_code == 200))):
+                _save_features(session, django_request, Base_URL, name, file_name[1], FeatureList, "Plasmid")
+            if((SequenceUpdateResponse.status_code == 200 or (AddSequenceUpdateResponse is not None and AddSequenceUpdateResponse.status_code == 200)) and CultureResponseResponse.status_code == 200 and ScarUpdateResponse.status_code == 200):
                 return True
             else:
                 return False
@@ -77,6 +170,8 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                 Ori_list.append(each_ori['Name'])
             for each_marker in OriAndMarkerLabel['Marker']:
                 Marker_list.append(each_marker['Name'])
+            Ori_list = _unique_nonempty_items(Ori_list)
+            Marker_list = _unique_nonempty_items(Marker_list)
             scar_data_body = scarFunction(Sequence)
             request_body = {"name":name, "sequence":Sequence}
             SequenceUpdateResponse = session.post(f"{Base_URL}UpdateBackboneSequence",json=request_body,cookies=django_request.COOKIES)
@@ -85,33 +180,7 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                 AddBackboneResponse = session.post(f"{Base_URL}AddBackbone",json=add_request_body,cookies=django_request.COOKIES)
                 if(AddBackboneResponse.status_code != 200):
                     return False
-            session.get(f"{Base_URL}deleteBackboneFeature?name={name}",cookies=django_request.COOKIES)
-            if(file_name[1] == "gb" or file_name[1] == "gbk" or file_name[1] == "ape" or file_name[1] == "str"):
-                for each_feature in FeatureList:
-                    try:
-                        start_position = each_feature.location.start+1
-                        end_position = each_feature.location.end
-                        label = each_feature.qualifiers['label'][0] if "label" in each_feature.qualifiers else ""
-                        feature_type = each_feature.type
-                        color = each_feature.qualifiers['color'][0] if 'color' in each_feature.qualifiers else ""
-                        ape_info = each_feature.qualifiers['ApEinfo_fwdcolor'][0] if 'ApEinfo_fwdcolor' in each_feature.qualifiers else ""
-                        request_body = {"start_position":start_position,"end_position":end_position,"label":label,"feature_type":feature_type,"color":color,"ape_info":ape_info}
-                        add_feature_response = session.post(f"{Base_URL}AddBackboneFeature/{name}",json=request_body,cookies = django_request.COOKIES)
-                    except Exception as e:
-                        continue
-            elif(file_name[1] == "dna"):
-                for each_feature in FeatureList:
-                    try:
-                        start_position = each_feature['start']
-                        end_position = each_feature['end']
-                        label = each_feature['name']
-                        feature_type = each_feature['type']
-                        color = each_feature['color']
-                        ape_info = each_feature['color']
-                        request_body = {"start_position":start_position,"end_position":end_position,"label":label,"feature_type":feature_type,"color":color,"ape_info":ape_info}
-                        add_feature_response = session.post(f"{Base_URL}AddBackboneFeature/{name}",json=request_body,cookies = django_request.COOKIES)
-                    except Exception as e:
-                        continue
+            _save_features(session, django_request, Base_URL, name, file_name[1], FeatureList, "Backbone")
             Culture_request_body = {"name":name,"ori" : Ori_list,"marker":Marker_list}
             CultureResponseResponse = session.post(f"{Base_URL}setBackboneCulture",json = Culture_request_body, cookies = django_request.COOKIES)
             scar_request_body = {"name":name,"bsmbi":scar_data_body[0],"bsai":scar_data_body[1],"bbsi":scar_data_body[2],"aari":scar_data_body[3],"sapi":scar_data_body[4]}
@@ -123,17 +192,39 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
         elif(upload_type == "part"):
             try:
                 target_seq = ""
-                Enzyme_result = BsaI.catalyse(Seq(Sequence),linear=False)
-                for each_result in Enzyme_result:
-                    if((BsaI.site in str(each_result)) == False):
-                        target_seq = str(each_result)
-                        # print(target_seq)
-                        break
+                target_start = 1
+                target_end = len(Sequence)
+                # Enzyme_result = BsaI.catalyse(Seq(Sequence),linear=False)
+                # for each_result in Enzyme_result:
+                #     if((BsaI.site in str(each_result)) == False):
+                #         target_seq = str(each_result)
+                #         # print(target_seq)
+                #         break
+                Enzyme_result = BsaI.search(Seq(Sequence))
+                if(len(Enzyme_result) == 2):
+                    target_seq = Sequence[Enzyme_result[0]-1:Enzyme_result[1]]
+                    target_start = Enzyme_result[0]
+                    target_end = Enzyme_result[1]
+                else:
+                    target_seq = Sequence
+                print(f"target_start:{target_start}")
+                print(f"target_end:{target_end}")
+                if(target_seq[:4].upper() == "GTGC" or target_seq[:4].upper() == "GCAC" or target_seq[:4].upper() == "ATCA"
+                   or target_seq[:4].upper() == "TGAT" or target_seq[:4].upper() == "AATG" or target_seq[:4].upper() == "CATT"
+                   or target_seq[:4].upper() == "TAAA" or target_seq[:4].upper() == "TTTA" or target_seq[:4].upper() == "CCTC"
+                   or target_seq[:4].upper() == "GAGG"):
+                    target_seq = target_seq[4:]
+                    target_start += 4
+                if(target_seq[-4:].upper() == "GTGC" or target_seq[-4:].upper() == "GCAC" or target_seq[-4:].upper() == "ATCA"
+                   or target_seq[-4:].upper() == "TGAT" or target_seq[-4:].upper() == "AATG" or target_seq[-4:].upper() == "CATT"
+                   or target_seq[-4:].upper() == "TAAA" or target_seq[-4:].upper() == "TTTA" or target_seq[-4:].upper() == "CCTC"
+                   or target_seq[-4:].upper() == "GAGG"):
+                    target_seq = target_seq[:-4]
+                    target_end -= 4
                 request_body = {"name":name, "Level0Sequence":target_seq}
-                print(request_body)
                 SequenceUpdateResponse = session.post(f"{Base_URL}UpdatePartSequence",json=request_body,cookies=django_request.COOKIES)
                 if(SequenceUpdateResponse.status_code == 200):
-                    return True
+                    pass
                 elif(SequenceUpdateResponse.json()['success'] == False and SequenceUpdateResponse.json()['message'] == "Part Does Not Exist"):
                     add_request_body = {"name":name,"alias":"","Level0Sequence":target_seq,"type":"promoter"}
                     SequenceAddResponse = session.post(f"{Base_URL}AddPartData",json=add_request_body,cookies=django_request.COOKIES)
@@ -141,9 +232,10 @@ def process_map_file(upload_map, file_name, upload_type, django_request,Base_URL
                         return False
                 else:
                     return False
+                if(save_feature):
+                    _save_features(session, django_request, Base_URL, name, file_name[1], FeatureList, "Part", crop_interval=(target_start, target_end))
                 return True
             except Exception as e:
-                print(e.args)
                 return False
                 
             
