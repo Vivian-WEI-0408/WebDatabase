@@ -47,6 +47,41 @@
                 batchUploadModal.hide();
             });
 
+            document.getElementById('saveCustomScarBtn').addEventListener('click', async function() {
+                const scarName = document.getElementById('customScarName').value.trim();
+                const scarSequence = document.getElementById('customScarSequence').value.trim();
+                const scarDescription = document.getElementById('customScarDescription').value.trim();
+
+                if (!scarName || !scarSequence) {
+                    alert('Scar 名称和碱基序列不能为空');
+                    return;
+                }
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const response = await fetch('/LabDatabase/CustomScar', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        scar_name: scarName,
+                        scar_sequence: scarSequence,
+                        scar_description: scarDescription
+                    }),
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('customScarForm').reset();
+                    const customScarModal = bootstrap.Modal.getInstance(document.getElementById('customScarModal'));
+                    customScarModal.hide();
+                    alert('自定义 Scar 保存成功');
+                }
+                else {
+                    alert(result.message || '自定义 Scar 保存失败');
+                }
+            });
+
             document.getElementById('Format-Checker-button').addEventListener('click',function(){
                 var file_input = document.getElementById("Format-Checker");
                 var file = file_input.files;
@@ -85,6 +120,8 @@
                 }
                 console.log(fd['files'])
                 fd.append('type',type);
+                const saveFeatureInput = document.getElementById('saveFeatureInput');
+                fd.append('save_feature', saveFeatureInput && saveFeatureInput.checked ? 'true' : 'false');
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 const response = await fetch("/LabDatabase/UploadMap",{
                     method:'POST',
@@ -375,9 +412,15 @@ function setupMenuEvents() {
             
             // 获取工具类型
             const tool = this.getAttribute('data-tool');
+            const href = this.getAttribute('href');
             
             // 执行相应的工具函数
+            if (href && href !== '#' && href.trim() !== '') {
+                return;
+            }
+
             if (tool) {
+                e.preventDefault();
                 switchTool(tool);
             }
             
@@ -635,6 +678,7 @@ function setupMenuEvents() {
 
             //渲染selector div
             renderselect();
+            setupMenuEvents();
 
             
 
@@ -835,6 +879,7 @@ function setupMenuEvents() {
             const modalOverlayPlate_Section = document.getElementById('PlateSection');
             // 创建仓库Plate功能
             const AssemblyStartBtn = document.getElementById('AssemblyStartBtn');
+            const BatchAssemblyStartBtn = document.getElementById('BatchAssemblyStartBtn');
             
             const createAssemblyTaskBtn = document.getElementById("create-plate");
 
@@ -865,6 +910,17 @@ function setupMenuEvents() {
                 const createPlateModal = bootstrap.Modal.getInstance(document.getElementById("modalOverlay-Plate"))
                 createPlateModal.hide();
             });
+
+            BatchAssemblyStartBtn.addEventListener('click', () => {
+                var assembly_upload = document.getElementById("AssemblyFileInput");
+                var assemblyFile = assembly_upload.files;
+                createWarehouse(assemblyFile);
+                const createRepoModal = bootstrap.Modal.getInstance(document.getElementById("modalOverlay-Repo"));
+                createRepoModal.hide();
+            });
+
+
+
 
         
             // 取消按钮点击事件
@@ -1216,6 +1272,36 @@ function setupMenuEvents() {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                 const response = await fetch('/LabDatabase/createRepo',{
+                    method: 'POST',
+                    body:fd,
+                    headers:{
+                        'X-CSRFToken':csrfToken,
+                    },
+                });
+                // .then(response => response.json)
+                const result = await response.json();
+                if(result.task_id){
+                    alert(result.message);
+                    pollTaskStatus(result.task_id);
+                }
+                else{
+                    displayResult(result);
+                }
+            }
+
+
+
+            async function createWarehouseAndBatchAssembly(file) {
+                if (!file){
+                    alert('请选择文件');
+                    return;
+                }
+                let fd = new FormData();
+                console.log(file.length);
+                fd.append('file',file[0]);
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                const response = await fetch('/LabDatabase/createRepoAndBatchAssembly',{
                     method: 'POST',
                     body:fd,
                     headers:{

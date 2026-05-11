@@ -114,6 +114,25 @@
                     <input class="form-control" type="number" id="end_position">
                     <label for="part_name" class="form-label">元件名称</label>
                     <input class="form-control" type="text" id="part_name">
+                    <label for="part_direction" class="form-label">截取方向</label>
+                    <select id="part_direction">
+                        <option value="forward" selected>正向</option>
+                        <option value="reverse">反向</option>
+                    </select>
+                    <label for="part_type_selection" class="form-label">存储类型</label>
+                    <select id="part_type_selection">
+                        <option>Promoter</option>
+                        <option>RBS</option>
+                        <option>CDS</option>
+                        <option>Terminator</option>
+                        <option>P+R</option>
+                    </select>
+                    <label for="part_source_prokaryote" class="form-label">part-source</label>
+                    <div>
+                        <input type="checkbox" id="part_source_prokaryote" checked>
+                        <label for="part_source_prokaryote">是否为原核生物</label>
+                    </div>
+                    <button class="btn btn-primary" id="part_generator">生成元件</button>
                     
                 </div>
             </i>

@@ -161,13 +161,13 @@
             </div>
 
             <div class="menu-item">
-                <div class="menu-header">
+                <div class="menu-header" onclick="toggleMenu(this)">
                     <div class="menu-icon"><i class="fa fa-bars"></i></div>
                     <div class="menu-text">设计工具</div>
                     <div class="menu-arrow"><i class="fa fa-angle-down" aria-hidden="true"></i></div>
                 </div>
                 <div class="submenu">
-                    <a href="" class="submenu-item" data-tool="base-designer"><i class="fa fa-cogs" aria-hidden="true">基本设计工具</i></a>
+                    <a href="/LabDatabase/design-builder" class="submenu-item" data-tool="base-designer" target="_blank"><i class="fa fa-cogs" aria-hidden="true">基本设计工具</i></a>
                     <a href="" class="submenu-item" data-tool="logic_designer"><i class="fa fa-cogs" aria-hidden="true">逻辑门设计工具</i></a>
                 </div>
             </div>
@@ -181,8 +181,8 @@
                 <div class="submenu">
                     <!-- <a href="" class="submenu-item" data-tool="create-repo"><i class="fa fa-cogs" aria-hidden="true">创建设计仓库</i></a>
                     <a href="" class="submenu-item" data-tool="create-plate"><i class="fa fa-cogs" aria-hidden="true">创建设计方案</i></a> -->
-                    <a href="" class="submenu-item"><i class="fa fa-cogs" aria-hidden="true">创建设计仓库</i></a>
-                    <a href="" class="submenu-item"><i class="fa fa-cogs" aria-hidden="true">创建设计方案</i></a>
+                    <a href="/LabDatabase/design-builder" class="submenu-item"><i class="fa fa-cogs" aria-hidden="true">创建设计仓库</i></a>
+                    <a href="/LabDatabase/design-builder" class="submenu-item"><i class="fa fa-cogs" aria-hidden="true">创建设计方案</i></a>
                 </div>
             </div>
 
@@ -267,6 +267,9 @@
                             </button>
                             <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#batchUploadModal">
                                 📁 批量上传
+                            </button>
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customScarModal">
+                                自定义 Scar
                             </button>
                             <div class="ms-auto">
                                 <input type="text" class="search-input" placeholder="搜索 Part..." id = "PartSearchInput">
@@ -497,6 +500,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-outline-primary" id="BatchAssemblyStartBtn">批量上传并组装</button>
                     <button type="button" class="btn btn-primary" id="assemblyFileUpload">批量上传</button>
                 </div>
             </div>
@@ -578,6 +582,10 @@
                             <label for="fileInput" class="form-label">选择图谱文件</label>
                             <input class="form-control" multiple type="file" id="fileInput" accept=".fasta, .gb, .gbk, .ape, .str, .dna">
                         </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="saveFeatureInput" checked>
+                            <label class="form-check-label" for="saveFeatureInput">是否存储 feature</label>
+                        </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">描述</label>
                             <textarea class="form-control" id="description" rows="3"></textarea>
@@ -589,6 +597,38 @@
                     <button type="button" class="btn btn-primary" id="uploadBtnPart">上传元件图谱</button>
                     <button type="button" class="btn btn-primary" id="uploadBtnBackbone">上传载体图谱</button>
                     <button type="button" class="btn btn-primary" id="uploadBtnPlasmid">上传质粒图谱</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义 Scar 模态框 -->
+    <div class="modal fade" id="customScarModal" tabindex="-1" aria-labelledby="customScarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customScarModalLabel">自定义 Scar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customScarForm">
+                        <div class="mb-3">
+                            <label for="customScarName" class="form-label">Scar 名称</label>
+                            <input class="form-control" type="text" id="customScarName" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label for="customScarSequence" class="form-label">碱基序列</label>
+                            <input class="form-control" type="text" id="customScarSequence" placeholder="例如 GTGC">
+                        </div>
+                        <div class="mb-3">
+                            <label for="customScarDescription" class="form-label">描述</label>
+                            <textarea class="form-control" id="customScarDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveCustomScarBtn">保存 Scar</button>
                 </div>
             </div>
         </div>

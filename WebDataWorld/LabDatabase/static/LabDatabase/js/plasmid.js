@@ -60,9 +60,18 @@ const TYPE_COLORS = {
             let plasmidid = pathname_list[pathname_list.length -1];
             window.location.href = `/LabDatabase/downloadPlasmidMap/${plasmidid}`;
         })
+
+        const partGeneratorButton = document.getElementById('part_generator');
+        if (partGeneratorButton) {
+            partGeneratorButton.addEventListener('click', generatePartFromPlasmid);
+        }
+
         // Download button click feedback
         document.querySelectorAll('.btn').forEach(button => {
             button.addEventListener('click', function() {
+                if (this.id === 'part_generator') {
+                    return;
+                }
                 const originalText = this.innerHTML;
                 this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Downloading...';
                 
@@ -72,6 +81,147 @@ const TYPE_COLORS = {
                 }, 1500);
             });
         });
+
+        function getCleanPlasmidSequence() {
+            const sequenceContainer = document.getElementById('SequenceContainer');
+            if (!sequenceContainer) {
+                return '';
+            }
+            return sequenceContainer.textContent.replace(/[^A-Za-z]/g, '').toUpperCase();
+        }
+
+        function extractCircularSequence(sequence, start, end) {
+            if (start <= end) {
+                return sequence.slice(start - 1, end);
+            }
+            return sequence.slice(start - 1) + sequence.slice(0, end);
+        }
+
+        function reverseSequence(sequence) {
+            const complementMap = {
+                A: 'T',
+                T: 'A',
+                C: 'G',
+                G: 'C',
+                U: 'A',
+                R: 'Y',
+                Y: 'R',
+                S: 'S',
+                W: 'W',
+                K: 'M',
+                M: 'K',
+                B: 'V',
+                V: 'B',
+                D: 'H',
+                H: 'D',
+                N: 'N'
+            };
+
+            return sequence
+                .toUpperCase()
+                .split('')
+                .reverse()
+                .map(base => complementMap[base] || base)
+                .join('');
+        }
+
+        function buildPartSequence(sequence, start, end, direction) {
+            const extracted = extractCircularSequence(sequence, start, end);
+            if (!extracted) {
+                return '';
+            }
+            if (direction === 'reverse') {
+                return reverseSequence(extracted);
+            }
+            return extracted;
+        }
+
+        async function generatePartFromPlasmid() {
+            const startValue = Number(document.getElementById('start_position').value);
+            const endValue = Number(document.getElementById('end_position').value);
+            const partName = document.getElementById('part_name').value.trim();
+            const partDirection = document.getElementById('part_direction').value;
+            const partType = document.getElementById('part_type_selection').value;
+            const isProkaryote = document.getElementById('part_source_prokaryote').checked;
+            const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
+            const plasmidName = document.getElementById('plasmid_name').innerText.trim();
+            const sequence = getCleanPlasmidSequence();
+            const sourceOrganism = isProkaryote ? 'E.coli' : 'saccharomyces';
+            
+            if (!partName) {
+                alert('请输入元件名称');
+                return;
+            }
+            if (!Number.isInteger(startValue) || !Number.isInteger(endValue) || startValue < 1 || endValue < 1) {
+                alert('请输入合法的起始和结束位置');
+                return;
+            }
+            if (!sequence) {
+                alert('未读取到质粒序列');
+                return;
+            }
+            if (startValue > sequence.length || endValue > sequence.length) {
+                alert(`位置超出质粒长度范围，当前长度为 ${sequence.length} bp`);
+                return;
+            }
+
+            const targetSequence = buildPartSequence(sequence, startValue, endValue, partDirection);
+            if (!targetSequence) {
+                alert('截取序列失败');
+                return;
+            }
+
+            console.log(targetSequence);
+            const requestBody = {
+                name: partName,
+                alias: '',
+                Level0Sequence: targetSequence,
+                ConfirmedSequence: '',
+                InsertSequence: '',
+                source: sourceOrganism,
+                reference: `Positions ${startValue}-${endValue} (${partDirection === 'forward' ? 'forward' : 'reverse'}) from plasmid ${plasmidName}`,
+                note: `Generated from plasmid ${plasmidName} with ${partDirection === 'forward' ? 'forward' : 'reverse'} direction; source=${sourceOrganism}`,
+                type: partType,
+            };
+
+            partGeneratorButton.disabled = true;
+            const originalText = partGeneratorButton.innerHTML;
+            partGeneratorButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const response = await fetch('/WebDatabase/AddPartData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify(requestBody),
+                    credentials: 'include',
+                });
+
+                const rawText = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(rawText);
+                } catch (error) {
+                    result = rawText;
+                }
+
+                if (!response.ok) {
+                    const message = typeof result === 'string' ? result : (result.message || '保存元件失败');
+                    alert(message);
+                    return;
+                }
+
+                alert(`元件 ${partName} 已保存，长度 ${targetSequence.length} bp`);
+            } catch (error) {
+                alert(`保存元件失败: ${error.message}`);
+            } finally {
+                partGeneratorButton.disabled = false;
+                partGeneratorButton.innerHTML = originalText;
+            }
+        }
 
         
         function initChart() {
