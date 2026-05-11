@@ -15,7 +15,9 @@ class SupportGG:
         temp = len(self.repository.get_all_part_names())
         if(len(self.repository.get_all_part_names())!=0):
             self.repository = dnacauldron.SequenceRepository()
-        self.repository.import_records(files=self.PartAddress_List,use_file_names_as_ids=False, topology='default_to_circular')
+        print(f"part_file_address:{self.PartAddress_List}")
+        print(f"part_name:{self.PartName_List}")
+        self.repository.import_records(files=self.PartAddress_List,use_file_names_as_ids=True, topology='default_to_circular')
         assembly = dnacauldron.Type2sRestrictionAssembly(parts=self.PartName_List, name = name)
         # assembly = dnacauldron.Type2sRestrictionAssembly(parts=self.PartName_List,expect_no_unused_parts=False)
         self.simulation = assembly.simulate(sequence_repository=self.repository)
@@ -34,8 +36,8 @@ class SupportGG:
         self.repository.add_records(records)
 
 if __name__ == '__main__':
-    AddressList = ['C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\backbone-CWJB21.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-p+r-Ptrc+cym2.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-terminator-pEcT04.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\\\AssemblyFile\\part-cds-pEcC09.gbk']
-    FileName = ['backbone-CWJB21', 'part-p+r-Ptrc+cym2', 'part-terminator-pEcT04', 'part-cds-pEcC09']
+    AddressList = ['C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\AssemblyFile\\\\backbone-pScbb01.gbk', 'C:\\Users\\admin\\Desktop\\WebDatabase\\WebDataWorld\\LabDatabase\\static\\LabDatabase\\DownloadFile\\GenerateFile\\AssemblyFile\\\\pScP01.gbk']
+    FileName = ['backbone-pScbb01', 'pScP01']
     test = SupportGG(AddressList,FileName)
     test.assemblyPart("webtest")
     test.show()

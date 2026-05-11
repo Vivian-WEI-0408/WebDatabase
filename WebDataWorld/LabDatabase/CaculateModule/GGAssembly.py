@@ -77,7 +77,7 @@ class GGFileProcessor:
         return errors
     
     @classmethod
-    def createTemporaryRepo(cls,django_request,upload_record, BASE_URL, File_Address, Assembly_File_Address):
+    def createTemporaryRepo(cls,django_request,upload_record, BASE_URL):
         """处理 Excel 文件"""
         logger.info('处理上传文件请求：%s',django_request.path)
         try:
@@ -91,7 +91,6 @@ class GGFileProcessor:
             df = cls.clean_dataframe(df)
 
             error_rows = []
-            empty_seq_rows = []
             session = createSession(django_request)
             # session = requests.Session()
             # token = django_request.COOKIES.get('csrftoken')
@@ -111,7 +110,7 @@ class GGFileProcessor:
                 else:
                     try:
                         Assembly_Plan_Name = row["AssemblyName"]
-                        request_body = {"Name":Assembly_Plan_Name, "Note":row["Note"]}
+                        request_body = {"Name":Assembly_Plan_Name, "note":row["Note"],"alias":row["Alias"],"level":row["Level"],"part_start_scar":row["Part Start Scar"] if row["Part Start Scar"] != None else "","part_end_start":row["Part End Scar"] if row["Part End Scar"] != None else ""}
                         tempRepo_response = session.post(f"{BASE_URL}createRepo",json=request_body,cookies=django_request.COOKIES)
                         if(tempRepo_response.status_code != 200):
                             error_rows.append(f"第{index}行，创建仓库失败")
@@ -168,6 +167,8 @@ class GGFileProcessor:
                     except Exception as e:
                         logger.error(f"处理Excel文件失败: {str(e.args)}")
                         continue
+            if error_rows:
+                return {"success":True,"error_row":error_rows}
             return {"success":True}
         except Exception as e:
             return {

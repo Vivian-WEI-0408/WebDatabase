@@ -1,10 +1,11 @@
 import logging
 from django.shortcuts import render
 import requests
+from .. import views
 
 logger = logging.getLogger(__name__)
 
-Base_URL = "http://10.30.76.2:8004/WebDatabase/"
+Base_URL = views.Base_URL
 
 def is_superuser(user):
     return user.is_authenticated and user.is_staff

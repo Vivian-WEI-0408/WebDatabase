@@ -5,6 +5,75 @@ from Bio.Seq import Seq
 
 
 DATE_FORMAT = "%Y-%m-%d"
+
+
+def _normalize_feature_position(position, sequence_length):
+    if position is None:
+        return 1
+    return max(1, min(int(position), sequence_length))
+
+
+def _infer_part_prefix_length(sequence, enzyme):
+    sequence = (sequence or "").upper()
+    enzyme = (enzyme or "").upper()
+
+    if not sequence:
+        return 0
+
+    if enzyme == "BSAI":
+        fixed_prefixes = [
+            "GGTCTCAATCA",
+            "GGTCTCAGTGC",
+            "GGTCTCATAAA",
+            "GGTCTCAAATG",
+            "GGTCTCAAT",
+            "GGTCTCAA",
+            "GGTCTCA",
+        ]
+        custom_anchor = "GGTCTCA"
+    else:
+        fixed_prefixes = [
+            "GAAGACCTATCA",
+            "GAAGACCTGTGC",
+            "GAAGACCTTAAA",
+            "GAAGACCTAATG",
+            "GAAGACCTAT",
+            "GAAGACCTA",
+            "GAAGACCT",
+        ]
+        custom_anchor = "GAAGACCT"
+
+    for prefix in fixed_prefixes:
+        if sequence.startswith(prefix):
+            return len(prefix)
+
+    if sequence.startswith(custom_anchor) and len(sequence) >= len(custom_anchor) + 4:
+        return len(custom_anchor) + 4
+
+    return 0
+
+
+def _shift_part_features(feature_list, sequence, enzyme):
+    prefix_length = _infer_part_prefix_length(sequence, enzyme)
+    if prefix_length <= 0:
+        return feature_list
+
+    sequence_length = len(sequence)
+    shifted_features = []
+    for each_feature in feature_list:
+        new_feature = dict(each_feature)
+        new_feature["feature_start"] = _normalize_feature_position(
+            each_feature.get("feature_start", 1) + prefix_length,
+            sequence_length,
+        )
+        new_feature["feature_end"] = _normalize_feature_position(
+            each_feature.get("feature_end", 1) + prefix_length,
+            sequence_length,
+        )
+        shifted_features.append(new_feature)
+    return shifted_features
+
+
 class SequenceAnnotator:
     def __init__(self,sequence,feature_list,reverse_feature_list,EnzymeList,name = "Unknow",species = "synthetic DNA construct",Reference = ""):
         self.length = len(sequence)
@@ -85,7 +154,6 @@ class SequenceAnnotator:
             file.write("FEATURES             Location/Qualifiers\n")
             
             for each_feature in feature_list:
-                
                 if(each_feature["feature_start"] > each_feature["feature_end"]):
                     if(each_feature["feature_type"].upper() == "CDS"):
                         if(sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "GTG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "TTG"
@@ -150,6 +218,94 @@ class SequenceAnnotator:
             file.write('//')
             file.flush()
             file.close()
+    
+    def GeneratorPartNoSa(name,sequence,file_address,feature_list,enzyme=""):
+        print("NoSA")
+        print(feature_list)
+        accession = "."
+        version = "1.0"
+        Keywords = "."
+        definition = "synthetic circular DNA"
+        reference = "synthetic"
+        feature_list = _shift_part_features(feature_list, sequence, enzyme)
+        # if os.path.exists(os.path.join(f'{file_address}',f'{name}.gbk')):
+        #     return
+        with open(os.path.join(f'{file_address}',f'{name}.gbk'),'w') as file:
+            file.write(("LOCUS       Exported              {0:>6} bp    DNA     {1:>8} CST \
+                {2}\n").format(len(sequence),"circular",datetime.datetime.now().strftime(DATE_FORMAT)))
+            file.write("DEFINITION  {}\n".format(definition))
+            file.write("ACCESSION   {}\n".format(accession))
+            file.write("VERSION     {}\n".format(version))
+            file.write("KEYWODS     {}\n".format(Keywords))
+            file.write("SOURCE      {}\n".format(reference))
+            file.write("FEATURES             Location/Qualifiers\n")
+            
+            for each_feature in feature_list:
+                if(each_feature["feature_start"] > each_feature["feature_end"]):
+                    if(each_feature["feature_type"].upper() == "CDS"):
+                        if(sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "GTG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "TTG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATC" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATA" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ACG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "CTG"):
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
+                        else:
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}complement(join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']}))\n")
+                    else:
+                        file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}join({each_feature['feature_start']}..{len(sequence)},1..{each_feature['feature_end']})\n")
+                    file.write(f"                     /label={each_feature['feature_label']}\n")
+
+                    if(each_feature["feature_apeinfo"] != None and each_feature["feature_apeinfo"] != ""):
+                        file.write(f"                     /color={each_feature['feature_apeinfo']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
+                    else:
+                        file.write(f"                     /color=#ffff80\n")
+                        file.write(f"                     /ApEinfo_fwdcolor=#ffff80\n")
+                else:
+                    if(each_feature["feature_type"].upper() == "CDS"):
+                        if(sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "GTG" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "TTG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATC" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ATA" or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "ACG"
+                        or sequence[each_feature["feature_start"]-1:each_feature["feature_start"]+2].upper() == "CTG"):
+                            print("zhengxiang")
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}{each_feature['feature_start']}..{each_feature['feature_end']}\n")
+                        else:
+                            print("fanxiang")
+                            file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}complement({each_feature['feature_start']}..{each_feature['feature_end']})\n")
+                    else:
+                        file.write(f"     {each_feature['feature_type']}{' '*(16-len(each_feature['feature_type']))}{each_feature['feature_start']}..{each_feature['feature_end']}\n")
+                    file.write(f"                     /label={each_feature['feature_label']}\n")
+                    if(each_feature["feature_apeinfo"] != None and each_feature["feature_apeinfo"] != ""):
+                        file.write(f"                     /color={each_feature['feature_apeinfo']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={each_feature['feature_apeinfo']}\n")
+                    else:
+                        file.write(f"                     /color=#ffff80\n")
+                        file.write(f"                     /ApEinfo_fwdcolor=#ffff80\n")
+
+            file.write("ORIGIN\n")
+            numOfline = (len(sequence) // 60) + 1
+            offset = 0
+            for each_line in range(0,numOfline):
+                file.write(f" "*(9-len(str(1+(60*each_line))))+f"{1+(60*each_line)} ")
+                if each_line != numOfline - 1:
+                    for i in range(0,6):
+                        if(i != 5):
+                            file.write(f"{sequence[offset:offset+10]} ")
+                            offset = offset + 10
+                        else:
+                            file.write(f"{sequence[offset:offset+10]}")
+                            offset = offset + 10
+                else:
+                    col_number = (len(sequence[offset:]) // 10) + 1
+                    for i in range(0,col_number):
+                        if(i != col_number -1):
+                            file.write(f"{sequence[offset:offset+10]} ")
+                            offset = offset + 10
+                        else:
+                            file.write(f"{sequence[offset:offset+10]} ")
+                            offset = offset + 10
+                file.write("\n")
+            file.write('//')
+            file.flush()
+            file.close()
+    
 
     def GenerateGBKFile(self, file_address, type="circular"):
         print("SA")
@@ -434,6 +590,25 @@ class SequenceAnnotator:
                         else:
                             file.write(f"                     /color={self.colors['rbs']}\n")
                             file.write(f"                     /ApEinfo_fwdcolor={self.colors['rbs']}\n")
+                else:
+                    if(self.feature_list[each_feature][0] > self.feature_list[each_feature][1]):
+                        file.write(f"     misc_feature     join({self.feature_list[each_feature][0]}..{self.length},1..{self.feature_list[each_feature][1]})\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['binding']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
+                    else:
+                        file.write(f"     misc_feature     {self.feature_list[each_feature][0]}..{self.feature_list[each_feature][1]}\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        if(len(self.feature_list[each_feature]) > 3):
+                            file.write(f"                     /color={self.feature_list[each_feature][3]}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.feature_list[each_feature][3]}\n")
+                        else:
+                            file.write(f"                     /color={self.colors['binding']}\n")
+                            file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
                 
                 
             for each_feature in self.reverse_feature_list.keys():
@@ -580,6 +755,17 @@ class SequenceAnnotator:
                         file.write(f"                     /label={each_feature}\n")
                         file.write(f"                     /color={self.colors['rbs']}\n")
                         file.write(f"                     /ApEinfo_fwdcolor={self.colors['rbs']}\n")
+                else:
+                    if(self.reverse_feature_list[each_feature][0] > self.reverse_feature_list[each_feature][1]):
+                        file.write(f"     misc_feature     complement(join({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length},1..{self.length - self.reverse_feature_list[each_feature][0]+1}))\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        file.write(f"                     /color={self.colors['binding']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
+                    else:
+                        file.write(f"     misc_feature     complement({self.length - self.reverse_feature_list[each_feature][1] + 1}..{self.length - self.reverse_feature_list[each_feature][0] + 1})\n")
+                        file.write(f"                     /label={each_feature}\n")
+                        file.write(f"                     /color={self.colors['binding']}\n")
+                        file.write(f"                     /ApEinfo_fwdcolor={self.colors['binding']}\n")
                 
             if(type == "promoter" or type == "p+r"):
                 file.write(f"     promoter        1..{self.length}\n")
