@@ -49,6 +49,10 @@ urlpatterns = [
     path("partlistbyuser/<str:username>",views.PartListByUser,name="partlistbyuser"),
     path("partfields",views.PartFields,name="partfields"),
     path("partSource/<int:partID>",views.GetPartSource,name="partSource"),
+    path("deletePartFeature",views.deletePartFeature,name="deletepartfeature"),
+    path("AddPartFeature/<str:PartName>",views.AddPartFeature,name="AddPartFeature"),
+    path("UpdatePartFeature",views.UpdatePartFeature,name="UpdatePartFeature"),
+    path("GetPartFeature/<int:PartID>",views.GetPartFeature,name="GetPartFeature"),
 
     path("plasmidcount",views.PlasmidCount,name="Plasmidcount"),
     path("Plasmid",views.PlasmidDataALL,name="Plasmid"),
@@ -83,6 +87,10 @@ urlpatterns = [
     path("UpdatePlasmidSequence",views.UpdatePlasmidSequence, name= "UpdatePlasmidSequence"),
     path("plasmidlistbyuser/<str:username>",views.PlasmidListByUser,name="plasmidlistbyuser"),
     path("plasmidfields",views.PlasmidFields,name="plasmidfields"),
+    path("deletePlasmidFeature",views.deletePlasmidFeature,name="deleteplasmidfeature"),
+    path("AddPlasmidFeature/<str:PlasmidName>",views.AddPlasmidFeature,name="AddPlasmidFeature"),
+    path("UpdatePlasmidFeature",views.UpdatePlasmidFeature,name="UpdatePlasmidFeature"),
+    path("GetPlasmidFeature/<int:PlasmidID>",views.GetPlasmidFeature,name="GetPlasmidFeature"),
 
     path("backbonecount",views.BackboneCount, name = "backbonecount"),
     path("Backbone",views.BackboneDataALL,name="Backbone"),

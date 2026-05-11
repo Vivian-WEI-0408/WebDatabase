@@ -19,6 +19,7 @@ from .models import (Backbonetable,Parentplasmidtable,
                     Testdatatable,CustomUser,Lbdnrtable,Lbddimertable,Dbdtable,Parentbackbonetable,\
                     Parentparttable, Partscartable, Backbonescartable, Plasmidscartable, \
                     Plasmid_Culture_Functions,Backbone_Culture_Functions,Backbonefeaturetable,
+                    Partfeaturetable, Plasmidfeaturetable,
                     VisitorProfile, VisitorAccessLog, VisitorFeedback)
 from django.views.decorators.csrf import csrf_exempt
 # from .serializers import StraintableSerializer, BackbonetableSerializer, ParentplasmidtableSerializer, \
@@ -26,6 +27,9 @@ from django.views.decorators.csrf import csrf_exempt
 #     TbPartUserfileaddressSerializer,TbPlasmidUserfileaddressSerializer,TestdatatableSerializer
 import logging
 from .logger import request_logger
+from .exceptions import WebDatabaseException,WebDatabaseConflictException,WebDatabasePermissionException,\
+                        WebDatabaseNotFoundException,WebDatabaseServerException,WebDatabaseValidationException,\
+                        WebDatabaseGETMethodException,WebDatabasePOSTMethodException
 
 
 def _build_or_keyword_query(raw_keywords, fields):
@@ -53,12 +57,9 @@ def _build_or_keyword_query(raw_keywords, fields):
 
 
 #----------------------------------------------------------
-#鐢ㄦ埛鐧诲綍楠岃瘉(涓棿浠?
+
 
 class User_auth(MiddlewareMixin):
-    """
-    闄や簡login,register,AdminLogin,ResetPassword椤甸潰锛屽叾浣欓〉闈㈠湪璺敱鑾峰彇璧勬簮鍓嶉兘闇€瑕佺粡杩囩敤鎴烽獙璇?
-    """
     
     def process_request(self,request):
         request.start_time = time.time()
@@ -70,11 +71,6 @@ class User_auth(MiddlewareMixin):
             #temp
             if(info['uname'] == "wang5042"):
                 request.session["info"]["uname"] = "optimus_wang"
-            print("9999999")
-            print(info)
-            # print(request.session.get('info'))
-            # # print(f'User_auth{info}')
-            # # print(request.user)
             user = request.user
             if user:
                 return
@@ -94,6 +90,12 @@ class User_auth(MiddlewareMixin):
             request, response, duration_time
         )
         return response
+    def process_exception(self,request,exception):
+        if(isinstance(exception, WebDatabaseException)):
+            return exception.to_response()
+        elif(isinstance(exception, Exception)):
+            return JsonResponse(data={"success":False, "message":str(e.args)},status=400,safe=False)
+        return None
     # if not info:
     #     return JsonResponse({'status': 'Not logged in'})
 
@@ -115,30 +117,28 @@ def SearchByStrainName(request):
         2. status_code = 400/404 string data, if search unsuccessfully
     """
     
-    try:
-        if(request.method == "GET"):
-            Name = request.GET.get('name')
-            if(Name == None or Name == ""):
-                return JsonResponse(data="Name cannot be empty", status=400,safe=False)
-                # return JsonResponse({'status': 201, 'data': "Name cannot be empty"})
-            StrainList = Straintable.objects.filter(strainname=Name)
-            if(len(StrainList) > 0):
-                # return HttpResponse("鎴愬姛",data = StrainList)
-                return JsonResponse(data=list(StrainList.values()), status=200,safe=False)
-                # return JsonResponse({'code':200,'status': 'success', 'data': list(StrainList.values())})
-            else:
-                return JsonResponse(data="No such strain", status=404,safe=False)
+    if(request.method == "GET"):
+        Name = request.GET.get('name')
+        if(Name == None or Name == ""):
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+        StrainList = Straintable.objects.filter(strainname=Name)
+        if(len(StrainList) > 0):
+            return JsonResponse(data=list(StrainList.values()), status=200,safe=False)
+            # return JsonResponse({'code':200,'status': 'success', 'data': list(StrainList.values())})
+        else:
+            raise WebDatabaseNotFoundException()
+            # return JsonResponse(data="No such strain", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Strain Not Found"})
-    except Exception as e:
-        return JsonResponse(data = str(e.args), status=400, safe=False)
-
+    else:
+        raise WebDatabaseGETMethodException()
 
 #-------------------------------------------------------------
 #Part Table
 #ALL
 def PartFields(request):
     """
-    鑾峰彇Parttable鎵€鏈夌浉鍏崇瓫閫変俊鎭」锛屼笉鍖呮嫭parentparttable锛宲artrputable锛宲artscartable锛宼bpartuserfileaddress
+    鑾峰彇Parttable鎵€鏈夌浉鍏崇瓫閫変俊鎭」锛屼笉鍖呮嫭arentparttable锛宲artrputable锛宲artscartable锛宼bpartuserfileaddress
     
     Args:
         request: django request
@@ -148,15 +148,13 @@ def PartFields(request):
         2. JsonResponse.json()["success"] = False, JsonResponse.json()["message"] = Error Information, JsonResponse.status_code = 400, if search unsuccessfully.
     """
     
-    try:
-        fields =[field.name for field in Parttable._meta.get_fields()]
-        fields.remove("parentparttable")
-        fields.remove("partrputable")
-        fields.remove("partscartable")
-        fields.remove("tbpartuserfileaddress")
-        return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
-    except Exception as e:
-        return JsonResponse(data={"success":False,"message":str(e.args)}, status=400, safe=False)
+    fields =[field.name for field in Parttable._meta.get_fields()]
+    fields.remove("parentparttable")
+    fields.remove("partrputable")
+    fields.remove("partscartable")
+    fields.remove("tbpartuserfileaddress")
+    fields.remove("partfeaturetable")
+    return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
     
 def PartCount(request):
     """
@@ -170,15 +168,12 @@ def PartCount(request):
         2.JsonResponse.json()['success'] = False,JsonResponse.json()["message"] = Error Information, JsonResponse.status_code=400/200 if search unsuccessfully.
     """
     
-    try:
-        if(request.method == "GET"):
-            count = Parttable.objects.values().count()
-            return JsonResponse(data = {'success':True, "data":count}, status = 200, safe = False)
-        else:
-            return JsonResponse(data = {"success":False, "message":"Juset GET method"}, status = 200, safe=False)
-    except Exception as e:
-        return JsonResponse(data={"success":False, "message":str(e.args)}, status=400,safe=False)
-    
+    if(request.method == "GET"):
+        count = Parttable.objects.values().count()
+        return JsonResponse(data = {'success':True, "data":count}, status = 200, safe = False)
+    else:
+        raise WebDatabaseGETMethodException()
+        # return JsonResponse(data = {"success":False, "message":"Juset GET method"}, status = 200, safe=False)
 
 def PartDataALL(request):
     """
@@ -194,43 +189,39 @@ def PartDataALL(request):
     
     """
     
-    # print("PartDataAll")
-    try:
-        if(request.method == "GET"):
-            page = int(request.GET.get('page',0))
-            if(page == 0):
-                PartData = Parttable.objects.all().order_by('name')
-                if(len(PartData) > 0):
-                    return JsonResponse(data=list(PartData.values()), status=200,safe=False)
-                    # return JsonResponse({'code':200,'data':list(PartData.values())})
-                else:
-                    return JsonResponse(data="No such part", status=404,safe=False)
-                    # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+    if(request.method == "GET"):
+        page = int(request.GET.get('page',0))
+        if(page == 0):
+            PartData = Parttable.objects.all().order_by('name')
+            if(len(PartData) > 0):
+                return JsonResponse(data=list(PartData.values()), status=200,safe=False)
+                # return JsonResponse({'code':200,'data':list(PartData.values())})
             else:
-                page_size = int(request.GET.get('page_size',10))
-                offset = (page -1)*page_size
-                total_count = Parttable.objects.count()
-                total_pages = (total_count + page_size -1) // page_size
-                query_set = list(Parttable.objects.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag'))[offset:offset+page_size]
-                # query_set = Parttable.objects.only('partid','name','type','sourceorganism','reference').order_by('name')[offset:offset+page_size]
-                has_next = page < total_pages
-                has_previous = page > 1
-                return JsonResponse(data={'success':True,
-                                            'data':query_set,
-                                            'pagination':{
-                                            'current_page' : page,
-                                            'total_pages' : total_pages,
-                                            'total_count' : total_count,
-                                            'has_next':has_next,
-                                            'has_previous' : has_previous,
-                                            'page_size':page_size,
-                                            'offset':offset
-                                            }
-                                        },status = 200, safe=False
-                                    )
-    except Exception as e:
-        return JsonResponse(data={"success":False,"message":str(e.args)}, status=400, safe=False)
-
+                raise WebDatabaseNotFoundException()
+                # return JsonResponse(data="No such part", status=404,safe=False)
+                # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+        else:
+            page_size = int(request.GET.get('page_size',10))
+            offset = (page -1)*page_size
+            total_count = Parttable.objects.count()
+            total_pages = (total_count + page_size -1) // page_size
+            query_set = list(Parttable.objects.order_by('name').values('partid','name','alias','type','sourceorganism','reference','tag'))[offset:offset+page_size]
+            # query_set = Parttable.objects.only('partid','name','type','sourceorganism','reference').order_by('name')[offset:offset+page_size]
+            has_next = page < total_pages
+            has_previous = page > 1
+            return JsonResponse(data={'success':True,
+                                        'data':query_set,
+                                        'pagination':{
+                                        'current_page' : page,
+                                        'total_pages' : total_pages,
+                                        'total_count' : total_count,
+                                        'has_next':has_next,
+                                        'has_previous' : has_previous,
+                                        'page_size':page_size,
+                                        'offset':offset
+                                        }
+                                    },status = 200, safe=False
+                                )
 #PartFilter
 def PartFilter(request):
     """
@@ -243,7 +234,6 @@ def PartFilter(request):
         JsonResponse: 1.JsonResponse.json()["success"] = True, JsonResponse.json()["data"] = a list of data dict, JsonResponse.json()["pagination"] = a dict of page information, JsonResponse.status_code = 200, if search successfully
         2.JsonResponse.json()["success"] = False, JsonResponse.json()["error"] = error information, if search unsuccessfully
     """
-    
     if(request.method == "POST"):
         data = json.loads(request.body)
         type = data["type"]
@@ -276,7 +266,8 @@ def PartFilter(request):
         elif(Enzyme == "SapI"):
             scarpartid = list(Partscartable.objects.filter(sapi = Scar).values('partid'))
         if(Enzyme != "" and len(scarpartid) == 0):
-            return JsonResponse(data={'success':False,'error':'No data'}, status = 400, safe = False)
+            raise WebDatabaseNotFoundException()
+            # return JsonResponse(data={'success':False,'error':'No data'}, status = 400, safe = False)
         # result = Parttable.objects
         PartResult = []
         if(len(scarpartid) != 0):
@@ -295,7 +286,7 @@ def PartFilter(request):
         else:
             result = Parttable.objects
             if(type != "" and result != None):
-                # 'partid','name','type','sourceorganism','reference'
+            # 'partid','name','type','sourceorganism','reference'
                 result = result.filter(type = type)
             if(name != "" and result != None):
                 # print(name)
@@ -346,13 +337,11 @@ def PartFilter(request):
                                             'offset' : 0
                                             }
                                         },status = 200, safe = False)
-            # return JsonResponse(data = {'success':False, 'error':'No data'},status = 404, safe = False)
 
 
 #Search
 def SearchByPartName(request):
     """
-    GET鏂规硶杩涜part table name鐨勭簿纭悳绱? 鍙傛暟涓簄ame
     
     Args:
         request: django request
@@ -362,27 +351,28 @@ def SearchByPartName(request):
         2. JsonResponse.json() = error information, JsonResponse.status_code = 400/404, if search unsuccessfully
     """
     
-    try:
-        if(request.method == "GET"):
-            Name = request.GET.get('name')
-            # print(Name)
-            if(Name == None or Name == ""):
-                return JsonResponse(data="Name cannot be empty", status=400,safe=False)
-                # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
-            PartList = Parttable.objects.filter(name=Name)
-            # print(PartList)
-            if(PartList != None):
-                return JsonResponse(data={"success":True, 'data':list(PartList.values())[0]}, status=200,safe=False)
-                # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
-            else:
-                return JsonResponse(data="No such part", status=404,safe=False)
-    except Exception as e:
-        return JsonResponse(data=str(e.args),status=400,safe=False)
+    
+    if(request.method == "GET"):
+        Name = request.GET.get('name')
+        # print(Name)
+        if(Name == None or Name == ""):
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
+        PartList = Parttable.objects.filter(name=Name)
+        # print(PartList)
+        if(PartList != None):
+            return JsonResponse(data={"success":True, 'data':list(PartList.values())[0]}, status=200,safe=False)
+            # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
+        else:
+            raise WebDatabaseNotFoundException()
+                # return JsonResponse(data="No such part", status=404,safe=False)
+    
 
 
 def SearchByPartNameFilter(request):
     """
-    閫氳繃鍚嶇Оname鍜宼ype瀵筆arttable鐨勬暟鎹繘琛屾煡璇紝鍚嶇О涓烘ā绯婃煡璇?
+    
     
     Args:
         request: django request
@@ -395,7 +385,8 @@ def SearchByPartNameFilter(request):
         Name = request.GET.get('keywords')
         Type = request.GET.get('Type')
         if(Name == None or Name == ""):
-            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
             try:
                 result = Parttable.objects.filter(type=Type)
@@ -409,6 +400,10 @@ def SearchByPartNameFilter(request):
                     return JsonResponse(data = [],status=200,safe=False)
             except Exception as e:
                 return JsonResponse(data = str(e),status=404,safe=False)
+    else:
+        raise WebDatabaseGETMethodException()
+
+
 
 def getBackboneOriAndMarker(Backboneid):
     """
@@ -425,11 +420,14 @@ def getBackboneOriAndMarker(Backboneid):
     ori_info = Backbone_Culture_Functions.objects.filter(backbone_id = Backboneid,function_type = 'ori').values('function_content')
     # print(ori_info)
     marker_info = Backbone_Culture_Functions.objects.filter(backbone_id = Backboneid,function_type = 'marker').values('function_content')
+    if(ori_info == None or marker_info == None):
+        raise WebDatabaseNotFoundException()
     for each_ori in ori_info:
         ori_list.append(each_ori['function_content'])
     for each_marker in marker_info:
         marker_list.append(each_marker['function_content'])
     return [ori_list, marker_list]
+        
 
 def SearchByBackboneNameFilter(request):
     """
@@ -444,16 +442,15 @@ def SearchByBackboneNameFilter(request):
     if(request.method == "GET"):
         Name = request.GET.get('keywords')
         if(Name == None or Name == ""):
-            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
-            try:
-                # backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','ori','marker','species'))
+            # backboneResult = list(Backbonetable.objects.filter(name__icontains = Name).values('id','name','ori','marker','species'))
                 result = Backbonetable.objects
                 keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
                 if keyword_query is not None:
                     result = result.filter(keyword_query)
                 backboneResult = list(result.values('id','name','species'))
-                #TODO: 鏍囪ori锛宮arker
                 for each in backboneResult:
                     info_list = getBackboneOriAndMarker(each['id'])
                     each['ori'] = info_list[0]
@@ -462,8 +459,8 @@ def SearchByBackboneNameFilter(request):
                     return JsonResponse(data=backboneResult,status=200,safe=False)
                 else:
                     return JsonResponse(data = [],status=200,safe=False)
-            except Exception as e:
-                return JsonResponse(data = str(e),status=404,safe=False)
+    else:
+        raise WebDatabaseGETMethodException()
 
 
 def SearchByPlasmidNameFilter(request):
@@ -476,27 +473,30 @@ def SearchByPlasmidNameFilter(request):
     Returns:
         JsonResponse | Any: View response or computed result.
     """
+    
     if(request.method == 'GET'):
         Name = request.GET.get('keywords')
         if(Name == None or Name == ""):
-            return JsonResponse(data="Name cannot be empty",status=400,safe=False)
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="Name cannot be empty",status=400,safe=False)
         else:
-            try:
-                result = Plasmidneed.objects
-                keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
-                if keyword_query is not None:
-                    result = result.filter(keyword_query)
-                plasmidResult = list(result.values('plasmidid','name'))
-                if(len(plasmidResult) > 0):
-                    for each in plasmidResult:
-                        info_list = getOriAndMarker(each['plasmidid'])
-                        each['ori_info'] = info_list[0]
-                        each['marker_info'] = info_list[1]
-                    return JsonResponse(data = plasmidResult,status=200,safe=False)
-                else:
-                    return JsonResponse(data = [],status=200,safe=False)
-            except Exception as e:
-                return JsonResponse(data = str(e),status=404,safe=False)
+            result = Plasmidneed.objects
+            keyword_query = _build_or_keyword_query(Name, ["name", "alias"])
+            if keyword_query is not None:
+                result = result.filter(keyword_query)
+            plasmidResult = list(result.values('plasmidid','name'))
+            if(len(plasmidResult) > 0):
+                for each in plasmidResult:
+                    info_list = getOriAndMarker(each['plasmidid'])
+                    each['ori_info'] = info_list[0]
+                    each['marker_info'] = info_list[1]
+                return JsonResponse(data = plasmidResult,status=200,safe=False)
+            else:
+                # raise WebDatabaseNotFoundException()
+                return JsonResponse(data = [],status=200,safe=False)
+    else:
+        raise WebDatabaseGETMethodException()
+    
 
 def SearchByPartID(request):
     """
@@ -508,20 +508,24 @@ def SearchByPartID(request):
     Returns:
         JsonResponse | Any: View response or computed result.
     """
+    
     if(request.method == "GET"):
         ID = request.GET.get('ID')
         if(ID == None or ID == ""):
-            return JsonResponse(data="ID cannot be empty", status=400,safe=False)
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="ID cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
         PartList = Parttable.objects.filter(partid=ID)
         if(len(PartList) > 0):
             return JsonResponse(data=list(PartList.values()), status=200,safe=False)
             # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
         else:
-            return JsonResponse(data="No such part", status=404,safe=False)
+            raise WebDatabaseNotFoundException()
+            # return JsonResponse(data="No such part", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': []})
     else:
-        return JsonResponse(data="Just Get Method", status=400, safe=False)
+        raise WebDatabaseGETMethodException()
+        # return JsonResponse(data="Just Get Method", status=400, safe=False)
 
 def SearchByPartAlterName(request):
     """
@@ -534,20 +538,21 @@ def SearchByPartAlterName(request):
         JsonResponse | Any: View response or computed result.
     """
     if(request.method == "GET"):
-        try:
-            AlterName = request.GET.get('AlterName')
-            if(AlterName == None or AlterName == ""):
-                return JsonResponse(data="AlterName cannot be empty", status=400,safe=False)
-                # return JsonResponse({'code':204,'status': 'failed', 'data': "AlterName cannot be empty"})
-            PartList = Parttable.objects.filter(alias=AlterName)
-            if(len(PartList) > 0):
-                return JsonResponse(data=list(PartList.values()), status=200,safe=False)
-                # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
-            else:
-                return JsonResponse(data="No such part", status=404,safe=False)
-                # return JsonResponse({'code':204,'status': 'failed', 'data': []})
-        except Exception as e:
-            return JsonResponse(data=e, status=404,safe=False)
+        AlterName = request.GET.get('AlterName')
+        if(AlterName == None or AlterName == ""):
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="AlterName cannot be empty", status=400,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': "AlterName cannot be empty"})
+        PartList = Parttable.objects.filter(alias=AlterName)
+        if(len(PartList) > 0):
+            return JsonResponse(data=list(PartList.values()), status=200,safe=False)
+            # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
+        else:
+            raise WebDatabaseNotFoundException()
+            # return JsonResponse(data="No such part", status=404,safe=False)
+            # return JsonResponse({'code':204,'status': 'failed', 'data': []})
+    else:
+        raise WebDatabaseGETMethodException()
 
 
 def SearchByPartType(request):
@@ -563,14 +568,15 @@ def SearchByPartType(request):
     if(request.method == "GET"):
         Type = request.GET.get('type')
         if(Type == None or Type == ""):
-            return JsonResponse(data="Type cannot be empty", status=400,safe=False)
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="Type cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Type cannot be empty"})
         if(Type.lower() == "promoter"):
             PartList = Parttable.objects.filter(type=1)
         elif(Type.lower() == "terminator"):
-            PartList = Parttable.objects.filter(type=2)
-        elif(Type.lower() == "cds"):
             PartList = Parttable.objects.filter(type=3)
+        elif(Type.lower() == "cds"):
+            PartList = Parttable.objects.filter(type=2)
         elif(Type.lower() == "rbs"):
             PartList = Parttable.objects.filter(type=4)
         else:
@@ -579,8 +585,14 @@ def SearchByPartType(request):
             return JsonResponse(data=list(PartList.values()), status=200,safe=False)
             # return JsonResponse({'code':200,'status': 'success', 'data': list(PartList.values())})
         else:
-            return JsonResponse(data="No such part", status=404,safe=False)
+            raise WebDatabaseNotFoundException()
+            # return JsonResponse(data="No such part", status=404,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
+    else:
+        raise WebDatabaseGETMethodException()
+    
+    
+    
 def SearchPartTypeByName(request):
     """
     SearchPartTypeByName API view.
@@ -594,7 +606,8 @@ def SearchPartTypeByName(request):
     if(request.method == "GET"):
         Name = request.GET.get('name')
         if(Name == None or Name == ""):
-            return JsonResponse(data="Name cannot be empty", status=400,safe=False)
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="Name cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
         Type = Parttable.objects.filter(name=Name).first().type
         if(Type != None):
@@ -602,11 +615,11 @@ def SearchPartTypeByName(request):
                 return JsonResponse(data={"Type":"Promoter"},status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type":"Promoter"}})
             elif(Type == 2):
-                return JsonResponse(data={"Type":"Terminator"},status=200)
+                return JsonResponse(data={"Type":"CDS"},status=200)
                 # return JsonResponse({'code':200,'status':'success','data':{"Type":"Terminator"}})
             elif(Type == 3):
                 # return HttpResponse("CDS")
-                return JsonResponse(data={"Type":"CDS"},status=200)
+                return JsonResponse(data={"Type":"Terminator"},status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "CDS"}})
             elif(Type == 4):
                 return JsonResponse(data={"Type":"RBS"},status=200)
@@ -615,8 +628,14 @@ def SearchPartTypeByName(request):
                 return JsonResponse(data={"Type":"P+R"}, status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "Carb"}})
         else:
-            return JsonResponse(data="No such part", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
+            raise WebDatabaseNotFoundException()
+                # return JsonResponse(data="No such part", status=404,safe=False)
+                # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
+    else:
+        raise WebDatabaseGETMethodException()
+
+
+
 
 def SearchPartTypeByID(request):
     """
@@ -631,7 +650,8 @@ def SearchPartTypeByID(request):
     if(request.method == "GET"):
         ID = request.GET.get('ID')
         if(ID == None or ID == ""):
-            return JsonResponse(data="ID cannot be empty", status=400,safe=False)
+            raise WebDatabaseValidationException()
+            # return JsonResponse(data="ID cannot be empty", status=400,safe=False)
             # return JsonResponse({'code':204,'status': 'failed', 'data': "Name cannot be empty"})
         Type = Parttable.objects.filter(partid=ID).first().type
         if(Type != None):
@@ -652,8 +672,11 @@ def SearchPartTypeByID(request):
                 return JsonResponse(data={"Type":"P+R"}, status=200)
                 # return JsonResponse({'code':200,'status': 'success', 'data': {"Type": "Carb"}})
         else:
-            return JsonResponse(data="No such part", status=404,safe=False)
-            # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
+            raise WebDatabaseNotFoundException()
+                # return JsonResponse(data="No such part", status=404,safe=False)
+                # return JsonResponse({'code':204,'status': 'failed', 'data': "Part Not Found"})
+    else:
+        raise WebDatabaseGETMethodException()
 
 # def SearchPartByStrength(request):
 #     Strength = float(request.GET.get('strength'))
@@ -679,7 +702,7 @@ def SearchByRPU(request):
     if (request.method == "GET"):
         RPU = float(request.GET.get('rpu'))
         if (RPU == None or RPU == 0):
-            return JsonResponse(data="RPU cannot be empty", status=400,safe=False)
+            raise WebDatabaseValidationException()
             # return JsonResponse({'code': 204, 'status': 'failed', 'data': "RPU cannot be empty"})
         RPULow = math.ceil(RPU)
         RPUHigh = math.floor(RPU)
@@ -1028,6 +1051,7 @@ def deletePartData(request):
             # return JsonResponse({'code':204,'status': 'failed', 'data': 'Part Not Found'})
         TbPartUserfileaddress.objects.filter(partid=PartID).delete()
         Partrputable.objects.filter(partid=PartID).delete()
+        Partfeaturetable.objects.filter(partid=PartID).delete()
         Parttable.objects.filter(partid = PartID).delete()
         return JsonResponse(data={"success":True}, status=200)
         # return JsonResponse({'code':200,'status': 'success','data':'Part data deleted'})
@@ -1860,7 +1884,10 @@ def AddPlasmidData(request):
             except IntegrityError:
                 return JsonResponse(data={"success":False, "message":"Plasmid name already exists"},status = 409, safe=False)
             except Exception as e:
-                return JsonResponse(data="fail upload",status = 400, safe=False)
+                return JsonResponse(data=str(e.args),status = 400, safe=False)
+
+                # print(e.args())
+                # return JsonResponse(data="fail upload",status = 400, safe=False)
         else:
             try:
                 with transaction.atomic():
@@ -1954,7 +1981,7 @@ def AddPlasmidParentByID(request):
                     parentPlasmidObj = Plasmidneed.objects.filter(plasmidid = ParentPlasmidID).first()
                     if(parentPlasmidObj == None):
                         return JsonResponse(data={"success":False},status=404,safe=False)
-                    if(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidObj,parentplasmidid = parentPlasmidObj).count() == 0):
+                    if(Parentplasmidtable.objects.filter(sonplasmidid = sonPlasmidObj.plasmidid,parentplasmidid = parentPlasmidObj.plasmidid).count() == 0):
                         Parentplasmidtable.objects.create(sonplasmidid=sonPlasmidObj,parentplasmidid = parentPlasmidObj)
                     return JsonResponse(data={"success":True},status=200,safe=False)
             except Plasmidneed.DoesNotExist:
@@ -2184,6 +2211,7 @@ def deletePlasmidData(request):
             Parentbackbonetable.objects.filter(sonplasmidid = PlasmidID).delete()
             Plasmidscartable.objects.filter(plasmidid = PlasmidID).delete()
             Plasmid_Culture_Functions.objects.filter(plasmid_id = PlasmidID).delete()
+            Plasmidfeaturetable.objects.filter(plasmidid=PlasmidID).delete()
             TbPlasmidUserfileaddress.objects.filter(plasmidid=PlasmidID).delete()
             Plasmidneed.objects.filter(plasmidid = PlasmidID).delete()
             return JsonResponse(data={"success":True}, status=200, safe=False)
@@ -2322,6 +2350,7 @@ def PlasmidFields(request):
     fields.remove("plasmidscartable")
     fields.remove("plasmidunessential")
     fields.remove("tbplasmiduserfileaddress")
+    fields.remove("plasmidfeaturetable")
     return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
 
 def PlasmidListByUser(request,username):
@@ -3187,6 +3216,7 @@ def BackboneFields(request):
     fields.remove("backbonescartable")
     fields.remove("tbbackboneuserfileaddress")
     fields.remove("parentbackbonetable")
+    fields.remove("backbonefeaturetable")
     return JsonResponse(data={"success":True, "data":fields}, status = 200, safe=False)
 
 def BackboneListByUser(request,username):
@@ -3288,6 +3318,147 @@ def GetBackboneFeature(request, BackboneID):
             return JsonResponse(data={"success":False,"message":str(e.args)},status=400,safe=False)
     else:
         return JsonResponse(data={"successs":False,"message":"Just Get Method"},status=400,safe=False)
+
+
+def _get_feature_payload(data):
+    return {
+        "feature_start": data.get("feature_start", data.get("start_position")),
+        "feature_end": data.get("feature_end", data.get("end_position")),
+        "feature_type": data.get("feature_type"),
+        "feature_label": data.get("feature_label", data.get("label")),
+        "feature_color": data.get("feature_color", data.get("color")),
+        "feature_apeinfo": data.get("feature_apeinfo", data.get("ape_info")),
+    }
+
+
+def _validate_feature_payload(payload, partial=False):
+    required_fields = ["feature_start", "feature_end", "feature_type", "feature_label", "feature_color", "feature_apeinfo"]
+    if partial:
+        payload = {key: value for key, value in payload.items() if value is not None}
+        if not payload:
+            return False, "No feature fields to update", payload
+    missing_fields = [field for field in required_fields if not partial and payload.get(field) in [None, ""]]
+    if missing_fields:
+        return False, f"Missing required fields: {', '.join(missing_fields)}", payload
+    return True, "", payload
+
+
+def _add_feature(request, parent_model, feature_model, parent_lookup, parent_id_field, parent_obj_field, parent_name):
+    if request.method != "POST":
+        return JsonResponse(data={"success": False, "message": "Just POST Method"}, status=405, safe=False)
+
+    try:
+        data = json.loads(request.body)
+        payload = _get_feature_payload(data)
+        valid, message, payload = _validate_feature_payload(payload)
+        print(data)
+        print(valid)
+        print(message)
+        print(payload)
+        if not valid:
+            
+            return JsonResponse(data={"success": False, "message": message}, status=400, safe=False)
+
+        parent_obj = parent_model.objects.get(**{parent_lookup: parent_name})
+        feature_obj = feature_model.objects.create(**{parent_obj_field: parent_obj}, **payload)
+        return JsonResponse(data={"success": True, "data": list(feature_model.objects.filter(pfid=feature_obj.pfid).values())[0]}, status=200, safe=False)
+    except parent_model.DoesNotExist:
+        return JsonResponse(data={"success": False, "message": f"No such {parent_id_field}"}, status=404, safe=False)
+    except Exception as e:
+        return JsonResponse(data={"success": False, "message": str(e.args)}, status=400, safe=False)
+
+
+def _get_feature(request, feature_model, parent_obj_field, parent_id):
+    if request.method != "GET":
+        return JsonResponse(data={"success": False, "message": "Just GET Method"}, status=405, safe=False)
+
+    try:
+        result = feature_model.objects.filter(**{parent_obj_field: parent_id}).values()
+        return JsonResponse(data={"success": True, "data": list(result)}, status=200, safe=False)
+    except Exception as e:
+        return JsonResponse(data={"success": False, "message": str(e.args)}, status=400, safe=False)
+
+
+def _update_feature(request, feature_model):
+    if request.method != "POST":
+        return JsonResponse(data={"success": False, "message": "Just POST Method"}, status=405, safe=False)
+
+    try:
+        data = json.loads(request.body)
+        pfid = data.get("pfid")
+        if pfid in [None, ""]:
+            return JsonResponse(data={"success": False, "message": "pfid cannot be empty"}, status=400, safe=False)
+        payload = _get_feature_payload(data)
+        valid, message, payload = _validate_feature_payload(payload, partial=True)
+        if not valid:
+            return JsonResponse(data={"success": False, "message": message}, status=400, safe=False)
+
+        with transaction.atomic():
+            feature_obj = feature_model.objects.select_for_update().get(pfid=pfid)
+            for field, value in payload.items():
+                setattr(feature_obj, field, value)
+            feature_obj.save()
+        return JsonResponse(data={"success": True, "data": list(feature_model.objects.filter(pfid=pfid).values())[0]}, status=200, safe=False)
+    except feature_model.DoesNotExist:
+        return JsonResponse(data={"success": False, "message": "Feature does not exist"}, status=404, safe=False)
+    except Exception as e:
+        return JsonResponse(data={"success": False, "message": str(e.args)}, status=400, safe=False)
+
+
+def _delete_feature(request, feature_model, parent_model, parent_lookup, parent_obj_field):
+    if request.method != "GET":
+        return JsonResponse(data={"success": False, "message": "Just GET Method"}, status=405, safe=False)
+
+    try:
+        pfid = request.GET.get("pfid")
+        parent_id = request.GET.get("id")
+        parent_name = request.GET.get("name")
+        if pfid:
+            deleted_count, _ = feature_model.objects.filter(pfid=pfid).delete()
+        elif parent_id:
+            deleted_count, _ = feature_model.objects.filter(**{parent_obj_field: parent_id}).delete()
+        elif parent_name:
+            parent_obj = parent_model.objects.get(**{parent_lookup: parent_name})
+            deleted_count, _ = feature_model.objects.filter(**{parent_obj_field: parent_obj.pk}).delete()
+        else:
+            return JsonResponse(data={"success": False, "message": "pfid or id or name cannot be empty"}, status=400, safe=False)
+        return JsonResponse(data={"success": True, "deleted_count": deleted_count}, status=200, safe=False)
+    except parent_model.DoesNotExist:
+        return JsonResponse(data={"success": False, "message": "Parent data does not exist"}, status=404, safe=False)
+    except Exception as e:
+        return JsonResponse(data={"success": False, "message": str(e.args)}, status=400, safe=False)
+
+
+def AddPartFeature(request, PartName):
+    return _add_feature(request, Parttable, Partfeaturetable, "name", "part", "partid", PartName)
+
+
+def GetPartFeature(request, PartID):
+    return _get_feature(request, Partfeaturetable, "partid", PartID)
+
+
+def UpdatePartFeature(request):
+    return _update_feature(request, Partfeaturetable)
+
+
+def deletePartFeature(request):
+    return _delete_feature(request, Partfeaturetable, Parttable, "name", "partid")
+
+
+def AddPlasmidFeature(request, PlasmidName):
+    return _add_feature(request, Plasmidneed, Plasmidfeaturetable, "name", "plasmid", "plasmidid", PlasmidName)
+
+
+def GetPlasmidFeature(request, PlasmidID):
+    return _get_feature(request, Plasmidfeaturetable, "plasmidid", PlasmidID)
+
+
+def UpdatePlasmidFeature(request):
+    return _update_feature(request, Plasmidfeaturetable)
+
+
+def deletePlasmidFeature(request):
+    return _delete_feature(request, Plasmidfeaturetable, Plasmidneed, "name", "plasmidid")
             
 
 
@@ -4045,7 +4216,7 @@ def AddPlasmidParentInfo(request):
         if("PlasmidID" in data):
             plasmidID = data['PlasmidID']
         ParentInfo = data["PlasmidParentInfo"]
-        if(plasmidID == 0 or ParentInfo == ""):
+        if(plasmidID == 0):
             return JsonResponse(data = {"success":False,"data":"Parameter is empty"},status = 400, safe=False)
         start_time = time.time()
         max_wait_time = 5
@@ -4138,7 +4309,7 @@ def AddParentPartByID(request):
                     parentPartObj = Parttable.objects.filter(partid = ParentPartID).first()
                     if(parentPartObj == None):
                         return JsonResponse(data={"success":False,"message":"No Such Part Data"},status=404,safe=False)
-                    if(Parentparttable.objects.filter(sonplasmidid = sonPlasmidObj,parentpartid = parentPartObj).count() == 0):
+                    if(Parentparttable.objects.filter(sonplasmidid = sonPlasmidObj.plasmidid,parentpartid = parentPartObj.partid).count() == 0):
                         Parentparttable.objects.create(sonplasmidid=sonPlasmidObj,parentpartid = parentPartObj)
                     return JsonResponse(data={"success":True},status=200,safe=False)
             except Plasmidneed.DoesNotExist:
@@ -4227,7 +4398,7 @@ def AddBackboneParentByID(request):
                     parentBackboneObj = Backbonetable.objects.filter(id = ParentBackboneID).first()
                     if(parentBackboneObj == None):
                         return JsonResponse(data={"success":False},status=404,safe=False)
-                    if(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj,parentbackboneid = parentBackboneObj).count() == 0):
+                    if(Parentbackbonetable.objects.filter(sonplasmidid = sonPlasmidObj.plasmidid,parentbackboneid = parentBackboneObj.id).count() == 0):
                         Parentbackbonetable.objects.create(sonplasmidid=sonPlasmidObj,parentbackboneid = parentBackboneObj)
                     return JsonResponse(data={"success":True},status=200,safe=False)
             except Plasmidneed.DoesNotExist:
@@ -4931,8 +5102,13 @@ def create_repository(request):
     if(request.method == "POST"):
         
         data = json.loads(request.body)
+        print(data)
         Name = data.get("Name")
-        Note = data.get("Note")
+        Note = data.get("note")
+        Alias = data.get("alias")
+        Level = data.get("level")
+        Part_Start_Scar = data.get("part_start_scar")
+        Part_End_Scar = data.get("part_end_start")
         if(Name != None and Name != ""):
             try:
                 repository_id = str(uuid.uuid1())
@@ -4944,7 +5120,7 @@ def create_repository(request):
                 with transaction.atomic():
                     if(Temporaryrepository.objects.filter(userid = user,name=Name).exists()):
                         Temporaryrepository.objects.filter(userid=user, name=Name).delete()
-                    Temporaryrepository.objects.create(id=repository_id,name=Name,userid=user,repositorycreate_time = timezone.now(),repositoryupdate_time = timezone.now(),repositoryexpire_time = expires_at,note=Note,data=default_data)
+                    Temporaryrepository.objects.create(id=repository_id,name=Name,userid=user,repositorycreate_time = timezone.now(),repositoryupdate_time = timezone.now(),repositoryexpire_time = expires_at,note=Note,data=default_data, alias = Alias, level=Level,part_start_scar=Part_Start_Scar,part_end_scar=Part_End_Scar)
                 return JsonResponse(data={'success':True,'repository_id':repository_id,'repository_name':Name,'url':f'/repository/{repository_id}','expires_at':expires_at},status=200,safe=False)
             except Exception as e:
                 return JsonResponse(data=str(e.args),status = 400, safe=False)
@@ -4997,7 +5173,7 @@ def get_repository(request):
                 if(repository.is_expired()):
                     repository.delete()
                     return JsonResponse({'success':False,'message':'Repository expired'},status = 410)
-                return JsonResponse(data={'success':True,'repository':repository.id,'data':repository.data,'name':repository.name,"created_time":repository.repositorycreate_time,"expired_time":repository.repositoryexpire_time}, status = 200, safe = False)
+                return JsonResponse(data={'success':True,'repository':repository.id,'data':repository.data,'name':repository.name,"created_time":repository.repositorycreate_time,"expired_time":repository.repositoryexpire_time,"note":repository.note,"alias":repository.alias,"level":repository.level,"part_start_scar":repository.part_start_scar,"part_end_scar":repository.part_end_scar}, status = 200, safe = False)
             else:
                 return JsonResponse(data={'error':'Repository not found'},status = 404,safe=False)
         except Temporaryrepository.DoesNotExist:

@@ -11,6 +11,44 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+
+class DeduplicatingCreateManager(models.Manager):
+    def create(self, **kwargs):
+        instance = self.model(**kwargs)
+        instance.save(force_insert=True, using=self._db)
+        return instance
+
+
+class DeduplicatingSaveMixin(models.Model):
+    objects = DeduplicatingCreateManager()
+
+    class Meta:
+        abstract = True
+
+    def _dedup_lookup(self):
+        lookup = {}
+        for field in self._meta.concrete_fields:
+            if field.primary_key:
+                continue
+            lookup[field.attname] = getattr(self, field.attname)
+        return lookup
+
+    def save(self, *args, **kwargs):
+        using = kwargs.get("using") or self._state.db
+        duplicate_qs = type(self).objects.using(using).filter(**self._dedup_lookup())
+        if self.pk is not None:
+            duplicate_qs = duplicate_qs.exclude(pk=self.pk)
+
+        duplicate = duplicate_qs.first()
+        if duplicate is not None:
+            setattr(self, self._meta.pk.attname, duplicate.pk)
+            self._state.adding = False
+            self._state.db = using
+            return
+
+        super().save(*args, **kwargs)
+
+
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 
@@ -80,7 +118,7 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
-class Backbone_Culture_Functions(models.Model):
+class Backbone_Culture_Functions(DeduplicatingSaveMixin, models.Model):
     bcfid = models.AutoField(primary_key=True)
     backbone_id = models.ForeignKey('Backbonetable', models.CASCADE, db_column='backbone_id')
     function_content = models.CharField(max_length=50)
@@ -91,7 +129,7 @@ class Backbone_Culture_Functions(models.Model):
         db_table = 'backbone_culture_functions'
 
 
-class Backbonescartable(models.Model):
+class Backbonescartable(DeduplicatingSaveMixin, models.Model):
     backbonescarid = models.AutoField(db_column='BackboneScarID', primary_key=True)  # Field name made lowercase.
     backboneid = models.ForeignKey('Backbonetable', models.CASCADE, db_column='BackboneID')  # Field name made lowercase.
     bsmbi = models.CharField(db_column='BsmBI', max_length=100)  # Field name made lowercase.
@@ -365,7 +403,7 @@ class Parts(models.Model):
         db_table = 'parts'
 
 
-class Partscartable(models.Model):
+class Partscartable(DeduplicatingSaveMixin, models.Model):
     partscarid = models.AutoField(db_column='PartScarID', primary_key=True)  # Field name made lowercase.
     part_id = models.ForeignKey('Parttable',models.CASCADE,db_column='part_id')
     bsmbi = models.CharField(db_column='BsmBI', max_length=100)  # Field name made lowercase.
@@ -401,7 +439,7 @@ class Parttable(models.Model):
         db_table = 'parttable'
 
 
-class Plasmid_Culture_Functions(models.Model):
+class Plasmid_Culture_Functions(DeduplicatingSaveMixin, models.Model):
     pcfid = models.AutoField(primary_key=True)
     plasmid_id = models.ForeignKey('Plasmidneed', models.DO_NOTHING,db_column="plasmid_id")
     function_content = models.CharField(max_length=100)
@@ -437,7 +475,7 @@ class Plasmidneed(models.Model):
         db_table = 'plasmidneed'
 
 
-class Plasmidscartable(models.Model):
+class Plasmidscartable(DeduplicatingSaveMixin, models.Model):
     plasmidscarid = models.AutoField(db_column='PlasmidScarID', primary_key=True)  # Field name made lowercase.
     plasmidid = models.ForeignKey(Plasmidneed, models.CASCADE, db_column='PlasmidID')  # Field name made lowercase.
     bsmbi = models.CharField(db_column='BsmBI', max_length=100)  # Field name made lowercase.
@@ -535,7 +573,11 @@ class Temporaryrepository(models.Model):
     data = models.JSONField(blank=True, null=True)
     name = models.CharField(max_length=500, blank=True, null=True)
     note = models.TextField(db_column='Note', blank=True, null=True)  # Field name made lowercase.
-
+    alias = models.CharField(db_column = 'alias',max_length=100, blank=True, null = True)
+    level = models.IntegerField(db_column='Level',blank=True, null = True)
+    part_start_scar = models.CharField(db_column='part_start_scar',max_length=10,blank=True, null=True)
+    part_end_scar = models.CharField(db_column='part_end_scar',max_length=10,blank=True,null=True)
+    
     class Meta:
         managed = True
         db_table = 'temporaryrepository'
@@ -807,7 +849,7 @@ class Yeastparts(models.Model):
         db_table = 'yeastparts'
 
 
-class Backbonefeaturetable(models.Model):
+class Backbonefeaturetable(DeduplicatingSaveMixin, models.Model):
     bfif = models.AutoField(primary_key=True)
     backboneid = models.ForeignKey('Backbonetable', models.CASCADE, db_column='backboneid')
     feature_start = models.IntegerField()
@@ -820,3 +862,33 @@ class Backbonefeaturetable(models.Model):
     class Meta:
         managed = True
         db_table = 'BackboneFeatureTable'
+
+
+class Partfeaturetable(DeduplicatingSaveMixin, models.Model):
+    pfid = models.AutoField(primary_key=True)
+    partid = models.ForeignKey('Parttable', models.CASCADE, db_column='partid')
+    feature_start = models.IntegerField()
+    feature_end = models.IntegerField()
+    feature_type = models.CharField(max_length=50)
+    feature_label = models.CharField(max_length=50)
+    feature_color = models.CharField(max_length=50)
+    feature_apeinfo = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'PartFeatureTable'
+
+
+class Plasmidfeaturetable(DeduplicatingSaveMixin, models.Model):
+    pfid = models.AutoField(primary_key=True)
+    plasmidid = models.ForeignKey('Plasmidneed', models.CASCADE, db_column='plasmidid')
+    feature_start = models.IntegerField()
+    feature_end = models.IntegerField()
+    feature_type = models.CharField(max_length=50)
+    feature_label = models.CharField(max_length=50)
+    feature_color = models.CharField(max_length=50)
+    feature_apeinfo = models.CharField(max_length=50)
+
+    class Meta:
+        managed = True
+        db_table = 'PlasmidFeatureTable'
