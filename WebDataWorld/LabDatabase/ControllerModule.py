@@ -2153,32 +2153,32 @@ def ImportDataset():
 
 
 #Assembly在文件是否存在方面的操作，在的话之间加入列表，没有就自动书写文件（书写后删除）
-def AssemblyFunction():
-    try:
-        GG = SupportGG(FileAddressList, FileNameList)
-        GG.assemblyPart("test")
-        GG.show()
-        messageBox = QMessageBox()
-        messageBox.setWindowTitle("AssemblyResult")
-        messageBox.setText("Finish!")
-        messageBox.exec()
-        Controller.UI.PartsToMerge.clear()
-        Controller.UI.BackboneToMerge.clear()
-        Controller.UI.PlasmidToMerge.clear()
-        Controller.UI.RefreshTable('PartTable', Controller.conn, Controller.c)
-        Controller.UI.RefreshTable('BackboneTable',Controller.conn,Controller.c)
-        Controller.UI.RefreshTable('PlasmidNeed',Controller.conn,Controller.c)
-    except OperationalError as e:
-        if(e.args[0] == 1142):
-            messageBox = QMessageBox()
-            messageBox.setWindowTitle("Privilege Error")
-            messageBox.setText("You don't have this privilege.")
-            messageBox.exec_()
-        else:
-            messageBox = QMessageBox()
-            messageBox.setWindowTitle("Error")
-            messageBox.setText(str(e.args))
-            messageBox.exec_()
+# def AssemblyFunction():
+#     try:
+#         GG = SupportGG(FileAddressList, FileNameList)
+#         GG.assemblyPart("test")
+#         GG.show()
+#         messageBox = QMessageBox()
+#         messageBox.setWindowTitle("AssemblyResult")
+#         messageBox.setText("Finish!")
+#         messageBox.exec()
+#         Controller.UI.PartsToMerge.clear()
+#         Controller.UI.BackboneToMerge.clear()
+#         Controller.UI.PlasmidToMerge.clear()
+#         Controller.UI.RefreshTable('PartTable', Controller.conn, Controller.c)
+#         Controller.UI.RefreshTable('BackboneTable',Controller.conn,Controller.c)
+#         Controller.UI.RefreshTable('PlasmidNeed',Controller.conn,Controller.c)
+#     except OperationalError as e:
+#         if(e.args[0] == 1142):
+#             messageBox = QMessageBox()
+#             messageBox.setWindowTitle("Privilege Error")
+#             messageBox.setText("You don't have this privilege.")
+#             messageBox.exec_()
+#         else:
+#             messageBox = QMessageBox()
+#             messageBox.setWindowTitle("Error")
+#             messageBox.setText(str(e.args))
+#             messageBox.exec_()
 
 # def WriteGBKFileWithoutC(part, index,cur):
 #     CurrentSeq = ""
