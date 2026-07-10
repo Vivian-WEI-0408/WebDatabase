@@ -511,13 +511,21 @@ class Straintable(models.Model):
     background = models.CharField(db_column='Background', max_length=20)  # Field name made lowercase.
     marker = models.CharField(db_column='Marker', max_length=30)  # Field name made lowercase.
     store = models.CharField(db_column='Store', max_length=100)  # Field name made lowercase.
-    genotype = models.CharField(max_length=100)
-    type = models.IntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'straintable'
+        
 
+class StrainGenotypeTable(models.Model):
+    sgid = models.AutoField(db_column='sdid',primary_key=True)
+    plasmidid = models.ForeignKey(Plasmidneed,models.CASCADE,db_column='plasmidid')
+    strainid = models.ForeignKey(Straintable,models.CASCADE,db_column='strainid')
+
+    class Meta:
+        managed = True
+        db_table = 'strain_genotype_table'
+    
 
 class Structures(models.Model):
     collection = models.CharField(max_length=100, blank=True, null=True)
