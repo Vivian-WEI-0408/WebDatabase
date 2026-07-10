@@ -134,8 +134,8 @@
                 file_input.innerText = "";
                 const result = await response.json();
                 if(result.task_id){
-                    alert(result.message);
                     pollTaskStatus(result.task_id);
+                    showNotification(result.message);
                 }
                 else{
                     displayResult(result);
@@ -163,8 +163,8 @@
                 file_input.innerText = '';
                 const result = await response.json()
                 if(result.task_id){
-                    alert(result.message);
                     pollTaskStatus(result.task_id);
+                    showNotification(result.message);
                 }
                 else{
                     displayResult(result);
@@ -199,32 +199,32 @@
             }
 
             function displayError(message){
-                alert(message);
+                showNotification(message, true);
             }
 
             function displayResult(result){
                 if(result.status === "completed"){
                     if(result.message){
                         if(result.error.length != 0){
-                            alert(result.error.join(","));
+                            showNotification(result.error.join(","), true);
                         }
                         else{
-                            alert(result.message);
+                            showNotification(result.message);
                         }
                         
                     }
                     else{
                         if(result.error != null && result.error.length != 0){
-                            alert(result.error.join(","));
+                            showNotification(result.error.join(","), true);
                         }
                         else{
-                            alert("上传完成");
+                            showNotification("上传完成");
                         }
                     }
                 }
                 else{
                     console.log(result.error);
-                    alert('处理失败：'+result.error);
+                    showNotification('处理失败：'+result.error, true);
                 }
             }
             document.getElementById('PartSelectorReset').addEventListener('click', function(){
@@ -1218,8 +1218,8 @@ function setupMenuEvents() {
                 const result = await response.json();
                 console.log(result);
                 if(result.task_id){
-                    alert(result.message);
                     pollAssemblyTaskStatus(result.task_id,warehouseName);
+                    showNotification(result.message);
                 }
                 else{
                     displayResult(result);
@@ -1238,8 +1238,10 @@ function setupMenuEvents() {
                             clearInterval(pollInterval);
                             displayResult(result);
 
-                            // window.location.href = `/LabDatabase/getAssembly/${warehouseName}/${taskId}`
-                            window.location.href = result.result.download_url;
+                            const downloadUrl = result.result?.archive_download_url || result.result?.download_url;
+                            if (downloadUrl) {
+                                window.location.href = downloadUrl;
+                            }
                         }
                         else if(result.status === "failed"){
                             console.log("failed");
@@ -1281,8 +1283,8 @@ function setupMenuEvents() {
                 // .then(response => response.json)
                 const result = await response.json();
                 if(result.task_id){
-                    alert(result.message);
                     pollTaskStatus(result.task_id);
+                    showNotification(result.message);
                 }
                 else{
                     displayResult(result);
@@ -1311,8 +1313,8 @@ function setupMenuEvents() {
                 // .then(response => response.json)
                 const result = await response.json();
                 if(result.task_id){
-                    alert(result.message);
                     pollTaskStatus(result.task_id);
+                    showNotification(result.message);
                 }
                 else{
                     displayResult(result);
@@ -1321,6 +1323,10 @@ function setupMenuEvents() {
         
             // 显示通知
             function showNotification(message, isError = false) {
+                if (!notificationCreateRepo) {
+                    console[isError ? 'error' : 'log'](message);
+                    return;
+                }
                 notificationCreateRepo.textContent = message;
             
                 if (isError) {
