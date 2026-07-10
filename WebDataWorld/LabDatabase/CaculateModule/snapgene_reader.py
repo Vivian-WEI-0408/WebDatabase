@@ -136,7 +136,7 @@ def snapgene_to_dict(file_obj):
 
                     data["features"].append(
                         dict(
-                            start=min([start - 1 for (start, end) in segments_ranges]),
+                            start=min([start for (start, end) in segments_ranges]),
                             end=max([end for (start, end) in segments_ranges]),
                             strand=strand_dict[feature.get("@directionality", "0")],
                             type=feature["@type"],
@@ -158,6 +158,5 @@ def snapgene_to_dict(file_obj):
     return data
 
 if __name__ == "__main__":
-    file_address = r"c:\Users\admin\xwechat_files\wxid_hh7vrsekcboh21_db9a\msg\file\2026-01\LXY344 ptac-BCD7-TALlaa B0030 4CLlaa-DT54.dna"
-    print(snapgene_to_dict(open(file_address,'rb')))
+    pass
     
