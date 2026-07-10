@@ -31,6 +31,9 @@ class WebDatabaseValidationException(WebDatabaseException):
     default_error_code = "validation_error"
     default_message = "Request parameters are invalid"
     default_status_code = 400
+    
+    def __init__(self,parameter):
+        self.default_message = f"Request parameters {parameter} are invalid"
 
 
 class WebDatabaseNotFoundException(WebDatabaseException):
@@ -59,9 +62,14 @@ class WebDatabaseServerException(WebDatabaseException):
 class WebDatabasePOSTMethodException(WebDatabaseException):
     default_error_code = "request_error"
     default_message = "Just POST Method"
-    default_status_code = 200
+    default_status_code = 500
     
 class WebDatabaseGETMethodException(WebDatabaseException):
     default_error_code = "request_error"
     default_message = "JUST GET Method"
-    default_status_code = 200
+    default_status_code = 500
+
+class WebDatabaseTimeoutException(WebDatabaseException):
+    default_error_code = "internal_error"
+    default_message = "TIME OUT"
+    default_status_code = 500
