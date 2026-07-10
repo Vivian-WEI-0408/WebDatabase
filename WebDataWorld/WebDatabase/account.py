@@ -325,7 +325,6 @@ class CustomLoginForm(AuthenticationForm):
             return user
 # @csrf_protect
 def login_view(request):
-    print("aaaaaaa")
     if request.user.is_authenticated:
         next_url = request.GET.get("next","/LabDatabase/index")
         print("next_url: "+next_url)
@@ -341,10 +340,21 @@ def login_view(request):
             # user = form.authenticate_user()
             # login(request, user)
             login(request, form.cleaned_data['user'])
-            print(form.cleaned_data['user'])
-            request.session['info'] = {'uid':form.cleaned_data['uid'],'uname':form.cleaned_data['username']}
-            print(form.cleaned_data)
-            return redirect(next_url)
+            if('@' in form.cleaned_data["username"]):
+                user_obj = CustomUser.objects.get(email = form.cleaned_data["username"])
+            else:
+                user_obj = CustomUser.objects.get(uname = form.cleaned_data["username"])
+            if user_obj is not None:
+                uid = user_obj.uid
+                username = user_obj.uname
+                print(form.cleaned_data['user'])
+                request.session['info'] = {'uid':uid,'uname':username}
+                print(form.cleaned_data)
+                return redirect(next_url)
+            else:
+                form.add_error('username',"用户名或邮箱错误")
+                form.add_error('password',"密码错误")
+                return render(request, 'Login.html', {"form":form,"next_url":next_url})
         else:
             # print(form.cleaned_data)
             form.add_error('username',"用户名或邮箱错误")
