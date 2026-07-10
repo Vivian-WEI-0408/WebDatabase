@@ -115,6 +115,10 @@
                         if(result.status === "completed"){
                             clearInterval(pollInterval);
                             displayResult(result);
+                            const downloadUrl = result.result?.archive_download_url || result.result?.download_url;
+                            if (downloadUrl) {
+                                window.location.href = downloadUrl;
+                            }
                             btnText.textContent = '组装完成';
                             loadingSpinner.style.display = 'none';
             
