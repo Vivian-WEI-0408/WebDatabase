@@ -59,6 +59,7 @@ urlpatterns = [
     path("getDocument/<str:fileid>",views.getDocument,name="getDocument"),
     path("getDocByAdd",views.getDocumentByAddress,name="getDocByAdd"),
     path("getAssembly/<str:fileName>",views.getAssemblyFile,name="getAssembly"),
+    path("getAssemblyArchive/<str:task_id>",views.getAssemblyArchive,name="getAssemblyArchive"),
     
     path("createRepo",views.CreateTempRepository,name="createRepo"),
     path("AssemblyRepo",views.AssemblyRepo,name="AssemblyRepo"),
@@ -67,6 +68,7 @@ urlpatterns = [
     path("AssemblyWithoutRepo",views.AssemblyWithoutRepo,name="AssemblyWithoutRepo"),
     
     path("FetchExperienceDetail/<str:partName>",views.GetExperienceDetail,name="FetchExperienceDetail"),
+    path("api/upload/view",views.view_upload_records,name="view_upload_records"),
     
     path("user/<str:username>",views.user,name="user"),
     
