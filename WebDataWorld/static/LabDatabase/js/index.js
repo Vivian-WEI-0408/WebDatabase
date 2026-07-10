@@ -4,6 +4,35 @@
             backbone: 1,
             plasmid: 1
         };
+
+        function renderRelatedSummary(item) {
+            const parts = Array.isArray(item.related_parts) ? item.related_parts : [];
+            const backbones = Array.isArray(item.related_backbones) ? item.related_backbones : [];
+            const plasmids = Array.isArray(item.related_plasmids) ? item.related_plasmids : [];
+            const sections = [];
+
+            if (parts.length > 0) {
+                sections.push(`Part: ${parts.join(', ')}`);
+            }
+            if (backbones.length > 0) {
+                sections.push(`Backbone: ${backbones.join(', ')}`);
+            }
+            if (plasmids.length > 0) {
+                sections.push(`Plasmid: ${plasmids.join(', ')}`);
+            }
+
+            return sections.length > 0 ? sections.join('<br>') : '-';
+        }
+
+        function ensureArray(value) {
+            if (Array.isArray(value)) {
+                return value;
+            }
+            if (typeof value === 'string' && value.trim() !== '') {
+                return value.split(',').map(item => item.trim()).filter(Boolean);
+            }
+            return [];
+        }
         
         document.getElementById('uploadBtnPart').addEventListener('click', function() {
                 // alert('上传功能将在实际系统中实现');
@@ -1535,17 +1564,16 @@ function setupMenuEvents() {
                             result.forEach(item => {
                                 const row = document.createElement('tr');
                                 row.setAttribute("id", `plasmid_row_${item.plasmidid}`)
-                                var ori_list = item.ori_info;
-                                var marker_list = item.marker_info;
-                                console.log(ori_list);
-                                console.log(marker_list);
+                                const oriList = ensureArray(item.ori_info);
+                                const markerList = ensureArray(item.marker_info);
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
-                                    <td>${item.ori_info.join(", ")}</td>
-                                    <td>${item.marker_info.join(", ")}</td>
+                                    <td>${oriList.join(", ") || "-"}</td>
+                                    <td>${markerList.join(", ") || "-"}</td>
                                     <td>${item.level}</td>
-                                    <td>${item.scar}</td>
+                                    <td>${renderRelatedSummary(item)}</td>
+                                    <td>${item.scar || "-"}</td>
                                     <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
@@ -1931,10 +1959,11 @@ function setupMenuEvents() {
                                 row.innerHTML = `
                                     <td>${item.name}</td>
                                     <td>${item.alias}</td>
-                                    <td>${item.ori_info.join(", ")}</td>
-                                    <td>${item.marker_info.join(", ")}</td>
+                                    <td>${ensureArray(item.ori_info).join(", ") || "-"}</td>
+                                    <td>${ensureArray(item.marker_info).join(", ") || "-"}</td>
                                     <td>${item.level}</td>
-                                    <td>${item.scar}</td>
+                                    <td>${renderRelatedSummary(item)}</td>
+                                    <td>${item.scar || "-"}</td>
                                     <td><span class="status-badge ${item.tag === 'normal' ? 'status-active' : 'status-inactive'}">${item.tag === 'normal' ? '正常' : '非正常'}</span></td>
                                     <td class="action-cell">
                                         <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='/LabDatabase/plasmid/${item.plasmidid}'">查看</button>
